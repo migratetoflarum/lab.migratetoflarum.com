@@ -5,7 +5,7 @@ import App from '../utils/App';
 import LoadingScreen from '../components/LoadingScreen';
 import OtherTools from '../components/OtherTools';
 import moment from 'moment';
-import urlError from '../helpers/urlError';
+import DomainReport from '../components/DomainReport';
 
 export default {
     oninit(vnode) {
@@ -183,41 +183,18 @@ export default {
                             ] : [
                                 m('p', 'Could not find the configured config.url'),
                             ]),
-                            m('.list-group', Object.keys(urls).map(
-                                key => {
-                                    const url = urls[key];
-
-                                    const keyParts = key.split('-');
-
-                                    const fullUrl = keyParts[1] + '://' + (keyParts[0] === 'www' ? 'www.' : '') + reportKey('base_address');
-
-                                    return m('.list-group-item', [
-                                        m('p', fullUrl),
-                                        (url.type === 'ok' ? [
-                                            m('p', [icon('check', {className: 'text-success'}), ' responded 200 ok']),
-                                        ] : null),
-                                        (url.type === 'redirect' ? [
-                                            m('p', [icon('long-arrow-right'), ' redirects to ', url.redirect_to]),
-                                        ] : null),
-                                        (url.type === 'error' ? (() => {
-                                            const error = urlError(url);
-
-                                            return [
-                                                m('p', [
-                                                    icon('times', {className: 'text-danger'}), ' ',
-                                                    error.description,
-                                                ]),
-                                                m('.alert.alert-warning', [
-                                                    m('h5', 'Suggestion:'),
-                                                    m('p', error.suggest),
-                                                    m('h5', 'Full error message from our backend:'),
-                                                    (url.exception_message ? m('pre', url.exception_message) : null),
-                                                ]),
-                                            ];
-                                        })() : null),
-                                    ]);
-                                },
-                            )),
+                            m('.list-group', [
+                                m(DomainReport, {
+                                    address: reportKey('base_address'),
+                                    httpReport: reportKey('urls.apex-http'),
+                                    httpsReport: reportKey('urls.apex-https'),
+                                }),
+                                m(DomainReport, {
+                                    address: 'www.' + reportKey('base_address'),
+                                    httpReport: reportKey('urls.www-http'),
+                                    httpsReport: reportKey('urls.www-https'),
+                                }),
+                            ]),
                         ]),
                     ]),
                 ]),

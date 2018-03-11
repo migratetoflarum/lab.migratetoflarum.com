@@ -9,7 +9,7 @@ export default function (url) {
             case 6:
                 return {
                     description: 'Could not resolve host',
-                    suggest: 'Check the hostname can be publicly resolved. For example use the dig command with a public DNS server like Google: dig {hostname} @8.8.8.8',
+                    suggest: 'Check the hostname can be publicly resolved. For example use the dig command with a public DNS server like Google: `dig {hostname} @8.8.8.8`. Having a www. record is not strictly required if you are using a subdomain for your forum. It is recommended to have one if you are using the bare domain for your forum',
                 };
             // Failed to connect() to host or proxy.
             case 7:
