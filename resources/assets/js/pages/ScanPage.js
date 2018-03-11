@@ -5,6 +5,7 @@ import App from '../utils/App';
 import LoadingScreen from '../components/LoadingScreen';
 import OtherTools from '../components/OtherTools';
 import moment from 'moment';
+import urlError from '../helpers/urlError';
 
 export default {
     oninit(vnode) {
@@ -190,17 +191,6 @@ export default {
 
                                     const fullUrl = keyParts[1] + '://' + (keyParts[0] === 'www' ? 'www.' : '') + reportKey('base_address');
 
-                                    let errorMessage = 'error: ' + url.error;
-
-                                    switch (url.error) {
-                                        case 'no-resolve':
-                                            errorMessage = 'domain does not resolve';
-                                            break;
-                                        case 'no-tls':
-                                            errorMessage = 'server does not support https';
-                                            break;
-                                    }
-
                                     return m('.list-group-item', [
                                         m('p', fullUrl),
                                         (url.type === 'ok' ? [
@@ -209,12 +199,22 @@ export default {
                                         (url.type === 'redirect' ? [
                                             m('p', [icon('long-arrow-right'), ' redirects to ', url.redirect_to]),
                                         ] : null),
-                                        (url.type === 'error' ? [
-                                            m('p', [
-                                                icon('times', {className: 'text-danger'}), ' ',
-                                                errorMessage,
-                                            ]),
-                                        ] : null),
+                                        (url.type === 'error' ? (() => {
+                                            const error = urlError(url);
+
+                                            return [
+                                                m('p', [
+                                                    icon('times', {className: 'text-danger'}), ' ',
+                                                    error.description,
+                                                ]),
+                                                m('.alert.alert-warning', [
+                                                    m('h5', 'Suggestion:'),
+                                                    m('p', error.suggest),
+                                                    m('h5', 'Full error message from our backend:'),
+                                                    (url.exception_message ? m('pre', url.exception_message) : null),
+                                                ]),
+                                            ];
+                                        })() : null),
                                     ]);
                                 },
                             )),

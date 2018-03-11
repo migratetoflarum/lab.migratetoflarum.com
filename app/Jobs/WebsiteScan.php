@@ -7,7 +7,6 @@ use App\Scan;
 use App\ScannerClient;
 use Carbon\Carbon;
 use Exception;
-use GuzzleHttp\Exception\ConnectException;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -76,17 +75,10 @@ class WebsiteScan implements ShouldQueue
                         default:
                             $urlReport['type'] = 'httperror';
                     }
-                } catch (Exception $e) {
+                } catch (Exception $exception) {
                     $urlReport['type'] = 'error';
-                    $urlReport['error_message'] = $e->getMessage();
-
-                    if ($e instanceof ConnectException && str_contains($e->getMessage(), 'Could not resolve host')) {
-                        $urlReport['error'] = 'no-resolve';
-                    } else if ($e instanceof ConnectException && str_contains($e->getMessage(), 'port 443: Connection refused')) {
-                        $urlReport['error'] = 'no-tls';
-                    } else {
-                        throw $e;
-                    }
+                    $urlReport['exception_class'] = get_class($exception);
+                    $urlReport['exception_message'] = $exception->getMessage();
                 }
 
                 $this->report['urls'][($prefix === 'www.' ? 'www' : 'apex') . '-' . $scheme] = $urlReport;
