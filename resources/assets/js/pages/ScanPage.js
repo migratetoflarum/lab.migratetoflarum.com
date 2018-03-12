@@ -67,6 +67,12 @@ export default {
             });
         }
 
+        if (scan.attributes.report.failed) {
+            return m('.alert.alert-danger.my-5.py-5.text-center', [
+                m('p', m('strong', 'An error occured while performing this scan :(')),
+            ]);
+        }
+
         function reportKey(key, defaultValue = null) {
             const parts = ('attributes.report.' + key).split('.');
 

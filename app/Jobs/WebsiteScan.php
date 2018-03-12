@@ -206,4 +206,17 @@ class WebsiteScan implements ShouldQueue
 
         return array_get($this->responses, $url);
     }
+
+    public function failed(Exception $exception)
+    {
+        $this->scan->report = [
+            'failed' => true,
+            'exception_class' => get_class($exception),
+            'exception_message' => $exception->getMessage(),
+        ];
+        $this->scan->scanned_at = Carbon::now();
+        $this->scan->save();
+
+        event(new ScanUpdated($this->scan));
+    }
 }
