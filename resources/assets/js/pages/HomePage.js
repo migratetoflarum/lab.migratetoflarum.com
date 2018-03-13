@@ -55,20 +55,25 @@ export default {
                         });
                     },
                 }, [
-                    m('.form-group.mt-3', m('.input-group', [
-                        m('input.form-control[type=url]', {
-                            className: vnode.state.errors.length ? 'is-invalid' : '',
-                            placeholder: 'https://yourflarum.tld',
-                            value: vnode.state.url,
-                            oninput: m.withAttr('value', value => {
-                                vnode.state.url = value;
+                    m('.position-relative', [
+                        m('.form-group.mt-3', m('.input-group', [
+                            m('input.form-control[type=url]', {
+                                className: vnode.state.errors.length ? 'is-invalid' : '',
+                                placeholder: 'https://yourflarum.tld',
+                                value: vnode.state.url,
+                                oninput: m.withAttr('value', value => {
+                                    vnode.state.url = value;
+                                }),
+                                disabled: vnode.state.loading,
                             }),
-                            disabled: vnode.state.loading,
-                        }),
-                        m('.input-group-append', m('button.btn.btn-primary[type=submit]', {
-                            disabled: vnode.state.loading,
-                        }, vnode.state.loading ? 'Processing...' : ['Scan ', icon('chevron-right')])),
-                    ])),
+                            m('.input-group-append', m('button.btn.btn-primary[type=submit]', {
+                                disabled: vnode.state.loading,
+                            }, vnode.state.loading ? 'Processing...' : ['Scan ', icon('chevron-right')])),
+                        ])),
+                        vnode.state.errors.map(
+                            error => m('.invalid-tooltip.d-block', error)
+                        ),
+                    ]),
                     m('.form-group.text-center', m('label', m('input[type=checkbox]', {
                         checked: vnode.state.hidden,
                         disabled: vnode.state.loading,
@@ -76,9 +81,6 @@ export default {
                             vnode.state.hidden = !vnode.state.hidden;
                         },
                     }), ' Do not show the results on the homepage')),
-                    vnode.state.errors.map(
-                        error => m('.invalid-tooltip.d-block', error)
-                    ),
                     m('.page-recent', [
                         m('h5', 'Recent scans'),
                         m('.list-group.list-group-flush', recentScans.map(
