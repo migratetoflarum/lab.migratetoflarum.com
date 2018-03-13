@@ -64,7 +64,7 @@ const CSPReport = {
             name: 'CSP',
             rate: cspEnforce ? 'good' : (cspReport ? 'neutral' : 'bad'),
             status: cspEnforce ? 'CSP is enabled' : 'CSP is in report only mode',
-            suggest: ['CSP headers allow you to whitelist what resources can be used on your page and is an effective mesure against XSS. ', m('a[href=https://scotthelme.co.uk/content-security-policy-an-introduction/]', 'Learn more about it')],
+            suggest: ['CSP headers allow you to whitelist what resources can be used on your page and is an effective measure against XSS. ', m('a[href=https://scotthelme.co.uk/content-security-policy-an-introduction/]', 'Learn more about it')],
         });
     },
 };
