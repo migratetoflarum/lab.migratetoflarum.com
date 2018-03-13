@@ -15,7 +15,6 @@ export default {
         let iconName = null;
 
         if (iconData) {
-            console.log(iconData);
             if (iconData.color && colorRegex.test(iconData.color)) {
                 iconStyle.color = iconData.color;
             }

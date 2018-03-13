@@ -1,4 +1,4 @@
-<script type="text/javascript">
+<script type="text/javascript" nonce="{{ cspNonce() }}">
     var _paq = _paq || [];
     _paq.push(['trackPageView']);
     _paq.push(['enableLinkTracking']);

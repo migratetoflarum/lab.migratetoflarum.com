@@ -6,9 +6,15 @@ use App\Http\Controllers\Api\ScanController;
 use App\Resources\ScanResource;
 use App\Scan;
 use Illuminate\Database\Eloquent\Builder;
+use Spatie\Csp\AddCspHeaders;
 
 class AppController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(AddCspHeaders::class);
+    }
+
     protected function appView($preload = [])
     {
         $recent = Scan::where('hidden', false)

@@ -12,6 +12,7 @@
         "laravel/horizon": "^1.2",
         "laravel/tinker": "~1.0",
         "pusher/pusher-php-server": "~3.0",
+        "spatie/laravel-csp": "^1.0",
         "symfony/css-selector": "^4.0",
         "symfony/dom-crawler": "^4.0"
     },
