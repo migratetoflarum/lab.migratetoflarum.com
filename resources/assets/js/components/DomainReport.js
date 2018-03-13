@@ -50,7 +50,7 @@ const HSTSReport = {
                 'Enabled, max age: ' + moment.duration(hsts.maxAge, 'seconds').humanize().replace('a ', '1 ') +
                 ', include subdomains: ' + (hsts.includeSubDomains ? 'yes' : 'no') +
                 ', preloaded: ' + (hsts.preload ? 'yes' : 'no') : null),
-            suggest: ['An HSTS header prevents traffic from being downgraded to HTTP. ', m('a[href=https://scotthelme.co.uk/hsts-the-missing-link-in-tls/]', 'Learn more about it')],
+            suggest: [m('a[href=https://scotthelme.co.uk/hsts-the-missing-link-in-tls/]', 'HSTS headers'), ' prevent traffic from being downgraded to HTTP'],
         });
     },
 };
@@ -64,7 +64,7 @@ const CSPReport = {
             name: 'CSP',
             rate: cspEnforce ? 'good' : (cspReport ? 'neutral' : 'bad'),
             status: cspEnforce ? 'CSP is enabled' : 'CSP is in report only mode',
-            suggest: ['CSP headers allow you to whitelist what resources can be used on your page and is an effective measure against XSS. ', m('a[href=https://scotthelme.co.uk/content-security-policy-an-introduction/]', 'Learn more about it')],
+            suggest: [m('a[href=https://scotthelme.co.uk/content-security-policy-an-introduction/]', 'CSP headers'), ' allow you to whitelist what resources can be used on your page and is an effective measure against XSS'],
         });
     },
 };
