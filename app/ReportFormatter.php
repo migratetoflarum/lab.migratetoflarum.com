@@ -25,4 +25,29 @@ class ReportFormatter implements Arrayable
 
         return $this->report;
     }
+
+    /**
+     * Get the list of extension ids from the modules in the report
+     * @return array
+     */
+    public function flarumExtensionIds(): array
+    {
+        if (!$this->report) {
+            return [];
+        }
+
+        $modules = array_get($this->report, 'homepage.modules', []);
+
+        $ids = [];
+
+        foreach ($modules as $module) {
+            $parts = explode('/', $module);
+
+            if (count($parts) >= 2) {
+                $ids[] = $parts[0] . '-' . $parts[1];
+            }
+        }
+
+        return $ids;
+    }
 }

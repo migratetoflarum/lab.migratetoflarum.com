@@ -9,3 +9,18 @@
 .page-recent {
     padding-top: 10vh;
 }
+
+.extension-icon {
+    width: 4em;
+    height: 4em;
+    background-size: contain;
+    background-position: center center;
+    background-repeat: no-repeat;
+    border-radius: 0.3em;
+    text-align: center;
+}
+
+.extension-icon .fa {
+    font-size: 2em;
+    line-height: 2em;
+}

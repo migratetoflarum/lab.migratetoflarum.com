@@ -6,6 +6,7 @@ import LoadingScreen from '../components/LoadingScreen';
 import OtherTools from '../components/OtherTools';
 import moment from 'moment';
 import DomainReport from '../components/DomainReport';
+import ExtensionsReport from '../components/ExtensionsReport';
 
 export default {
     oninit(vnode) {
@@ -182,7 +183,11 @@ export default {
                             (reportKey('multiple_urls') ? [
                                 m('.alert.alert-warning', m('p', 'Your forum is answering to multiple urls. Set redirects to a single canonical url. Assets won\'t load correctly on the non-canonical domains')),
                             ] : [
-                                m('p', ['The forum canonical url is ', m('a', {href: reportKey('canonical_url')}, reportKey('canonical_url'))]),
+                                m('p', ['The forum canonical url is ', m('a', {
+                                    href: reportKey('canonical_url'),
+                                    target: '_blank',
+                                    rel: 'nofollow',
+                                }, reportKey('canonical_url'))]),
                             ]),
                             (baseUrl ? [
                                 m('p', ['config.url is ', m('code', baseUrl)]),
@@ -205,19 +210,9 @@ export default {
                     ]),
                 ]),
                 m('.col-md-6', [
-                    m('.card.mt-3', [
-                        m('.card-body', [
-                            m('h2.card-title', 'Extensions'),
-                            (reportKey('homepage.modules', []) === null ? [
-                                m('p', 'Could not find the list of modules'),
-                            ] : [
-                                m('p', 'Modules loaded on the forum:'),
-                                m('ul', reportKey('homepage.modules', []).map(
-                                    extension => m('li', extension)
-                                )),
-                            ]),
-                        ]),
-                    ]),
+                    m(ExtensionsReport, {
+                        scan,
+                    }),
                     m('.card.mt-3', [
                         m('.card-body', [
                             m('h2.card-title', 'Security'),
