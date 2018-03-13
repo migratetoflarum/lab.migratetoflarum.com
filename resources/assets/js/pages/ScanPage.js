@@ -13,16 +13,35 @@ export default {
         vnode.state.scanId = m.route.param('key');
         vnode.state.found = true;
         vnode.state.loading = false;
+        vnode.state.listening = false;
 
-        vnode.state.scanLoaded = () => {
+        function fetchScanData() {
+            m.request({
+                method: 'get',
+                url: '/api/scans/' + vnode.state.scanId,
+            }).then(response => {
+                Store.load(response.data);
+
+                listenForScanUpdate();
+            }).catch(() => {
+                vnode.state.found = false;
+            });
+        }
+
+        function listenForScanUpdate() {
             const scan = Store.get('scans', vnode.state.scanId);
 
-            if (!scan.attributes.scanned_at) {
+            if (!vnode.state.listening && !scan.attributes.scanned_at) {
+                vnode.state.listening = true;
+
                 window.Echo.channel('scans.' + scan.id).listen('ScanUpdated', data => {
-                    if (data.type === 'scans') {
+                    if (data.type === 'scans' && data.id === vnode.state.scanId) {
                         Store.load(data);
 
                         m.redraw();
+
+                        // Fetch full data
+                        fetchScanData();
 
                         return;
                     }
@@ -32,21 +51,12 @@ export default {
                     console.error(data);
                 });
             }
-        };
+        }
 
         if (Store.get('scans', vnode.state.scanId)) {
-            vnode.state.scanLoaded();
+            listenForScanUpdate();
         } else {
-            m.request({
-                method: 'get',
-                url: '/api/scans/' + id,
-            }).then(response => {
-                Store.load(response.data);
-
-                vnode.state.scanLoaded();
-            }).catch(() => {
-                vnode.state.found = false;
-            });
+            fetchScanData();
         }
     },
     view(vnode) {
@@ -65,6 +75,14 @@ export default {
         if (!scan.attributes.scanned_at) {
             return m(LoadingScreen, {
                 text: 'Scan in progress...',
+            });
+        }
+
+        // If scanned_at is set but report is null it means part of the data was sent over socket
+        // and the report is now being fetched via the API
+        if (scan.attributes.report === null) {
+            return m(LoadingScreen, {
+                text: 'Loading report...',
             });
         }
 

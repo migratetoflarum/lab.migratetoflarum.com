@@ -28,6 +28,16 @@ class ScanUpdated implements ShouldBroadcast
 
     public function broadcastWith(): array
     {
-        return (new ScanResource($this->scan))->jsonSerialize();
+        // The report is sometimes too big for the sockets, so we just send the other parts of the report
+        // We also skip relationships to reduce the size
+        return [
+            'type' => 'scans',
+            'id' => $this->scan->uid,
+            'attributes' => [
+                'hidden' => $this->scan->hidden,
+                'report' => null,
+                'scanned_at' => optional($this->scan->scanned_at)->toW3cString(),
+            ],
+        ];
     }
 }
