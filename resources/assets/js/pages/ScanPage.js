@@ -95,37 +95,58 @@ export default {
         const urls = reportKey('urls', {});
 
         if (Object.keys(urls).some(key => key.split('-')[1] === 'http' && urls[key].type === 'ok')) {
-            suggestions.push([
-                'The forum accepts HTTP connections, which puts your user\'s data and the integrity of your data at risk. ',
-                'Deploy HTTPS and redirect traffic to fix it.',
-            ]);
+            suggestions.push({
+                title: 'HTTP',
+                suggest: [
+                    'The forum accepts HTTP connections, which puts your user\'s data and the integrity of your data at risk. ',
+                    'Deploy HTTPS and redirect traffic to fix it.',
+                ],
+            });
         }
 
         const expectedBaseUrl = (reportKey('canonical_url') || '').replace(/\/$/, '');
         const baseUrl = reportKey('homepage.boot.base_url');
 
-        if (baseUrl && expectedBaseUrl !== baseUrl) {
-            suggestions.push([
-                'The config.url of your Flarum does not match the canonical url. ',
-                'This will prevent any resource from loading correctly. ',
-                'Set the url setting in your config.php to "' + expectedBaseUrl + '" to fix this (currently set to ' + reportKey('homepage.boot.base_url') + '")',
-            ]);
+        if (reportKey('multiple_urls')) {
+            suggestions.push({
+                title: 'Multiple urls',
+                suggest: [
+                    'This Flarum is accepting connections via multiple urls which will result in an invalid config.url value being used for some of them. ',
+                    'This will also impact your search engine ranking by creating duplicate content. ',
+                    'Setup redirects so only the url defined in your config.php (' + reportKey('homepage.boot.base_url') + ') can be used to access the forum to fix it.',
+                ],
+            });
+        } else if (baseUrl && expectedBaseUrl !== baseUrl) {
+            suggestions.push({
+                title: 'config.php url',
+                suggest: [
+                    'The config.php url setting of your Flarum does not match the canonical url used to access it. ',
+                    'This will prevent Flarum from loading and working correctly. ',
+                    'Set the url setting in your config.php to "' + expectedBaseUrl + '" to fix this (currently set to "' + reportKey('homepage.boot.base_url') + '").',
+                ],
+            });
         }
 
         if (reportKey('malicious_access.vendor')) {
-            suggestions.push([
-                'Your vendor folder is currently being served by your webserver. ',
-                'This could expose untrusted scripts to the world and compromise your security. ',
-                'Use a rewrite rule to prevent your webserver from serving this folder.',
-            ]);
+            suggestions.push({
+                title: 'Vendor folder',
+                suggest: [
+                    'Your vendor folder is currently being served by your webserver. ',
+                    'This could expose untrusted scripts to the world and compromise your security. ',
+                    'Use a rewrite rule to prevent your webserver from serving this folder.',
+                ],
+            });
         }
 
         if (reportKey('malicious_access.storage')) {
-            suggestions.push([
-                'Your storage folder is currently being served by your webserver. ',
-                'This could expose private data (including access tokens) and compromise your security. ',
-                'Use a rewrite rule to prevent your webserver from serving this folder.',
-            ]);
+            suggestions.push({
+                title: 'Storage folder',
+                suggest: [
+                    'Your storage folder is currently being served by your webserver. ',
+                    'This could expose private data (including access tokens) and compromise your security. ',
+                    'Use a rewrite rule to prevent your webserver from serving this folder.',
+                ],
+            });
         }
 
         return [
@@ -166,7 +187,10 @@ export default {
                 m('h1', 'Report for ' + (reportKey('canonical_url') || scan.relationships.website.data.attributes.normalized_url)),
             ]),
             suggestions.map(
-                suggestion => m('.alert.alert-danger', m('p', suggestion))
+                suggestion => m('.alert.alert-danger', m('.row', [
+                    m('.col-md-2', m('h5.mt-2', suggestion.title)),
+                    m('.col-md-10', m('p', suggestion.suggest)),
+                ]))
             ),
             m('.row', [
                 m('.col-md-6', [
