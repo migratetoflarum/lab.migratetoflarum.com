@@ -1,6 +1,7 @@
 import m from 'mithril';
 import link from '../helpers/link';
 import icon from '../helpers/icon';
+import App from '../utils/App';
 
 export default {
     oninit(vnode) {
@@ -19,13 +20,14 @@ export default {
                     m('#navbar.collapse.navbar-collapse', [
                         m('ul.navbar-nav.ml-auto', [
                             m('li.nav-item', link('/', {className: 'nav-link'}, 'Scan a forum')),
-                            m('li.nav-item', link('https://clarkwinkelmann.com/flarum', {
-                                className: 'nav-link',
-                            }, 'Flarum services by Clark Winkelmann')),
-                            m('li.nav-item', link('https://discuss.flarum.org/', {
-                                className: 'nav-link',
+                            m('li.nav-item', m('a.nav-link', {
+                                href: App.flarumServices,
                                 target: '_blank',
-                            }, 'Flarum Discuss')),
+                            }, ['Flarum services by Clark Winkelmann ', icon('external-link')])),
+                            m('li.nav-item', m('a.nav-link', {
+                                href: App.discuss,
+                                target: '_blank',
+                            }, ['Discuss thread ', icon('external-link')])),
                         ]),
                     ]),
                 ])),
@@ -34,9 +36,18 @@ export default {
             m('footer.py-3', m('.container.text-center.text-muted', [
                 m('p', [
                     'This is a free and ',
-                    m('a[href=https://github.com/migratetoflarum/lab.migratetoflarum.com]', 'open-source'),
+                    m('a', {href: App.githubRepo}, 'open-source'),
                     ' service created by ',
                     m('a[href=https://clarkwinkelmann.com/]', 'Clark Winkelmann'),
+                ]),
+                m('p', [
+                    'Please report any issue on ',
+                    m('a', {href: App.githubIssues}, 'GitHub'),
+                    ' or in the ',
+                    m('a', {href: App.discuss}, 'Discuss thread'),
+                    '. Contact ',
+                    m('a', {href: 'mailto:' + App.supportEmail}, App.supportEmail),
+                    ' for security or legal issues',
                 ]),
                 m('p', '© MigrateToFlarum ' + vnode.state.copyrightDate),
             ])),
