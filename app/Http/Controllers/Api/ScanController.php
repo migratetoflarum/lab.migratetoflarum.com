@@ -13,6 +13,7 @@ use GuzzleHttp\Exception\TransferException;
 use Illuminate\Cache\Repository;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\Response;
 
 class ScanController extends Controller
 {
@@ -173,7 +174,10 @@ class ScanController extends Controller
 
                         break;
                     default:
-                        throw $this->createUrlValidationException('The url returned the status code ' . $response->getStatusCode() . ' (' . $destination . ')');
+                        $status = $response->getStatusCode();
+                        $text = array_get(Response::$statusTexts, $status, 'Unknown status code');
+
+                        throw $this->createUrlValidationException("The url $destination returned the status code $status ($text)");
                 }
             }
 

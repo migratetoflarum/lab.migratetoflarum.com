@@ -4,6 +4,7 @@ import urlError from '../helpers/urlError';
 import Warning from './Warning';
 import parseHSTS from '../helpers/parseHSTS';
 import moment from 'moment';
+import httpStatusCodes from '../helpers/httpStatusCodes';
 
 const HeaderReport = {
     view(vnode) {
@@ -78,14 +79,14 @@ const UrlReport = {
             m('.col-sm-2', type.toUpperCase()),
             m('.col-sm-10', [
                 (report.type === 'ok' ? [
-                    m('p', [icon('check', {className: 'text-success'}), ' responded 200 ok']),
+                    m('p', [icon('check', {className: 'text-success'}), ' Got valid response']),
                     (type === 'http' ? m(Warning, {
                         description: 'HTTP is insecure and should\'t be used to serve any content',
                         suggestion: 'Serve a redirect to HTTPS instead',
                     }) : null),
                 ] : null),
                 (report.type === 'redirect' ? [
-                    m('p', [icon('long-arrow-right'), ' redirects to ', report.redirect_to]),
+                    m('p', [icon('long-arrow-right'), ' Redirects to ', report.redirect_to]),
                     (report.status === 302 ? m(Warning, {
                         description: 'This is a temporary redirect',
                         suggestion: 'Consider using a 301 permanent redirect',
@@ -95,6 +96,12 @@ const UrlReport = {
                         suggestion: 'Consider using a 301 permanent redirect',
                     }) : null),
                 ] : null),
+                (report.type === 'httperror' ? (() => {
+                    return [
+                        icon('times', {className: 'text-danger'}),
+                        ' Received status code ' + report.status + ' (' + (httpStatusCodes[report.status] || 'Unknown status code') + ')',
+                    ];
+                })() : null),
                 (report.type === 'error' ? (() => {
                     const error = urlError(report);
 
