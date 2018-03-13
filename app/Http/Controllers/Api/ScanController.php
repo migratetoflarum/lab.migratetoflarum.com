@@ -9,6 +9,7 @@ use App\Scan;
 use App\ScannerClient;
 use App\Website;
 use Carbon\Carbon;
+use GuzzleHttp\Exception\TransferException;
 use Illuminate\Cache\Repository;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -146,7 +147,13 @@ class ScanController extends Controller
             $maxRedirects = 5;
 
             for ($i = 0; $i < $maxRedirects; $i++) {
-                $response = $client->get($destination);
+                try {
+                    $response = $client->get($destination);
+                } catch (TransferException $exception) {
+                    report($exception);
+
+                    throw $this->createUrlValidationException("An error occurred while connecting to url $destination");
+                }
 
                 switch ($response->getStatusCode()) {
                     case 200:
