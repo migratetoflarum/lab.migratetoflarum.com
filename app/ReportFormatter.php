@@ -32,11 +32,15 @@ class ReportFormatter implements Arrayable
      */
     public function flarumExtensionIds(): array
     {
-        if (!$this->report) {
+        if (is_null($this->report)) {
             return [];
         }
 
-        $modules = array_get($this->report, 'homepage.modules', []);
+        $modules = array_get($this->report, 'homepage.modules');
+
+        if (!is_array($modules)) {
+            return [];
+        }
 
         $ids = [];
 
