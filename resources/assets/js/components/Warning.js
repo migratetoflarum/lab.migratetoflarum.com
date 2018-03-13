@@ -9,12 +9,12 @@ export default {
         return m('.alert.alert-warning', [
             m('p', [
                 vnode.attrs.description,
-                (vnode.attrs.suggestion ? [' ', m('a[href=javascript:;]', {
+                (vnode.attrs.suggestion ? [' ', m('button.btn.btn-sm.btn-link', {
                     onclick() {
                         vnode.state.showSuggestion = !vnode.state.showSuggestion;
                     },
                 }, 'Show suggestions')] : null),
-                (vnode.attrs.log ? [' ', m('a[href=javascript:;].text-muted', {
+                (vnode.attrs.log ? [' ', m('button.btn.btn-sm.btn-link.text-muted', {
                     onclick() {
                         vnode.state.showLog = !vnode.state.showLog;
                     },
