@@ -101,7 +101,7 @@ export default {
             ]);
         }
 
-        const expectedBaseUrl = reportKey('canonical_url', '').replace(/\/$/, '');
+        const expectedBaseUrl = (reportKey('canonical_url') || '').replace(/\/$/, '');
         const baseUrl = reportKey('homepage.boot.base_url');
 
         if (baseUrl && expectedBaseUrl !== baseUrl) {
@@ -163,7 +163,7 @@ export default {
                         });
                     },
                 }, 'Scan again'),
-                m('h1', 'Report for ' + reportKey('canonical_url')),
+                m('h1', 'Report for ' + (reportKey('canonical_url') || scan.relationships.website.data.attributes.normalized_url)),
             ]),
             suggestions.map(
                 suggestion => m('.alert.alert-danger', m('p', suggestion))
