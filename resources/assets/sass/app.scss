@@ -1,3 +1,6 @@
+// Use file instead of data: uri so it doesn't require to lower CSP strength
+$navbar-dark-toggler-icon-bg: url(../images/navbar-toggle.svg);
+
 @import '~bootstrap/scss/bootstrap';
 @import "~font-awesome/scss/font-awesome";
 
