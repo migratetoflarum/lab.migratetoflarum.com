@@ -71,7 +71,12 @@ export default {
                             }, vnode.state.loading ? 'Processing...' : ['Scan ', icon('chevron-right')])),
                         ])),
                         vnode.state.errors.map(
-                            error => m('.invalid-tooltip.d-block', error)
+                            error => m('.invalid-tooltip.d-block', {
+                                onclick() {
+                                    // Hide errors if you click on them
+                                    vnode.state.errors = [];
+                                },
+                            }, error)
                         ),
                     ]),
                     m('.form-group.text-center', m('label', m('input[type=checkbox]', {
