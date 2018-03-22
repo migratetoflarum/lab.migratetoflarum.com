@@ -4,6 +4,7 @@ namespace App;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
+use Pdp\Rules;
 
 /**
  * @property int $id
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\Collection;
  * @property Carbon $updated_at
  *
  * @property Collection|Scan[] $scans
+ * @property bool $is_apex
  */
 class Website extends UidModel
 {
@@ -25,5 +27,19 @@ class Website extends UidModel
     public function scans()
     {
         return $this->hasMany(Scan::class);
+    }
+
+    public function getIsApexAttribute(): bool
+    {
+        /**
+         * @var $rules Rules
+         */
+        $rules = app(Rules::class);
+
+        $parsedUrl = parse_url("https://{$this->normalized_url}");
+
+        $domain = $rules->resolve(array_get($parsedUrl, 'host'));
+
+        return is_null($domain->getSubDomain());
     }
 }

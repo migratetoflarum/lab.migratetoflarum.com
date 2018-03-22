@@ -27,6 +27,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('horizon:snapshot')->everyFiveMinutes();
 
         $schedule->command('extensions:retrieve')->dailyAt('5:00');
+
+        $schedule->command('update-public-suffix-list')->weekly();
     }
 
     /**

@@ -3,8 +3,10 @@
 namespace App\Providers;
 
 use App\ScannerClient;
+use Exception;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Horizon\Horizon;
+use Pdp\Rules;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -40,6 +42,16 @@ class AppServiceProvider extends ServiceProvider
                     'User-Agent' => 'MigrateToFlarum Lab',
                 ],
             ]);
+        });
+
+        $this->app->singleton(Rules::class, function () {
+            $rules = cache('public-suffix-list-rules');
+
+            if (!$rules) {
+                throw new Exception('Public Suffix List rules not cached');
+            }
+
+            return new Rules($rules);
         });
     }
 }

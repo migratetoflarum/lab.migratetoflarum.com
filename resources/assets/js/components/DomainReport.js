@@ -132,6 +132,9 @@ const UrlReport = {
 };
 
 export default {
+    oninit(vnode) {
+        vnode.state.showUnimportantDomain = false;
+    },
     view(vnode) {
         // If the report does not exist or is incomplete for this domain we don't show anything
         // Most likely a report for an IP that has no www domain
@@ -147,23 +150,45 @@ export default {
             error = urlError(vnode.attrs.httpReport);
         }
 
+        let domainMatters = true;
+
+        // The subdomain www is not important if it isn't directly under the apex
+        if (vnode.attrs.address.indexOf('www.') === 0 && !vnode.attrs.website.attributes.is_apex) {
+            domainMatters = false;
+        }
+
+        let showDomain = true;
+
+        // If the unimportant subdomain does not resolve we simply don't show it
+        if (!domainMatters && error && error.description === 'Could not resolve host' && !vnode.state.showUnimportantDomain) {
+            showDomain = false;
+        }
+
         return m('.list-group-item', [
             m('p', '//' + vnode.attrs.address),
-            (sameError ? [
-                m(Warning, {
-                    description: error.description,
-                    suggestion: error.suggest,
-                    log: vnode.attrs.httpReport.exception_message,
-                }),
+            (showDomain ? [
+                (sameError ? [
+                    m(Warning, {
+                        description: error.description,
+                        suggestion: error.suggest,
+                        log: vnode.attrs.httpReport.exception_message,
+                    }),
+                ] : [
+                    m(UrlReport, {
+                        report: vnode.attrs.httpReport,
+                        type: 'http',
+                    }),
+                    m(UrlReport, {
+                        report: vnode.attrs.httpsReport,
+                        type: 'https',
+                    }),
+                ]),
             ] : [
-                m(UrlReport, {
-                    report: vnode.attrs.httpReport,
-                    type: 'http',
-                }),
-                m(UrlReport, {
-                    report: vnode.attrs.httpsReport,
-                    type: 'https',
-                }),
+                m('.btn.btn-sm.btn-block.btn-light', {
+                    onclick() {
+                        vnode.state.showUnimportantDomain = true;
+                    },
+                }, 'Not used. Show details anyway ?'),
             ]),
         ]);
     },

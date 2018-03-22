@@ -61,6 +61,7 @@ export default {
     },
     view(vnode) {
         const scan = Store.get('scans', vnode.state.scanId);
+        const website = scan.relationships.website.data;
 
         if (!vnode.state.found) {
             return m('.alert.alert-danger', 'Error loading report');
@@ -178,7 +179,7 @@ export default {
                             url: '/api/scans',
                             data: {
                                 _token: App.csrfToken,
-                                website_id: scan.relationships.website.data.id,
+                                website_id: website.id,
                                 hidden: scan.attributes.hidden,
                             },
                         }).then(response => {
@@ -202,7 +203,7 @@ export default {
                         });
                     },
                 }, 'Scan again'),
-                m('h1', 'Report for ' + (reportKey('canonical_url') || scan.relationships.website.data.attributes.normalized_url)),
+                m('h1', 'Report for ' + (reportKey('canonical_url') || website.attributes.normalized_url)),
             ]),
             suggestions.map(
                 suggestion => m('.alert.alert-danger', m('.row', [
@@ -238,11 +239,13 @@ export default {
                             ]),
                             m('.list-group', [
                                 m(DomainReport, {
+                                    website,
                                     address: reportKey('base_address'),
                                     httpReport: reportKey('urls.apex-http'),
                                     httpsReport: reportKey('urls.apex-https'),
                                 }),
                                 m(DomainReport, {
+                                    website,
                                     address: 'www.' + reportKey('base_address'),
                                     httpReport: reportKey('urls.www-http'),
                                     httpsReport: reportKey('urls.www-https'),
