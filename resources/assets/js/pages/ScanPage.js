@@ -7,6 +7,7 @@ import OtherTools from '../components/OtherTools';
 import moment from 'moment';
 import DomainReport from '../components/DomainReport';
 import ExtensionsReport from '../components/ExtensionsReport';
+import Rating from '../components/Rating';
 
 export default {
     oninit(vnode) {
@@ -227,6 +228,13 @@ export default {
                     m('.card.mt-3', [
                         m('.card-body', [
                             m('h2.card-title', 'General'),
+                            m('p', [
+                                'Rating: ',
+                                m(Rating, {
+                                    rating: scan.attributes.rating,
+                                }),
+                                m('em.text-muted', ' (more details about the rating coming soon)'),
+                            ]),
                             m('p', 'Scan performed on ' + moment(scan.attributes.scanned_at).format('YYYY-MM-DD HH:mm:ss')),
                             m('p', 'Visibility: ' + (scan.attributes.hidden ? 'this scan won\'t show up on the homepage' : 'this scan might show up on the homepage' )),
                         ]),

@@ -27,3 +27,26 @@ $navbar-dark-toggler-icon-bg: url(../images/navbar-toggle.svg);
     font-size: 2em;
     line-height: 2em;
 }
+
+.scan-rating {
+    display: inline-block;
+    min-width: 2em;
+    text-align: center;
+    font-weight: bold;
+
+    &[data-rating^=A] {
+        color: green;
+    }
+
+    &[data-rating^=B] {
+        color: orange;
+    }
+
+    &[data-rating^=C] {
+        color: red;
+    }
+
+    &[data-rating^=D] {
+        color: brown;
+    }
+}

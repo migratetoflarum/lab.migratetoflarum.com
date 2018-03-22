@@ -5,6 +5,7 @@ import Store from '../utils/Store';
 import sortByAttribute from '../helpers/sortByAttribute';
 import link from '../helpers/link';
 import moment from 'moment';
+import Rating from '../components/Rating';
 
 export default {
     oninit(vnode) {
@@ -14,7 +15,7 @@ export default {
         vnode.state.errors = [];
     },
     view(vnode) {
-        const recentScans = Store.all('scans').sort(sortByAttribute('scanned_at', 'desc')).slice(0, 5);
+        const recentScans = Store.all('scans').sort(sortByAttribute('scanned_at', 'desc'));
 
         return m('.page-home', [
             m('h2.text-center', 'Check the configuration of your Flarum'),
@@ -93,9 +94,13 @@ export default {
                                 className: 'list-group-item list-group-item-action',
                             }, [
                                 m('span.float-right.text-muted', moment(scan.attributes.scanned_at).fromNow()),
+                                m(Rating, {
+                                    rating: scan.attributes.rating,
+                                }),
+                                ' ',
                                 scan.relationships.website.data.attributes.name,
                                 ' - ',
-                                scan.relationships.website.data.attributes.canonical_url,
+                                m('span.text-muted', scan.relationships.website.data.attributes.normalized_url.replace(/\/$/, '')),
                             ])
                         )),
                     ]),

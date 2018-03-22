@@ -41,6 +41,7 @@ class ScanResource extends Resource
                 'hidden' => $this->resource->hidden,
                 'report' => $report->toArray(),
                 'scanned_at' => optional($this->resource->scanned_at)->toW3cString(),
+                'rating' => $this->resource->computeRating(),
             ],
             'relationships' => [
                 'website' => [
