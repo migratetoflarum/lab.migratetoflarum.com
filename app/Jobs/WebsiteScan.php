@@ -163,21 +163,39 @@ class WebsiteScan implements ShouldQueue
                 }
             });
 
-
             $homepageReport['modules'] = $modules;
             $homepageReport['boot'] = $boot;
 
             $maliciousAccess = [];
 
             if ($flarumUrl) {
-                try {
-                    $response = $this->doRequest("$flarumUrl/vendor/composer/installed.json");
-                    $maliciousAccess['vendor'] = $response->getStatusCode() === 200;
+                $tryMaliciousAccess = [
+                    'vendor' => [
+                        'vendor/composer/installed.json',
+                        'vendor/flarum/core/LICENSE',
+                    ],
+                    'storage' => [
+                        'storage/logs/flarum.log',
+                        'storage/views/7dc8e518535b1d01db47bee524631424', // app.blade.php in beta7
+                    ],
+                    'composer' => [
+                        'composer.json',
+                        'composer.lock',
+                    ],
+                ];
 
-                    $response = $this->doRequest("$flarumUrl/storage/logs/flarum.log");
-                    $maliciousAccess['storage'] = $response->getStatusCode() === 200;
-                } catch (Exception $e) {
-                    throw $e;
+                foreach ($tryMaliciousAccess as $access => $urls) {
+                    $accessible = false;
+
+                    foreach($urls as $url) {
+                        $response = $this->doRequest("$flarumUrl/$url");
+
+                        if ($response->getStatusCode() === 200) {
+                            $accessible = true;
+                        }
+                    }
+
+                    $maliciousAccess[$access] = $accessible;
                 }
             }
 

@@ -168,6 +168,17 @@ export default {
             });
         }
 
+        if (reportKey('malicious_access.composer')) {
+            suggestions.push({
+                title: 'Composer files',
+                suggest: [
+                    'Your Composer files are currently being served by your webserver. ',
+                    'This could expose advanced information about your server configuration and installed packages. ',
+                    'Use a rewrite rule to prevent your webserver from serving the composer.json and composer.lock files.',
+                ],
+            });
+        }
+
         return [
             m('', [
                 m('button.btn.btn-secondary.float-right', {
@@ -262,21 +273,32 @@ export default {
                         m('.card-body', [
                             m('h2.card-title', 'Security'),
                             m('ul', [
-                                m('li', reportKey('malicious_access.vendor') ? [
+                                {
+                                    key: 'vendor',
+                                    good: 'vendor folder seem protected',
+                                    bad: 'your vendor folder is publicly reachable',
+                                },
+                                {
+                                    key: 'storage',
+                                    good: 'storage folder seem protected',
+                                    bad: 'your storage folder is publicly reachable',
+                                },
+                                {
+                                    key: 'composer',
+                                    good: 'Composer files not exposed',
+                                    bad: 'your composer.json and/or composer.lock files are publicly readable',
+                                },
+                            ].map(
+                                access => m('li', reportKey('malicious_access.' + access.key) ? [
                                     icon('times', {className: 'text-danger'}),
-                                    ' your vendor folder is publicly reachable',
+                                    ' ',
+                                    access.bad,
                                 ] : [
                                     icon('check', {className: 'text-success'}),
-                                    ' vendor folder seem protected',
-                                ]),
-                                m('li', reportKey('malicious_access.storage') ? [
-                                    icon('times', {className: 'text-danger'}),
-                                    ' your storage folder is publicly reachable',
-                                ] : [
-                                    icon('check', {className: 'text-success'}),
-                                    ' storage folder seem protected',
-                                ]),
-                            ]),
+                                    ' ',
+                                    access.good,
+                                ])
+                            )),
                         ]),
                     ]),
                 ]),
