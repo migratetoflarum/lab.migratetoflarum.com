@@ -133,6 +133,12 @@ const UrlReport = {
 
 export default {
     view(vnode) {
+        // If the report does not exist or is incomplete for this domain we don't show anything
+        // Most likely a report for an IP that has no www domain
+        if (!vnode.attrs.httpReport || !vnode.attrs.httpsReport) {
+            return null;
+        }
+
         const sameError = vnode.attrs.httpReport.type === 'error' && vnode.attrs.httpsReport.type === 'error' && vnode.attrs.httpReport.exception_message === vnode.attrs.httpsReport.exception_message;
 
         let error;

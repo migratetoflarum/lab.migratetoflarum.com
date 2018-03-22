@@ -41,8 +41,18 @@ class WebsiteScan implements ShouldQueue
 
         $this->report['urls'] = [];
 
+        $prefixes = [''];
+
+        // Add protocol just so it can be parsed
+        $parsedUrl = parse_url("https://$baseAddress");
+
+        // Do not try to access www. if the host is an ip
+        if (!filter_var(array_get($parsedUrl, 'host'), FILTER_VALIDATE_IP)) {
+            $prefixes[] = 'www.';
+        }
+
         // Try the various urls that might be used to access the forum
-        foreach (['', 'www.'] as $prefix) {
+        foreach ($prefixes as $prefix) {
             foreach (['https', 'http'] as $scheme) {
                 $url = "$scheme://$prefix$baseAddress";
 
