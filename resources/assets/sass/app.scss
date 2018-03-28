@@ -50,3 +50,18 @@ $navbar-dark-toggler-icon-bg: url(../images/navbar-toggle.svg);
         color: brown;
     }
 }
+
+.ScanRatingDetails {
+    .scan-rating {
+        font-size: 3em;
+    }
+
+    .list-group {
+        font-size: 0.9em;
+    }
+
+    .list-group-item {
+        padding-top: 0.3em;
+        padding-bottom: 0.3em;
+    }
+}

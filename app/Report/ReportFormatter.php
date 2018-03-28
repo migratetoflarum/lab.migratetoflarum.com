@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Report;
 
 use Illuminate\Contracts\Support\Arrayable;
 

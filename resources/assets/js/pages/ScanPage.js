@@ -227,14 +227,26 @@ export default {
                 m('.col-md-6', [
                     m('.card.mt-3', [
                         m('.card-body', [
-                            m('h2.card-title', 'General'),
-                            m('p', [
-                                'Rating: ',
-                                m(Rating, {
-                                    rating: scan.attributes.rating,
-                                }),
-                                m('em.text-muted', ' (more details about the rating coming soon)'),
+                            m('h2.card-title', 'Rating'),
+                            m('.row.ScanRatingDetails', [
+                                m('.col-md-2.text-center', [
+                                    m(Rating, {
+                                        rating: scan.attributes.rating,
+                                    }),
+                                ]),
+                                m('.col-md-10', [
+                                    m('ul.list-group.list-group-flush', scan.attributes.rating_rules.map(
+                                        rule => m('li.list-group-item', [
+                                            (rule.cap ? (rule.cap === '-' ? 'Not rating' : 'Capped to ' + rule.cap) : ''),
+                                            (rule.bonus === '+' ? 'Bonus' : ''),
+                                            (rule.bonus === '-' ? 'Malus' : ''),
+                                            ': ',
+                                            rule.description,
+                                        ]),
+                                    )),
+                                ]),
                             ]),
+                            m('h3.card-title', 'Details'),
                             m('p', 'Scan performed on ' + moment(scan.attributes.scanned_at).format('YYYY-MM-DD HH:mm:ss')),
                             m('p', 'Visibility: ' + (scan.attributes.hidden ? 'this scan won\'t show up on the homepage' : 'this scan might show up on the homepage' )),
                         ]),
@@ -282,29 +294,42 @@ export default {
                             m('h2.card-title', 'Security'),
                             m('ul', [
                                 {
-                                    key: 'vendor',
+                                    key: 'malicious_access.vendor',
                                     good: 'vendor folder seem protected',
                                     bad: 'your vendor folder is publicly reachable',
+                                    neutral: 'Skipped vendor folder check',
                                 },
                                 {
-                                    key: 'storage',
+                                    key: 'malicious_access.storage',
                                     good: 'storage folder seem protected',
                                     bad: 'your storage folder is publicly reachable',
+                                    neutral: 'Skipped storage folder check',
                                 },
                                 {
-                                    key: 'composer',
+                                    key: 'malicious_access.composer',
                                     good: 'Composer files not exposed',
                                     bad: 'your composer.json and/or composer.lock files are publicly readable',
+                                    neutral: 'Skipped composer files check',
+                                },
+                                {
+                                    key: 'homepage.boot.debug',
+                                    good: 'Debug mode is off',
+                                    bad: 'Debug mode is on',
+                                    neutral: 'Skipped debug mode check',
                                 },
                             ].map(
-                                access => m('li', reportKey('malicious_access.' + access.key) ? [
+                                access => m('li', reportKey(access.key) === true ? [
                                     icon('times', {className: 'text-danger'}),
                                     ' ',
                                     access.bad,
-                                ] : [
+                                ] : (reportKey(access.key) === false) ? [
                                     icon('check', {className: 'text-success'}),
                                     ' ',
                                     access.good,
+                                ] : [
+                                    icon('fast-forward', {className: 'text-muted'}),
+                                    ' ',
+                                    access.neutral,
                                 ])
                             )),
                         ]),

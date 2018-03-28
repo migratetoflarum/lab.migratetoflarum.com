@@ -3,7 +3,8 @@
 namespace App\Resources;
 
 use App\Extension;
-use App\ReportFormatter;
+use App\Report\RatingAgent;
+use App\Report\ReportFormatter;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Resources\Json\Resource;
 
@@ -34,6 +35,9 @@ class ScanResource extends Resource
             return is_null($duplicateNotAbandoned);
         })->values();
 
+        $agent = new RatingAgent($this->resource);
+        $agent->rate();
+
         return [
             'type' => 'scans',
             'id' => $this->resource->uid,
@@ -41,7 +45,8 @@ class ScanResource extends Resource
                 'hidden' => $this->resource->hidden,
                 'report' => $report->toArray(),
                 'scanned_at' => optional($this->resource->scanned_at)->toW3cString(),
-                'rating' => $this->resource->computeRating(),
+                'rating' => $agent->rating,
+                'rating_rules' => $agent->importantRules,
             ],
             'relationships' => [
                 'website' => [
