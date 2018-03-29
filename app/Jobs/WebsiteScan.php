@@ -100,9 +100,21 @@ class WebsiteScan implements ShouldQueue
         $canonicalUrl = array_first($workingUrls);
         $this->report['canonical_url'] = $canonicalUrl;
 
-        if ($canonicalUrl) {
-            $homepage = new Crawler($this->doRequest($canonicalUrl)->getBody()->getContents());
+        $homepage = null;
 
+        if ($canonicalUrl) {
+            try {
+                $homepage = new Crawler($this->doRequest($canonicalUrl)->getBody()->getContents());
+            } catch (Exception $exception) {
+                $this->report['homepage'] = [
+                    'failed' => true,
+                    'exception_class' => get_class($exception),
+                    'exception_message' => $exception->getMessage(),
+                ];
+            }
+        }
+
+        if ($homepage) {
             $homepageReport = [];
 
             $flarumUrl = null;
@@ -185,17 +197,33 @@ class WebsiteScan implements ShouldQueue
                 ];
 
                 foreach ($tryMaliciousAccess as $access => $urls) {
-                    $accessible = false;
+                    $accessReport = [
+                        'access' => false,
+                        'urls' => [],
+                        'errors' => [],
+                    ];
 
-                    foreach($urls as $url) {
-                        $response = $this->doRequest("$flarumUrl/$url");
+                    foreach ($urls as $url) {
+                        try {
+                            $fullUrl = "$flarumUrl/$url";
+                            $response = $this->doRequest($fullUrl);
 
-                        if ($response->getStatusCode() === 200) {
-                            $accessible = true;
+                            if ($response->getStatusCode() === 200) {
+                                $accessReport['access'] = true;
+                                $accessReport['urls'][] = $fullUrl;
+                            }
+                        } catch (Exception $exception) {
+                            // Errors are not considered to allow malicious access
+                            // But the messages are still saved just in case
+                            $accessReport['errors'][] = [
+                                'url' => $fullUrl,
+                                'exception_class' => get_class($exception),
+                                'exception_message' => $exception->getMessage(),
+                            ];
                         }
                     }
 
-                    $maliciousAccess[$access] = $accessible;
+                    $maliciousAccess[$access] = $accessReport;
                 }
             }
 

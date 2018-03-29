@@ -294,19 +294,19 @@ export default {
                             m('h2.card-title', 'Security'),
                             m('ul', [
                                 {
-                                    key: 'malicious_access.vendor',
+                                    key: 'malicious_access.vendor.access',
                                     good: 'vendor folder seem protected',
                                     bad: 'your vendor folder is publicly reachable',
                                     neutral: 'Skipped vendor folder check',
                                 },
                                 {
-                                    key: 'malicious_access.storage',
+                                    key: 'malicious_access.storage.access',
                                     good: 'storage folder seem protected',
                                     bad: 'your storage folder is publicly reachable',
                                     neutral: 'Skipped storage folder check',
                                 },
                                 {
-                                    key: 'malicious_access.composer',
+                                    key: 'malicious_access.composer.access',
                                     good: 'Composer files not exposed',
                                     bad: 'your composer.json and/or composer.lock files are publicly readable',
                                     neutral: 'Skipped composer files check',

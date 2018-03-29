@@ -60,9 +60,21 @@ class RatingTest extends TestCase
             'canonical_url' => 'https://example.com',
             'multiple_urls' => false,
             'malicious_access' => [
-                'vendor' => false,
-                'storage' => false,
-                'composer' => false,
+                'vendor' => [
+                    'access' => false,
+                    'urls' => [],
+                    'errors' => [],
+                ],
+                'storage' => [
+                    'access' => false,
+                    'urls' => [],
+                    'errors' => [],
+                ],
+                'composer' => [
+                    'access' => false,
+                    'urls' => [],
+                    'errors' => [],
+                ],
             ],
         ], $report);
     }
@@ -104,6 +116,7 @@ class RatingTest extends TestCase
 
     public function testInsecure()
     {
+        // These are tests for the old syntax that used a single boolean value
         $this->assertReportRating($this->alterGoodReport([
             'malicious_access' => [
                 'vendor' => true,
@@ -119,6 +132,31 @@ class RatingTest extends TestCase
         $this->assertReportRating($this->alterGoodReport([
             'malicious_access' => [
                 'composer' => true,
+            ],
+        ]), 'D');
+
+        // These are the tests for the current syntax with more details
+        $this->assertReportRating($this->alterGoodReport([
+            'malicious_access' => [
+                'vendor' => [
+                    'access' => true,
+                ],
+            ],
+        ]), 'D');
+
+        $this->assertReportRating($this->alterGoodReport([
+            'malicious_access' => [
+                'storage' => [
+                    'access' => true,
+                ],
+            ],
+        ]), 'D');
+
+        $this->assertReportRating($this->alterGoodReport([
+            'malicious_access' => [
+                'composer' => [
+                    'access' => true,
+                ],
             ],
         ]), 'D');
     }
