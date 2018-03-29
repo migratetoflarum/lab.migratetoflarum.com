@@ -127,7 +127,7 @@ export default {
         const expectedBaseUrl = (reportKey('canonical_url') || '').replace(/\/$/, '');
         const baseUrl = reportKey('homepage.boot.base_url');
 
-        if (reportKey('multiple_urls')) {
+        if (reportKey('multiple_urls') === true) {
             suggestions.push({
                 title: 'Multiple urls',
                 suggest: [
@@ -147,7 +147,7 @@ export default {
             });
         }
 
-        if (reportKey('malicious_access.vendor')) {
+        if (reportKey('malicious_access.vendor.access') === true) {
             suggestions.push({
                 title: 'Vendor folder',
                 suggest: [
@@ -158,7 +158,7 @@ export default {
             });
         }
 
-        if (reportKey('malicious_access.storage')) {
+        if (reportKey('malicious_access.storage.access') === true) {
             suggestions.push({
                 title: 'Storage folder',
                 suggest: [
@@ -169,7 +169,7 @@ export default {
             });
         }
 
-        if (reportKey('malicious_access.composer')) {
+        if (reportKey('malicious_access.composer.access') === true) {
             suggestions.push({
                 title: 'Composer files',
                 suggest: [
