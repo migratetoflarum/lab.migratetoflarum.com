@@ -17,18 +17,17 @@ class AppController extends Controller
 
     protected function appView($preload = [])
     {
-        $recent = Scan::where('hidden', false)
+        $recentScans = Scan::publiclyVisible()
             ->whereHas('website', function (Builder $query) {
-                $query->whereNotNull('canonical_url')
-                    ->whereNotNull('name');
+                return $query->publiclyVisible();
             })
-            ->orderBy('scanned_at', 'desc')
+            ->latest()
             ->take(config('scanner.show_recent_count'))
             ->get();
 
-        $recent->load('website');
+        $recentScans->load('website');
 
-        $preload = array_merge(ScanResource::collection($recent)->jsonSerialize(), $preload);
+        $preload = array_merge(ScanResource::collection($recentScans)->jsonSerialize(), $preload);
 
         return view('app')->withPreload($preload);
     }

@@ -3,6 +3,7 @@
 namespace App;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @property int $id
@@ -27,5 +28,13 @@ class Scan extends UidModel
     public function website()
     {
         return $this->belongsTo(Website::class);
+    }
+
+    public function scopePubliclyVisible(Builder $query)
+    {
+        $query
+            ->where('hidden', false)
+            ->whereNotNull('report')
+            ->whereNotNull('scanned_at');
     }
 }

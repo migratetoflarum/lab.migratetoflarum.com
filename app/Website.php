@@ -3,6 +3,7 @@
 namespace App;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Pdp\Rules;
 
@@ -27,6 +28,21 @@ class Website extends UidModel
     public function scans()
     {
         return $this->hasMany(Scan::class);
+    }
+
+    public function lastPubliclyVisibleScan()
+    {
+        return $this
+            ->hasOne(Scan::class)
+            ->publiclyVisible()
+            ->latest();
+    }
+
+    public function scopePubliclyVisible(Builder $query)
+    {
+        $query
+            ->whereNotNull('canonical_url')
+            ->whereNotNull('name');
     }
 
     public function getIsApexAttribute(): bool
