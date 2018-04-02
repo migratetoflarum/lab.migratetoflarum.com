@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Api\ScanController;
 use App\Resources\ScanResource;
+use App\Resources\UserResource;
 use App\Scan;
 use Illuminate\Database\Eloquent\Builder;
 use Spatie\Csp\AddCspHeaders;
@@ -28,6 +29,10 @@ class AppController extends Controller
         $recentScans->load('website');
 
         $preload = array_merge(ScanResource::collection($recentScans)->jsonSerialize(), $preload);
+
+        if (auth()->check()) {
+            $preload[] = (new UserResource(auth()->user()))->jsonSerialize();
+        }
 
         return view('app')->withPreload($preload);
     }

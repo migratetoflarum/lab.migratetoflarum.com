@@ -3,6 +3,9 @@ import Layout from './pages/Layout';
 import HomePage from './pages/HomePage';
 import ScanPage from './pages/ScanPage';
 import App from './utils/App';
+import LoginPage from './pages/LoginPage';
+import AccountPage from './pages/AccountPage';
+import RegisterPage from './pages/RegisterPage';
 
 let root = document.getElementById('app');
 
@@ -11,6 +14,9 @@ App.init(root);
 const routes = {
     '/': HomePage,
     '/scans/:key': ScanPage,
+    '/login': LoginPage,
+    '/register': RegisterPage,
+    '/account': AccountPage,
 };
 
 let isFirstMatch = true;

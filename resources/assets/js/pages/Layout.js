@@ -8,6 +8,8 @@ export default {
         vnode.state.copyrightDate = (new Date).getFullYear();
     },
     view(vnode) {
+        const user = App.user();
+
         return m('.app', {
             'data-url': m.route.get(),
         }, [
@@ -28,6 +30,32 @@ export default {
                                 href: App.discuss,
                                 target: '_blank',
                             }, ['Discuss thread ', icon('external-link')])),
+                            (user ? [
+                                m('li.nav-item.dropdown', [
+                                    m('a[href=#][data-toggle=dropdown][aria-haspopup=true][aria-expanded=false].nav-link.dropdown-toggle', user.attributes.name),
+                                    m('.dropdown-menu', [
+                                        link('/account', {className: 'dropdown-item'}, 'My Account'),
+                                        m('button.dropdown-item', {
+                                            onclick() {
+                                                const form = document.createElement('form');
+                                                form.method = 'POST';
+                                                form.action = '/logout';
+
+                                                const token = document.createElement('input');
+                                                token.type = 'hidden';
+                                                token.name = '_token';
+                                                token.value = App.csrfToken;
+
+                                                form.appendChild(token);
+                                                document.body.appendChild(form);
+                                                form.submit();
+                                            },
+                                        }, 'Logout'),
+                                    ]),
+                                ]),
+                            ] : [
+                                m('li.nav-item', link('/login', {className: 'nav-link'}, 'Login')),
+                            ]),
                         ]),
                     ]),
                 ])),

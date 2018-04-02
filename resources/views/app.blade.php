@@ -9,9 +9,21 @@
     <title>{{ config('app.name') }}</title>
 </head>
 <body>
+@if (isset($errors) && count($errors) > 0)
+    <div class="container">
+        <div class="alert alert-danger">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    </div>
+@endif
 <?php
 $data = [
     'csrf' => csrf_token(),
+    'user' => auth()->id(),
     'preload' => isset($preload) ? json_encode($preload) : '[]',
 ];
 ?>
