@@ -39,8 +39,10 @@ class AppServiceProvider extends ServiceProvider
                 'allow_redirects' => false,
                 'http_errors' => false,
                 'headers' => [
-                    'User-Agent' => 'MigrateToFlarum Lab',
+                    'User-Agent' => config('scanner.client.user_agent'),
                 ],
+                'connect_timeout' => config('scanner.client.connect_timeout'),
+                'timeout' => config('scanner.client.timeout'),
             ]);
         });
 
