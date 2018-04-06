@@ -8,6 +8,7 @@ import moment from 'moment';
 import DomainReport from '../components/DomainReport';
 import ExtensionsReport from '../components/ExtensionsReport';
 import Rating from '../components/Rating';
+import RequestsReport from '../components/RequestsReport';
 
 export default {
     oninit(vnode) {
@@ -336,6 +337,9 @@ export default {
                     ]),
                 ]),
             ]),
+            m(RequestsReport, {
+                requests: reportKey('requests', []),
+            }),
             m(OtherTools),
         ];
     },

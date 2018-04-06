@@ -37,6 +37,7 @@ class WebsiteScan implements ShouldQueue
         $baseAddress = $this->scan->website->normalized_url;
 
         $this->report['base_address'] = $baseAddress;
+        $this->report['requests'] = [];
 
         $workingUrls = [];
 
@@ -64,11 +65,9 @@ class WebsiteScan implements ShouldQueue
 
                     $urlReport['status'] = $response->getStatusCode();
                     $urlReport['headers'] = array_only($response->getHeaders(), [
-                        'Date',
                         'Content-Security-Policy',
                         'Content-Security-Policy-Report-Only',
                         'Strict-Transport-Security',
-                        'Server',
                     ]);
 
                     switch ($response->getStatusCode()) {
@@ -105,7 +104,9 @@ class WebsiteScan implements ShouldQueue
 
         if ($canonicalUrl) {
             try {
-                $homepage = new Crawler($this->doRequest($canonicalUrl)->getBody()->getContents());
+                $homepage = new Crawler(tap($this->doRequest($canonicalUrl)->getBody(), function ($body) {
+                    $body->rewind();
+                })->getContents());
             } catch (Exception $exception) {
                 $this->report['homepage'] = [
                     'failed' => true,
@@ -274,12 +275,61 @@ class WebsiteScan implements ShouldQueue
     protected function doRequest(string $url): ResponseInterface
     {
         if (!array_has($this->responses, $url)) {
+            /**
+             * @var $client ScannerClient
+             */
             $client = app(ScannerClient::class);
 
-            $this->responses[$url] = $client->get($url);
+            $requestDate = Carbon::now()->toIso8601String();
+            $requestTime = microtime(true);
+
+            try {
+                $response = $client->get($url);
+                $this->responses[$url] = $response;
+
+                $this->report['requests'][] = [
+                    'request' => [
+                        'date' => $requestDate,
+                        'url' => $url,
+                        'method' => 'GET',
+                        'headers' => $client->getConfig('headers'),
+                    ],
+                    'response' => [
+                        'time' => round((microtime(true) - $requestTime) * 1000),
+                        'status_code' => $response->getStatusCode(),
+                        'reason_phrase' => $response->getReasonPhrase(),
+                        'protocol_version' => $response->getProtocolVersion(),
+                        'headers' => $response->getHeaders(),
+                        'body' => $response->getBody()->getContents(),
+                    ],
+                ];
+            } catch (Exception $exception) {
+                $this->report['requests'][] = [
+                    'request' => [
+                        'date' => $requestDate,
+                        'url' => $url,
+                        'method' => 'GET',
+                        'headers' => $client->getConfig('headers'),
+                    ],
+                    'exception' => [
+                        'time' => round((microtime(true) - $requestTime) * 1000),
+                        'class' => get_class($exception),
+                        'message' => $exception->getMessage(),
+                    ],
+                ];
+
+                // We also cache exceptions
+                $this->responses[$url] = $exception;
+            }
         }
 
-        return array_get($this->responses, $url);
+        $response = array_get($this->responses, $url);
+
+        if ($response instanceof Exception) {
+            throw $response;
+        }
+
+        return $response;
     }
 
     public function failed(Exception $exception)
