@@ -4,4 +4,6 @@ php:
   - 7.1
 
 before_install:
+  - cp .env.travis .env
   - composer install --prefer-dist -n
+  - php artisan key:generate
