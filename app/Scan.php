@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
  * @property string $uid
  * @property bool $hidden
  * @property array $report
+ * @property string $rating
  * @property Carbon $scanned_at
  * @property Carbon $created_at
  * @property Carbon $updated_at

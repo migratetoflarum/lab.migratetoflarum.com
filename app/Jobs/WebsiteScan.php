@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Events\ScanUpdated;
+use App\Report\RatingAgent;
 use App\Scan;
 use App\ScannerClient;
 use Carbon\Carbon;
@@ -233,6 +234,16 @@ class WebsiteScan implements ShouldQueue
 
         $this->scan->report = $this->report;
         $this->scan->scanned_at = Carbon::now();
+
+        try {
+            $ratingAgent = new RatingAgent($this->scan);
+            $ratingAgent->rate();
+
+            $this->scan->rating = $ratingAgent->rating;
+        } catch (Exception $exception) {
+            // ignore errors
+        }
+
         $this->scan->save();
 
         if ($canonicalUrl && $this->scan->website->canonical_url !== $canonicalUrl) {
@@ -243,6 +254,14 @@ class WebsiteScan implements ShouldQueue
 
         if ($title && $this->scan->website->name !== $title) {
             $this->scan->website->name = $title;
+        }
+
+        if ($this->scan->rating && $this->scan->website->last_rating !== $this->scan->rating) {
+            $this->scan->website->last_rating = $this->scan->rating;
+        }
+
+        if (!$this->scan->hidden) {
+            $this->scan->website->last_public_scanned_at = $this->scan->scanned_at;
         }
 
         if ($this->scan->website->isDirty()) {

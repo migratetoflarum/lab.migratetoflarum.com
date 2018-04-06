@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Api\ScanController;
 use App\Resources\ScanResource;
-use App\Scan;
-use Illuminate\Database\Eloquent\Builder;
+use App\Website;
+use Illuminate\Database\Eloquent\Collection;
 use Spatie\Csp\AddCspHeaders;
 
 class AppController extends Controller
@@ -17,14 +17,17 @@ class AppController extends Controller
 
     protected function appView($preload = [])
     {
-        $recentScans = Scan::publiclyVisible()
-            ->whereHas('website', function (Builder $query) {
-                return $query->publiclyVisible();
-            })
-            ->latest()
+        /**
+         * @var $recentWebsites Collection|Website[]
+         */
+        $recentWebsites = Website::publiclyVisible()
+            ->orderBy('last_public_scanned_at', 'desc')
             ->take(config('scanner.show_recent_count'))
             ->get();
 
+        $recentWebsites->load('lastPubliclyVisibleScan');
+
+        $recentScans = new Collection($recentWebsites->pluck('lastPubliclyVisibleScan'));
         $recentScans->load('website');
 
         $preload = array_merge(ScanResource::collection($recentScans)->jsonSerialize(), $preload);

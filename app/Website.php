@@ -13,6 +13,8 @@ use Pdp\Rules;
  * @property string $normalized_url
  * @property string $canonical_url
  * @property string $name
+ * @property string $last_rating
+ * @property Carbon $last_public_scanned_at
  * @property Carbon $created_at
  * @property Carbon $updated_at
  *
@@ -35,13 +37,14 @@ class Website extends UidModel
         return $this
             ->hasOne(Scan::class)
             ->publiclyVisible()
-            ->latest();
+            ->orderBy('scanned_at', 'desc');
     }
 
     public function scopePubliclyVisible(Builder $query)
     {
         $query
             ->whereNotNull('canonical_url')
+            ->whereNotNull('last_public_scanned_at')
             ->whereNotNull('name');
     }
 
