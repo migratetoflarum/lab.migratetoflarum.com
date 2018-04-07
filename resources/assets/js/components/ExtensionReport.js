@@ -90,7 +90,7 @@ export default {
                         ' ',
                         m('span.badge.badge-dark', 'Update available: ' + extension.attributes.last_version),
                     ] : null),
-                ]) : null),
+                ]) : m('p.my-1', m('small', 'Version unknown. Latest available: ' + extension.attributes.last_version))),
                 m('div', links),
                 (extension.attributes.abandoned ? m('.alert.alert-warning', [
                     m('p', 'This extension is abandonned'),

@@ -2,11 +2,13 @@
 
 namespace App\Resources;
 
+use App\Extension;
 use App\ExtensionVersion;
 use App\JavascriptModule;
 use App\Report\RatingAgent;
 use App\Report\ReportFormatter;
 use Composer\Semver\Comparator;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Resources\Json\Resource;
 
 class ScanResource extends Resource
@@ -33,13 +35,13 @@ class ScanResource extends Resource
                     'data' => new WebsiteResource($this->resource->website),
                 ],
                 'extensions' => [
-                    'data' => $this->extensions($request),
+                    'data' => $this->extensions($request, $report),
                 ],
             ],
         ];
     }
 
-    protected function extensions($request): array
+    protected function extensions($request, ReportFormatter $reportFormatter): array
     {
         if (is_null($this->resource->report)) {
             return [];
@@ -127,18 +129,53 @@ class ScanResource extends Resource
             ];
         })->filter(function (array $extensionData): bool {
             return count(array_get($extensionData, 'versions')) > 0;
-        })->sortBy('extension.package');
+        });
+
+        /**
+         * @var $matchingExtensions Collection
+         */
+        $matchingExtensions = Extension::whereIn('flarumid', $reportFormatter->flarumExtensionIds())->orderBy('package')->get();
+
+        $extensionsInBootLoader = $matchingExtensions->filter(function (Extension $extension) use ($matchingExtensions): bool {
+            // Keep any extension that isn't abandoned
+            if (!$extension->abandoned) {
+                return true;
+            }
+
+            // If the extension is abandoned but another one matches the flarum id,
+            // remove this extension. Occurs when an extension was renamed and therefore there are multiple matches
+            // We assume the forum is already using the non-abandoned version
+            $duplicateNotAbandoned = $matchingExtensions->first(function (Extension $duplicate) use ($extension) {
+                return !$duplicate->abandoned && $duplicate->flarumid === $extension->flarumid;
+            });
+
+            return is_null($duplicateNotAbandoned);
+        })->values();
+
+        // Merge the bootloader-based scan with the checksum-based scan
+        // The extensions only in the bootloader scan won't have any version number
+        foreach ($extensionsInBootLoader as $extensionInBootLoader) {
+            if (!$extensionsAfterAllModulesCheck->has($extensionInBootLoader->id)) {
+                $extensionsAfterAllModulesCheck->push([
+                    'extension' => $extensionInBootLoader,
+                ]);
+            }
+        }
+
+        $extensionsAfterAllModulesCheck->sortBy('extension.package');
 
         return $extensionsAfterAllModulesCheck->map(function (array $extensionData) use ($request): ExtensionResource {
             $extension = array_get($extensionData, 'extension');
 
-            $extension->possibleVersions = collect(array_get($extensionData, 'versions'))->sort(function (ExtensionVersion $a, ExtensionVersion $b): int {
-                if (Comparator::equalTo($a->version, $b->version)) {
-                    return 0;
-                }
+            if (array_has($extensionData, 'versions')) {
+                $extension->possibleVersions = collect(array_get($extensionData, 'versions'))->sort(function (ExtensionVersion $a, ExtensionVersion $b): int {
+                    if (Comparator::equalTo($a->version, $b->version)) {
+                        return 0;
+                    }
 
-                return Comparator::greaterThan($a->version, $b->version) ? 1 : -1;
-            })->values();
+                    return Comparator::greaterThan($a->version, $b->version) ? 1 : -1;
+                })->values();
+            }
 
             return new ExtensionResource($extension);
         })->values()->toArray();
