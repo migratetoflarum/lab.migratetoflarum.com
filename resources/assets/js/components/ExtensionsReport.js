@@ -42,7 +42,7 @@ export default {
                         },
                     }, (vnode.state.showCoreExtensions ? 'Hide' : 'Show') + ' ' + coreExtensionsCount + ' core extensions'),
                 ]),
-                m('p.text-muted', 'The following extensions are active on this forum. Admin-only or background-only extensions are not listed.'),
+                m('p.text-muted', 'The following extensions are active on this forum. Some admin-only or background-only extensions might not be visible to the scanner.'),
                 m('.list-group.list-group-flush', extensionsShown.map(
                     extension => m(ExtensionReport, {
                         extension,
