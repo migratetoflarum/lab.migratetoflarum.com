@@ -62,6 +62,9 @@ class RetrieveExtensions extends Command
                     '-',
                 ], $packageName);
 
+                // Save a first time so the extension id can be used when scanning the versions
+                $extension->save();
+
                 $lastVersion = null;
 
                 foreach ($versions as $version) {
@@ -123,7 +126,6 @@ class RetrieveExtensions extends Command
                 $extension->abandoned = array_get($details, 'abandoned');
                 $extension->repository = array_get($details, 'repository');
                 $extension->save();
-
             }
 
             $url = array_get($data, 'next');
