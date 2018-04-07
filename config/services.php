@@ -35,4 +35,8 @@ return [
         'secret' => env('STRIPE_SECRET'),
     ],
 
+    'github' => [
+        'api_access_token' => env('GITHUB_API_ACCESS_TOKEN'),
+    ],
+
 ];

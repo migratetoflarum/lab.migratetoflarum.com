@@ -75,6 +75,22 @@ export default {
                     ]),
                 ]),
                 m('p.my-1', extension.attributes.description),
+                (extension.relationships && extension.relationships.possible_versions && extension.relationships.possible_versions.data.length ? m('p.my-1', {
+                    title: 'Possible versions: ' + extension.relationships.possible_versions.data.map(version => version.attributes.version).join(', '),
+                }, [
+                    m('small', [
+                        'Version ',
+                        extension.relationships.possible_versions.data[0].attributes.version,
+                        (extension.relationships.possible_versions.data.length > 1 ? [
+                            ' - ',
+                            extension.relationships.possible_versions.data[extension.relationships.possible_versions.data.length - 1].attributes.version,
+                        ] : null),
+                    ]),
+                    (extension.attributes.update_available ? [
+                        ' ',
+                        m('span.badge.badge-dark', 'Update available: ' + extension.attributes.last_version),
+                    ] : null),
+                ]) : null),
                 m('div', links),
                 (extension.attributes.abandoned ? m('.alert.alert-warning', [
                     m('p', 'This extension is abandonned'),

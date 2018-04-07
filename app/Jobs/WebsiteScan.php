@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Events\ScanUpdated;
+use App\JavascriptFileParser;
 use App\Report\RatingAgent;
 use App\Scan;
 use App\ScannerClient;
@@ -13,6 +14,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Log;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\DomCrawler\Crawler;
 
@@ -104,9 +106,7 @@ class WebsiteScan implements ShouldQueue
 
         if ($canonicalUrl) {
             try {
-                $homepage = new Crawler(tap($this->doRequest($canonicalUrl)->getBody(), function ($body) {
-                    $body->rewind();
-                })->getContents());
+                $homepage = new Crawler($this->doRequest($canonicalUrl)->getBody()->getContents());
             } catch (Exception $exception) {
                 $this->report['homepage'] = [
                     'failed' => true,
@@ -182,6 +182,11 @@ class WebsiteScan implements ShouldQueue
 
             $maliciousAccess = [];
 
+            $javascriptModules = [
+                'forum' => null,
+                'admin' => null,
+            ];
+
             if ($flarumUrl) {
                 $tryMaliciousAccess = [
                     'vendor' => [
@@ -227,10 +232,65 @@ class WebsiteScan implements ShouldQueue
 
                     $maliciousAccess[$access] = $accessReport;
                 }
+
+                $forumJsHash = null;
+                $adminJsHash = null;
+
+                $homepage->filter('body script[src]')->each(function (Crawler $link) use (&$forumJsHash) {
+                    $src = $link->attr('src');
+
+                    if (!$forumJsHash && preg_match('~assets/forum\-([0-9a-f]{8})\.js$~', $src, $matches) === 1) {
+                        $forumJsHash = $matches[1];
+                    }
+                });
+
+                try {
+                    $revManifest = \GuzzleHttp\json_decode($this->doRequest("$flarumUrl/assets/rev-manifest.json")->getBody()->getContents(), true);
+
+                    $manifestForumJsHash = array_get($revManifest, 'forum.js');
+                    $manifestAdminJsHash = array_get($revManifest, 'admin.js');
+
+                    if (preg_match('~^[0-9a-f]{8}$~', $manifestForumJsHash) === 1) {
+                        if ($forumJsHash && $forumJsHash !== $manifestForumJsHash) {
+                            Log::info('Scan ' . $this->scan->uid . ' forum.js hash from homepage (' . $forumJsHash . ') is different from rev-manifest (' . $manifestForumJsHash . ')');
+                        }
+
+                        $forumJsHash = $manifestForumJsHash;
+                    }
+
+                    if (preg_match('~^[0-9a-f]{8}$~', $manifestAdminJsHash) === 1) {
+                        $adminJsHash = $manifestAdminJsHash;
+                    }
+                } catch (Exception $exception) {
+                    // silence errors
+                }
+
+                foreach ([
+                    'forum' => $forumJsHash,
+                    'admin' => $adminJsHash,
+                         ] as $stack => $hash) {
+                    try {
+                        if (!$hash) {
+                            continue;
+                        }
+
+                        $content = $this->doRequest("$flarumUrl/assets/$stack-$hash.js")->getBody()->getContents();
+                        $javascriptParser = new JavascriptFileParser($content);
+
+                        $javascriptModules[$stack] = [];
+
+                        foreach ($javascriptParser->modules() as $module) {
+                            $javascriptModules[$stack][array_get($module, 'module')] = md5(array_get($module, 'code'));
+                        }
+                    } catch (Exception $exception) {
+                        // silence errors
+                    }
+                }
             }
 
             $this->report['homepage'] = $homepageReport;
             $this->report['malicious_access'] = $maliciousAccess;
+            $this->report['javascript_modules'] = $javascriptModules;
         }
 
         $this->scan->report = $this->report;
@@ -287,6 +347,15 @@ class WebsiteScan implements ShouldQueue
                 $response = $client->get($url);
                 $this->responses[$url] = $response;
 
+                $content = $response->getBody()->getContents();
+
+                $bodySize = strlen($content);
+                $maxSize = config('scanner.keep_max_response_body_size');
+
+                if ($bodySize > $maxSize) {
+                    $content = substr($content, 0, $maxSize) . "\n\n(response truncated. Original length $bodySize)";
+                }
+
                 $this->report['requests'][] = [
                     'request' => [
                         'date' => $requestDate,
@@ -300,9 +369,11 @@ class WebsiteScan implements ShouldQueue
                         'reason_phrase' => $response->getReasonPhrase(),
                         'protocol_version' => $response->getProtocolVersion(),
                         'headers' => $response->getHeaders(),
-                        'body' => $response->getBody()->getContents(),
+                        'body' => $content,
                     ],
                 ];
+
+                $response->getBody()->rewind();
             } catch (Exception $exception) {
                 $this->report['requests'][] = [
                     'request' => [

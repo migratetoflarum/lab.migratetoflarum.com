@@ -3,6 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Extension;
+use App\ExtensionVersion;
+use Composer\Semver\Comparator;
+use Exception;
 use GuzzleHttp\Client;
 use Illuminate\Console\Command;
 
@@ -40,10 +43,7 @@ class RetrieveExtensions extends Command
 
                 $details = array_get(\GuzzleHttp\json_decode($this->client->get("/packages/$packageName.json")->getBody()->getContents(), true), 'package', []);
 
-                // For the latest version we simply take the first non-dev version available
-                $latestVersion = array_first(array_get($details, 'versions', []), function ($value, $key) {
-                    return !starts_with($key, 'dev-');
-                });
+                $versions = array_get($details, 'versions', []);
 
                 /**
                  * @var $extension Extension
@@ -62,15 +62,68 @@ class RetrieveExtensions extends Command
                     '-',
                 ], $packageName);
 
-                if ($latestVersion) {
+                $lastVersion = null;
+
+                foreach ($versions as $version) {
+                    $versionNumber = array_get($version, 'version');
+
+                    $this->info("Saving version $versionNumber");
+
+                    /**
+                     * @var $extensionVersion ExtensionVersion
+                     */
+                    $extensionVersion = ExtensionVersion::firstOrNew([
+                        'extension_id' => $extension->id,
+                        'version' => $versionNumber,
+                    ]);
+
+                    $extensionVersion->packagist = $version;
+                    $extensionVersion->save();
+
+                    if (
+                        !starts_with($versionNumber, 'dev-') &&
+                        !ends_with($versionNumber, '-dev')
+                    ) {
+                        $distUrl = array_get($version, 'dist.url');
+
+                        if (
+                            $distUrl &&
+                            !$extensionVersion->hasMedia('dist')
+                        ) {
+                            try {
+                                if (preg_match('~^https://api\.github\.com/repos/[^/]+/[^/]+/zipball/[0-9a-f]+$~', $distUrl) !== 1) {
+                                    throw new Exception("Invalid dist file url $distUrl");
+                                }
+
+                                $extensionVersion
+                                    ->addMediaFromGitHubApiUrl($distUrl)
+                                    ->toMediaCollection('dist');
+                            } catch (Exception $exception) {
+                                $this->error($exception->getMessage());
+
+                                report($exception);
+                            }
+                        }
+
+                        if (is_null($lastVersion) || Comparator::greaterThan($versionNumber, $lastVersion)) {
+                            $lastVersion = $versionNumber;
+                        }
+                    }
+                }
+
+                if ($lastVersion) {
+                    $latestVersion = array_get($versions, $lastVersion);
+
                     $extension->title = array_get($latestVersion, 'extra.flarum-extension.title');
                     $extension->icon = array_get($latestVersion, 'extra.flarum-extension.icon');
+                    $extension->last_version = $lastVersion;
                 }
 
                 $extension->description = array_get($details, 'description');
                 $extension->abandoned = array_get($details, 'abandoned');
                 $extension->repository = array_get($details, 'repository');
                 $extension->save();
+
             }
 
             $url = array_get($data, 'next');

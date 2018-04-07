@@ -3,6 +3,7 @@
 namespace App;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -14,13 +15,18 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $abandoned
  * @property string $repository
  * @property array $icon
+ * @property bool $hidden
+ * @property bool $last_version
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ *
+ * @property Collection|ExtensionVersion[] $versions
  */
 class Extension extends Model
 {
     protected $casts = [
         'icon' => 'array',
+        'hidden' => 'boolean',
     ];
 
     protected $visible = [
@@ -31,9 +37,15 @@ class Extension extends Model
         'repository',
         'abandoned',
         'icon',
+        'last_version',
     ];
 
     protected $fillable = [
         'package',
     ];
+
+    public function versions()
+    {
+        return $this->hasMany(ExtensionVersion::class);
+    }
 }
