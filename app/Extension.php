@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $description
  * @property string $abandoned
  * @property string $repository
+ * @property string $discuss_url
  * @property array $icon
  * @property bool $hidden
  * @property bool $last_version
@@ -35,6 +36,7 @@ class Extension extends Model
         'title',
         'description',
         'repository',
+        'discuss_url',
         'abandoned',
         'icon',
         'last_version',

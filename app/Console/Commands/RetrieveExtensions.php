@@ -120,6 +120,14 @@ class RetrieveExtensions extends Command
                     $extension->title = array_get($latestVersion, 'extra.flarum-extension.title');
                     $extension->icon = array_get($latestVersion, 'extra.flarum-extension.icon');
                     $extension->last_version = $lastVersion;
+
+                    $discussUrl = array_get($latestVersion, 'extra.flagrow.discuss');
+
+                    if (preg_match('~^https://discuss\.flarum\.org/d/[a-z0-9_-]+$~', $discussUrl) === 1) {
+                        $extension->discuss_url = $discussUrl;
+                    } else {
+                        $extension->discuss_url = null;
+                    }
                 }
 
                 $extension->description = array_get($details, 'description');

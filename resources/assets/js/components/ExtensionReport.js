@@ -61,6 +61,15 @@ export default {
                 [icon('code-fork'), ' Repository']));
         }
 
+        if (extension.attributes.discuss_url) {
+            links.push(' ');
+            links.push(m('a.btn.btn-sm.btn-light', {
+                href: extension.attributes.discuss_url,
+                target: '_blank',
+                rel: 'nofollow',
+            }, [m('span.fa.icon-flarum'), ' Discuss']));
+        }
+
         return m('.list-group-item.py-2', m('.row', [
             m('.col-2', m('.extension-icon', {
                 style: iconStyle,
