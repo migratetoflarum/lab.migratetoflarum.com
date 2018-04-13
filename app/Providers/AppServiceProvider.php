@@ -3,10 +3,10 @@
 namespace App\Providers;
 
 use App\ScannerClient;
-use Exception;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Horizon\Horizon;
 use Pdp\Rules;
+use Storage;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -47,13 +47,9 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(Rules::class, function () {
-            $rules = cache('public-suffix-list-rules');
+            $rules = Storage::get('public_suffix_list_converted');
 
-            if (!$rules) {
-                throw new Exception('Public Suffix List rules not cached');
-            }
-
-            return new Rules($rules);
+            return new Rules(unserialize($rules));
         });
     }
 }
