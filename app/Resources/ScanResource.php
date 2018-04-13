@@ -20,6 +20,14 @@ class ScanResource extends Resource
         $agent = new RatingAgent($this->resource);
         $agent->rate();
 
+        $extensions = cache()->remember(
+            "scan-{$this->resource->uid}-extensions",
+            config('scanner.extension_versions_cache'),
+            function () use ($request, $report): array {
+                return $this->extensions($request, $report);
+            }
+        );
+
         return [
             'type' => 'scans',
             'id' => $this->resource->uid,
@@ -35,7 +43,7 @@ class ScanResource extends Resource
                     'data' => new WebsiteResource($this->resource->website),
                 ],
                 'extensions' => [
-                    'data' => $this->extensions($request, $report),
+                    'data' => $extensions,
                 ],
             ],
         ];
