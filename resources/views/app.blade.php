@@ -13,6 +13,7 @@
 $data = [
     'csrf' => csrf_token(),
     'preload' => isset($preload) ? json_encode($preload) : '[]',
+    'sponsoring' => json_encode(config('sponsoring')),
 ];
 ?>
 <div id="app" {!! collect($data)->map(function ($value, string $attr) {

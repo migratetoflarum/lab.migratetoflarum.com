@@ -2,6 +2,7 @@ import m from 'mithril';
 import link from '../helpers/link';
 import icon from '../helpers/icon';
 import App from '../utils/App';
+import Sponsoring from '../components/Sponsoring';
 
 export default {
     oninit(vnode) {
@@ -32,6 +33,7 @@ export default {
                     ]),
                 ])),
             ]),
+            m(Sponsoring),
             m('.container.py-3', vnode.children),
             m('footer.py-3', m('.container.text-center.text-muted', [
                 m('p', [
@@ -48,6 +50,10 @@ export default {
                     '. Contact ',
                     m('a', {href: 'mailto:' + App.supportEmail}, App.supportEmail),
                     ' for security or legal issues',
+                ]),
+                m('p', [
+                    'Interested in sponsoring the lab ? Contact ',
+                    m('a', {href: 'mailto:' + App.sponsoringEmail}, App.sponsoringEmail),
                 ]),
                 m('p', '© MigrateToFlarum ' + vnode.state.copyrightDate),
             ])),

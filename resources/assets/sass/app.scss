@@ -5,8 +5,8 @@ $navbar-dark-toggler-icon-bg: url(../images/navbar-toggle.svg);
 @import "~font-awesome/scss/font-awesome";
 
 .page-home {
-    padding-top: 22vh;
-    padding-bottom: 10vh;
+    padding-top: 18vh;
+    padding-bottom: 8vh;
 }
 
 .page-recent {
@@ -73,4 +73,9 @@ $navbar-dark-toggler-icon-bg: url(../images/navbar-toggle.svg);
     margin-bottom: -0.1em;
     background-size: contain;
     background: url(../images/flarum-mono.svg) no-repeat center center;
+}
+
+.sponsoring {
+    font-size: 0.9em;
+    padding: 10px 0;
 }
