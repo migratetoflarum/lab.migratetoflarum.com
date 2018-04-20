@@ -20,13 +20,17 @@ class ScanResource extends Resource
         $agent = new RatingAgent($this->resource);
         $agent->rate();
 
-        $extensions = cache()->remember(
-            "scan-{$this->resource->uid}-extensions",
-            config('scanner.extension_versions_cache'),
-            function () use ($request, $report): array {
-                return $this->extensions($request, $report);
-            }
-        );
+        if (is_null($this->resource->report)) {
+            $extensions = [];
+        } else {
+            $extensions = cache()->remember(
+                "scan-{$this->resource->uid}-extensions",
+                config('scanner.extension_versions_cache'),
+                function () use ($request, $report): array {
+                    return $this->extensions($request, $report);
+                }
+            );
+        }
 
         return [
             'type' => 'scans',
