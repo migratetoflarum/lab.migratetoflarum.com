@@ -111,7 +111,6 @@ class ScanExtensions extends Command
 
             if (!$skipLocales && preg_match('~/locales?/([a-z][a-z_-]*)\.ya?ml$~', $filename, $matches) === 1) {
                 $this->scanForTranslations($matches, $zip->getFromIndex($fileIndex), $version);
-                //$this->scanForTranslations($matches, $zip->getStream($zip->getNameIndex($fileIndex)));
             }
         }
 
