@@ -4,6 +4,8 @@ namespace App\Console\Commands;
 
 use App\Extension;
 use App\ExtensionVersion;
+use App\Locale;
+use Carbon\Carbon;
 use Composer\Semver\Comparator;
 use Exception;
 use GuzzleHttp\Client;
@@ -81,6 +83,8 @@ class RetrieveExtensions extends Command
                     ]);
 
                     $extensionVersion->packagist = $version;
+                    $extensionVersion->version_normalized = array_get($version, 'version_normalized');
+                    $extensionVersion->packagist_time = Carbon::parse(array_get($version, 'time'));
                     $extensionVersion->save();
 
                     if (
@@ -120,6 +124,7 @@ class RetrieveExtensions extends Command
                     $extension->title = array_get($latestVersion, 'extra.flarum-extension.title');
                     $extension->icon = array_get($latestVersion, 'extra.flarum-extension.icon');
                     $extension->last_version = $lastVersion;
+                    $extension->last_version_time = Carbon::parse(array_get($latestVersion, 'time'));
 
                     $discussUrl = array_get($latestVersion, 'extra.flagrow.discuss');
 
@@ -128,11 +133,26 @@ class RetrieveExtensions extends Command
                     } else {
                         $extension->discuss_url = null;
                     }
+
+                    $localeId = null;
+
+                    if ($localeCode = array_get($latestVersion, 'extra.flarum-locale.code')) {
+                        $localeId = Locale::firstOrCreate([
+                            'code' => $localeCode,
+                        ], [
+                            'localized_name' => array_get($latestVersion, 'extra.flarum-locale.title'),
+                        ])->id;
+                    }
+
+                    $extension->flarum_locale_id = $localeId;
+
+                    $extension->lastVersion()->associate($extension->versions()->where('version', $lastVersion)->first());
                 }
 
                 $extension->description = array_get($details, 'description');
                 $extension->abandoned = array_get($details, 'abandoned');
                 $extension->repository = array_get($details, 'repository');
+                $extension->packagist_time = Carbon::parse(array_get($details, 'time'));
                 $extension->save();
             }
 

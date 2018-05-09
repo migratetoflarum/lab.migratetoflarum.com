@@ -177,10 +177,20 @@ class ScanResource extends Resource
         $extensionsAfterAllModulesCheck->sortBy('extension.package');
 
         return $extensionsAfterAllModulesCheck->map(function (array $extensionData) use ($request): ExtensionResource {
+            /**
+             * @var $extension Extension
+             */
             $extension = array_get($extensionData, 'extension');
 
+            $extension->offsetUnset('versions');
+
             if (array_has($extensionData, 'versions')) {
-                $extension->possibleVersions = collect(array_get($extensionData, 'versions'))->sort(function (ExtensionVersion $a, ExtensionVersion $b): int {
+                $extension->possibleVersions = collect(array_get($extensionData, 'versions'))->each(function(ExtensionVersion $version) {
+                    // Unload the relationships that will not be useful later
+                    // This prevents caching them and also prevents including them in the preload payload
+                    $version->offsetUnset('extension');
+                    $version->offsetUnset('modules');
+                })->sort(function (ExtensionVersion $a, ExtensionVersion $b): int {
                     if (Comparator::equalTo($a->version, $b->version)) {
                         return 0;
                     }

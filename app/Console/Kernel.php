@@ -28,7 +28,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('extensions:retrieve')->dailyAt('5:00');
 
-        $schedule->command('extensions:export-modules')->dailyAt('5:30');
+        $schedule->command('extensions:scan')->dailyAt('5:30');
 
         $schedule->command('update-public-suffix-list')->weekly();
     }

@@ -12,7 +12,12 @@ use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
  * @property int $id
  * @property int $extension_id
  * @property string $version
+ * @property string $version_normalized
  * @property array $packagist
+ * @property array $locale_errors
+ * @property Carbon $packagist_time
+ * @property Carbon $scanned_modules_at
+ * @property Carbon $scanned_locales_at
  * @property Carbon $created_at
  * @property Carbon $updated_at
  *
@@ -26,6 +31,10 @@ class ExtensionVersion extends Model implements HasMedia
 
     protected $casts = [
         'packagist' => 'array',
+        'locale_errors' => 'array',
+        'packagist_time' => 'timestamp',
+        'scanned_modules_at' => 'timestamp',
+        'scanned_locales_at' => 'timestamp',
     ];
 
     protected $fillable = [
@@ -35,6 +44,8 @@ class ExtensionVersion extends Model implements HasMedia
 
     protected $visible = [
         'version',
+        'locale_errors',
+        'packagist_time',
     ];
 
     public function extension()
@@ -47,6 +58,16 @@ class ExtensionVersion extends Model implements HasMedia
         return $this
             ->belongsToMany(JavascriptModule::class, 'extension_version_module', 'version_id', 'module_id')
             ->withPivot('checksum');
+    }
+
+    public function translationsProvided()
+    {
+        return $this->hasMany(ExtensionTranslation::class, 'version_id');
+    }
+
+    public function translationsReceived()
+    {
+        return $this->hasMany(ExtensionTranslation::class, 'namespace_extension_id', 'extension_id');
     }
 
     public function registerMediaCollections()

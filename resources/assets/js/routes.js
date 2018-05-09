@@ -3,6 +3,7 @@ import Layout from './pages/Layout';
 import HomePage from './pages/HomePage';
 import ScanPage from './pages/ScanPage';
 import App from './utils/App';
+import ExtensionsPage from './pages/ExtensionsPage';
 
 let root = document.getElementById('app');
 
@@ -11,6 +12,7 @@ App.init(root);
 const routes = {
     '/': HomePage,
     '/scans/:key': ScanPage,
+    '/extensions': ExtensionsPage,
 };
 
 let isFirstMatch = true;
