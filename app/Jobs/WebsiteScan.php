@@ -188,6 +188,10 @@ class WebsiteScan implements ShouldQueue
             ];
 
             if ($flarumUrl) {
+                // We check for $flarumUrl to know whether it's a Flarum install
+                // But we then use $canonicalUrl so we always have the proper protocol and can't be fooled into hitting another host
+                $safeFlarumUrl = rtrim($canonicalUrl, '/');
+
                 $tryMaliciousAccess = [
                     'vendor' => [
                         'vendor/composer/installed.json',
@@ -212,7 +216,7 @@ class WebsiteScan implements ShouldQueue
 
                     foreach ($urls as $url) {
                         try {
-                            $fullUrl = "$flarumUrl/$url";
+                            $fullUrl = "$safeFlarumUrl/$url";
                             $response = $this->doRequest($fullUrl, true);
 
                             if ($response->getStatusCode() === 200) {
@@ -245,7 +249,7 @@ class WebsiteScan implements ShouldQueue
                 });
 
                 try {
-                    $revManifest = \GuzzleHttp\json_decode($this->doRequest("$flarumUrl/assets/rev-manifest.json")->getBody()->getContents(), true);
+                    $revManifest = \GuzzleHttp\json_decode($this->doRequest("$safeFlarumUrl/assets/rev-manifest.json")->getBody()->getContents(), true);
 
                     $manifestForumJsHash = array_get($revManifest, 'forum.js');
                     $manifestAdminJsHash = array_get($revManifest, 'admin.js');
@@ -274,7 +278,7 @@ class WebsiteScan implements ShouldQueue
                             continue;
                         }
 
-                        $content = $this->doRequest("$flarumUrl/assets/$stack-$hash.js")->getBody()->getContents();
+                        $content = $this->doRequest("$safeFlarumUrl/assets/$stack-$hash.js")->getBody()->getContents();
                         $javascriptParser = new JavascriptFileParser($content);
 
                         $javascriptModules[$stack] = [];
