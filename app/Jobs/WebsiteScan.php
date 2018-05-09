@@ -213,7 +213,7 @@ class WebsiteScan implements ShouldQueue
                     foreach ($urls as $url) {
                         try {
                             $fullUrl = "$flarumUrl/$url";
-                            $response = $this->doRequest($fullUrl);
+                            $response = $this->doRequest($fullUrl, true);
 
                             if ($response->getStatusCode() === 200) {
                                 $accessReport['access'] = true;
@@ -266,8 +266,8 @@ class WebsiteScan implements ShouldQueue
                 }
 
                 foreach ([
-                    'forum' => $forumJsHash,
-                    'admin' => $adminJsHash,
+                             'forum' => $forumJsHash,
+                             'admin' => $adminJsHash,
                          ] as $stack => $hash) {
                     try {
                         if (!$hash) {
@@ -332,7 +332,7 @@ class WebsiteScan implements ShouldQueue
         event(new ScanUpdated($this->scan));
     }
 
-    protected function doRequest(string $url): ResponseInterface
+    protected function doRequest(string $url, bool $head = false): ResponseInterface
     {
         if (!array_has($this->responses, $url)) {
             /**
@@ -344,7 +344,7 @@ class WebsiteScan implements ShouldQueue
             $requestTime = microtime(true);
 
             try {
-                $response = $client->get($url);
+                $response = $client->request($head ? 'head' : 'get', $url);
                 $this->responses[$url] = $response;
 
                 $content = $response->getBody()->getContents();
@@ -360,7 +360,7 @@ class WebsiteScan implements ShouldQueue
                     'request' => [
                         'date' => $requestDate,
                         'url' => $url,
-                        'method' => 'GET',
+                        'method' => $head ? 'HEAD' : 'GET',
                         'headers' => $client->getConfig('headers'),
                     ],
                     'response' => [

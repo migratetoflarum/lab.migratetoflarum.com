@@ -32,7 +32,7 @@ export default {
                     icon(vnode.state.extended ? 'chevron-up' : 'chevron-down', {
                         className: 'float-right',
                     }),
-                    m('code', 'GET ' + request.request.url),
+                    m('code', request.request.method + ' ' + request.request.url),
                     ' ',
                     m('.badge.badge-' + resultClass, resultMessage),
                 ]),
@@ -71,7 +71,7 @@ export default {
                             ])
                         ] : null),
                     ]),
-                    m('pre', request.response.body),
+                    (request.request.method === 'HEAD' ? m('div', m('em', 'Only headers were fetched to save time')) : m('pre', request.response.body)),
                 ] : null),
                 (request.exception ? [
                     m('.alert.alert-warning', request.exception.message),
