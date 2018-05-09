@@ -11,7 +11,7 @@ const tools = [
     },
     {
         title: 'Security Headers',
-        href: 'https://securityheaders.io/',
+        href: 'https://securityheaders.com/',
     }
 ];
 
