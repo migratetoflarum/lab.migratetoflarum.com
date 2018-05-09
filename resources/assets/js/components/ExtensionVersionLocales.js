@@ -19,6 +19,7 @@ export default {
             expectedNumberOfReceivedStrings = translation.attributes.strings_count;
         });
 
+        let extensionsProvidedShown = 0;
         let extensionsReceivedShown = 0;
 
         return [
@@ -40,21 +41,28 @@ export default {
                             const receiever = translation.relationships.extension_receiver.data;
                             const providedToPackage = receiever ? receiever.attributes.package : null;
 
+                            // Do not show self, it's already shown below in "received"
+                            if (providedToPackage === extension.attributes.package) {
+                                return null;
+                            }
+
+                            extensionsProvidedShown++;
+
                             return m('tr', [
                                 m('td', translation.attributes.locale_code),
-                                m('td', providedToPackage === extension.attributes.package ? m('em', 'Self') : (receiever ? [
+                                m('td', receiever ? [
                                     receiever.attributes.title,
                                     ' ',
                                     m('small', m('em', providedToPackage)),
                                 ] : [
                                     m('code', translation.attributes.namespace),
                                     ' (not a known extension id)',
-                                ])),
+                                ]),
                                 m('td', translation.attributes.strings_count + ' strings'),
                             ]);
                         },
                     ),
-                    (version.relationships.translations_provided.data.length === 0 ? m('tr', m('td', m('em', 'No translations found'))) : null),
+                    (extensionsProvidedShown === 0 ? m('tr', m('td[colspan=3]', m('em', 'This packages does not provide translations to other packages'))) : null),
                 ]),
             ]),
             m('h6', 'Translations received'),
@@ -96,7 +104,7 @@ export default {
                             ]);
                         },
                     ),
-                    (extensionsReceivedShown === 0 ? m('tr', m('td', m('em', 'No translations found'))) : null),
+                    (extensionsReceivedShown === 0 ? m('tr', m('td[colspan=3]', m('em', 'No translations found. The package might not contain any string or is using a translation namespace that doesn\'t match the extension id'))) : null),
                 ]),
             ]),
         ];
