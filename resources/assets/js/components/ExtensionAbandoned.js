@@ -9,7 +9,7 @@ export default {
         }
 
         return m('.alert.alert-warning', [
-            m('p', 'This extension is abandonned'),
+            m('p', 'This extension is abandoned'),
             (extension.attributes.abandoned !== '1' ? m('p', 'Note from Packagist: ' + extension.attributes.abandoned) : null),
         ]);
     },
