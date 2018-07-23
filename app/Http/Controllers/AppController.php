@@ -41,7 +41,7 @@ class AppController extends Controller
 
         $bestWebsites->load('lastPubliclyVisibleScan');
 
-        $bestScans = new Collection($recentWebsites->pluck('lastPubliclyVisibleScan'));
+        $bestScans = new Collection($bestWebsites->pluck('lastPubliclyVisibleScan'));
         $bestScans->load('website');
 
         $preload = array_merge(
