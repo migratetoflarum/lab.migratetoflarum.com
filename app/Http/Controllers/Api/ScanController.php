@@ -10,9 +10,12 @@ use App\ScannerClient;
 use App\Website;
 use Carbon\Carbon;
 use GuzzleHttp\Exception\TransferException;
+use GuzzleHttp\Psr7\Uri;
 use Illuminate\Cache\Repository;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Psr\Http\Message\StreamInterface;
+use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\Response;
 
 class ScanController extends Controller
@@ -108,6 +111,58 @@ class ScanController extends Controller
         return $address;
     }
 
+    /**
+     * Attempts to clean the url to find the Flarum root/homepage
+     * The first step is using a regex to find common cases, then double-check by looking at the page content
+     * Because Flarum might be actually installed in a subfolder that matches one of its own url (for example Flarum at domain.tld/tags/)
+     * @param string $url Current final url
+     * @param StreamInterface $body Body reference from Guzzle
+     * @return null|string The new Flarum root url to try or null if the current one looks good
+     */
+    protected function shouldTryOtherRootUrl(string $url, StreamInterface $body):? string
+    {
+        $finalPath = (new Uri($url))->getPath();
+        $expectedFlarumUrlPath = $finalPath;
+
+        // We check if the url contains some typical Flarum application path and extract the expected Flarum root path
+        // No need to check for login-only paths as these will return a 403 and abort the scan anyway
+        if (preg_match('~^(.*/)(d/[^/]+(/[0-9]+)?|u/[^/]+|t/[^/]+|tags|following|all|notifications|flags)$~', $finalPath, $matches) === 1) {
+            $expectedFlarumUrlPath = $matches[1];
+        }
+
+        // In order to not blindly remove those application path (this could be an actual Flarum install in a subfolder !)
+        // We check if our predicted Flarum root path is the one used for the stylesheets in the page
+        if ($expectedFlarumUrlPath !== $finalPath) {
+            $flarumUrl = null;
+
+            $flarumPage = new Crawler($body->getContents());
+
+            $flarumPage->filter('head link[rel="stylesheet"]')->each(function (Crawler $link) use (&$flarumUrl) {
+                $href = $link->attr('href');
+
+                if (!$flarumUrl && str_contains($href, '/assets/forum-')) {
+                    $flarumUrl = array_first(explode('/assets/forum-', $href, 2)) . '/';
+                }
+            });
+
+            if ($flarumUrl) {
+                $actualFlarumUrlPath = (new Uri($flarumUrl))->getPath();
+
+                if ($actualFlarumUrlPath === $expectedFlarumUrlPath) {
+                    // We trigger a new loop run with our new expected and verified Flarum root url
+                    // in case there would be another redirect
+                    return (string)(new Uri($url))
+                        ->withPath($actualFlarumUrlPath)
+                        // We remove query and fragment as well, as they probably belonged to the application page previously linked
+                        ->withQuery('')
+                        ->withFragment('');
+                }
+            }
+        }
+
+        return null;
+    }
+
     protected function getDestinationUrl(string $url): string
     {
         $address = $this->getParsedUrl($url);
@@ -158,6 +213,14 @@ class ScanController extends Controller
 
                 switch ($response->getStatusCode()) {
                     case 200:
+                        $other = $this->shouldTryOtherRootUrl($destination, $response->getBody());
+
+                        if ($other) {
+                            $destination = $other;
+
+                            continue;
+                        }
+
                         // Exit loop
                         break 2;
                     case 301:
