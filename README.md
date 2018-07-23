@@ -7,7 +7,7 @@ Visit https://lab.migratetoflarum.com/ to get started.
 
 ## A MigrateToFlarum service
 
-This is a free extension by MigrateToFlarum, an online forum migration tool (launching soon).
+This is a free service by MigrateToFlarum, an online forum migration tool (launching soon).
 Follow us on Twitter for updates https://twitter.com/MigrateToFlarum
 
 Need a custom Flarum extension ? [Contact Clark Winkelmann !](https://clarkwinkelmann.com/flarum)
