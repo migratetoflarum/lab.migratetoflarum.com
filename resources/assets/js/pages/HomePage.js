@@ -3,9 +3,7 @@ import icon from '../helpers/icon';
 import App from '../utils/App';
 import Store from '../utils/Store';
 import sortByAttribute from '../helpers/sortByAttribute';
-import link from '../helpers/link';
-import moment from 'moment';
-import Rating from '../components/Rating';
+import ScansList from '../components/ScansList';
 
 export default {
     oninit(vnode) {
@@ -15,11 +13,12 @@ export default {
         vnode.state.errors = [];
     },
     view(vnode) {
-        const recentScans = Store.all('scans').sort(sortByAttribute('scanned_at', 'desc'));
+        const recentScans = Store.all('scans').sort(sortByAttribute('scanned_at', 'desc')).slice(0, 5);
+        const bestScans = Store.all('scans').sort(sortByAttribute('rating', 'asc')).slice(0, 5);
 
         return m('.page-home', [
             m('h2.text-center', 'Check the configuration of your Flarum'),
-            m('.row.justify-content-center', [
+            m('.row.justify-content-center.new-scan-area', [
                 m('form.col-md-6', {
                     onsubmit(event) {
                         event.preventDefault();
@@ -87,26 +86,20 @@ export default {
                             vnode.state.hidden = !vnode.state.hidden;
                         },
                     }), ' Do not show the results on the homepage')),
-                    m('.page-recent', [
-                        m('h5', 'Recent scans'),
-                        m('.list-group.list-group-flush', recentScans.map(
-                            scan => link('/scans/' + scan.id, {
-                                className: 'list-group-item list-group-item-action',
-                            }, [
-                                m('span.float-right.text-muted', moment(scan.attributes.scanned_at).fromNow()),
-                                m(Rating, {
-                                    rating: scan.attributes.rating,
-                                }),
-                                ' ',
-                                scan.relationships.website.data.attributes.name,
-                                ' - ',
-                                m('span.text-muted', scan.relationships.website.data.attributes.normalized_url.replace(/\/$/, '')),
-                                (scan.attributes.hidden ? m('span.text-muted', {
-                                    title: 'This scan won\'t show up for other users',
-                                }, [' ', icon('eye-slash')]) : null),
-                            ])
-                        )),
-                    ]),
+                ]),
+            ]),
+            m('.row', [
+                m('.col-md-6', [
+                    m('h5', 'Best ratings'),
+                    m(ScansList, {
+                        scans: bestScans,
+                    }),
+                ]),
+                m('.col-md-6', [
+                    m('h5', 'Recent scans'),
+                    m(ScansList, {
+                        scans: recentScans,
+                    }),
                 ]),
             ]),
         ]);

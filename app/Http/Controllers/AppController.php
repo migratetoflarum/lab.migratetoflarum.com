@@ -30,7 +30,25 @@ class AppController extends Controller
         $recentScans = new Collection($recentWebsites->pluck('lastPubliclyVisibleScan'));
         $recentScans->load('website');
 
-        $preload = array_merge(ScanResource::collection($recentScans)->jsonSerialize(), $preload);
+        /**
+         * @var $bestWebsites Collection|Website[]
+         */
+        $bestWebsites = Website::publiclyVisible()
+            ->where('last_rating', 'like', 'A%')
+            ->orderBy('last_public_scanned_at', 'desc')
+            ->take(config('scanner.show_best_count'))
+            ->get();
+
+        $bestWebsites->load('lastPubliclyVisibleScan');
+
+        $bestScans = new Collection($recentWebsites->pluck('lastPubliclyVisibleScan'));
+        $bestScans->load('website');
+
+        $preload = array_merge(
+            ScanResource::collection($recentScans)->jsonSerialize(),
+            ScanResource::collection($bestScans)->jsonSerialize(),
+            $preload
+        );
 
         return view('app')->withPreload($preload);
     }
