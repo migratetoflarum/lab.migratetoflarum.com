@@ -1,8 +1,9 @@
 import m from 'mithril';
 import icon from '../helpers/icon';
+import sortByAttribute from '../helpers/sortByAttribute';
+import sortByRating from '../helpers/sortByRating';
 import App from '../utils/App';
 import Store from '../utils/Store';
-import sortByAttribute from '../helpers/sortByAttribute';
 import ScansList from '../components/ScansList';
 
 export default {
@@ -14,7 +15,7 @@ export default {
     },
     view(vnode) {
         const recentScans = Store.all('scans').sort(sortByAttribute('scanned_at', 'desc')).slice(0, 5);
-        const bestScans = Store.all('scans').sort(sortByAttribute('rating', 'asc')).slice(0, 5);
+        const bestScans = Store.all('scans').sort(sortByRating()).slice(0, 5);
 
         return m('.page-home', [
             m('h2.text-center', 'Check the configuration of your Flarum'),
