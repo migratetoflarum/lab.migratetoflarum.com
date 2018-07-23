@@ -86,8 +86,8 @@ const UrlReport = {
                     }) : null),
                 ] : null),
                 (report.type === 'redirect' ? [
-                    m('p', [icon('long-arrow-right'), ' ' + (report.status === 301 ? 'Permanent' : 'Temporary') + ' redirect to ', report.redirect_to]),
-                    (report.status === 302 ? [
+                    m('p', [icon('long-arrow-right'), ' ' + (report.status === 301 ? 'Permanent' : 'Temporary') + ' redirect to ', (report.redirect_to ? report.redirect_to : m('em', '(no url)'))]),
+                    (report.status === 302 && report.redirect_to ? [
                         m(Warning, {
                             description: report.redirect_to.indexOf('https://') === 0 ?
                                 'Temporary redirects to https offer no security forward in time' :
@@ -95,6 +95,11 @@ const UrlReport = {
                             suggestion: 'Consider using a 301 permanent redirect instead (the browsers and search engines will cache it)',
                         }),
                     ] : null),
+                    (report.redirect_to ? null : [
+                        m(Warning, {
+                            description: 'This redirect appears broken (no Location header found)',
+                        }),
+                    ]),
                 ] : null),
                 (report.type === 'httperror' ? (() => {
                     return [
