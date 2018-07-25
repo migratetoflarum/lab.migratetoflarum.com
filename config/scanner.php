@@ -7,6 +7,7 @@ return [
     'keep_max_response_body_size' => env('SCANNER_KEEP_RESPONSE_SIZE', 50000),
     'extension_versions_cache' => env('SCANNER_EXTENSION_VERSIONS_CACHE', 1440), // minutes
     'rating_cache' => env('SCANNER_RATING_CACHE', 1440), // minutes
+    'best_scans_cache' => env('SCANNER_BEST_SCANS_CACHE', 720), // minutes
 
     'client' => [
         'user_agent' => env('SCANNER_USER_AGENT', 'MigrateToFlarum Lab'),
