@@ -17,8 +17,16 @@ class ScanResource extends Resource
     {
         $report = new ReportFormatter($this->resource->report);
 
-        $agent = new RatingAgent($this->resource);
-        $agent->rate();
+        $agent = cache()->remember(
+            "scan-{$this->resource->uid}-rating",
+            config('scanner.rating_cache'),
+            function (): RatingAgent {
+                $agent = new RatingAgent($this->resource);
+                $agent->rate();
+
+                return $agent;
+            }
+        );
 
         if (is_null($this->resource->report)) {
             $extensions = [];
@@ -185,7 +193,7 @@ class ScanResource extends Resource
             $extension->offsetUnset('versions');
 
             if (array_has($extensionData, 'versions')) {
-                $extension->possibleVersions = collect(array_get($extensionData, 'versions'))->each(function(ExtensionVersion $version) {
+                $extension->possibleVersions = collect(array_get($extensionData, 'versions'))->each(function (ExtensionVersion $version) {
                     // Unload the relationships that will not be useful later
                     // This prevents caching them and also prevents including them in the preload payload
                     $version->offsetUnset('extension');
