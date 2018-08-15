@@ -336,6 +336,12 @@ class WebsiteScan implements ShouldQueue
         event(new ScanUpdated($this->scan));
     }
 
+    protected function saveIntermediateScan()
+    {
+        $this->scan->report = $this->report;
+        $this->scan->save();
+    }
+
     protected function doRequest(string $url, bool $head = false): ResponseInterface
     {
         if (!array_has($this->responses, $url)) {
@@ -396,6 +402,8 @@ class WebsiteScan implements ShouldQueue
                 // We also cache exceptions
                 $this->responses[$url] = $exception;
             }
+
+            $this->saveIntermediateScan();
         }
 
         $response = array_get($this->responses, $url);
@@ -409,11 +417,15 @@ class WebsiteScan implements ShouldQueue
 
     public function failed(Exception $exception)
     {
-        $this->scan->report = [
+        $existingReport = $this->scan->report;
+
+        $additionalReport = [
             'failed' => true,
             'exception_class' => get_class($exception),
             'exception_message' => $exception->getMessage(),
         ];
+
+        $this->scan->report = is_array($existingReport) ? ($existingReport + $additionalReport) : $additionalReport;
         $this->scan->scanned_at = Carbon::now();
         $this->scan->save();
 

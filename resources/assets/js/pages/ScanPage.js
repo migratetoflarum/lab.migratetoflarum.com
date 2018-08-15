@@ -89,25 +89,6 @@ export default {
             });
         }
 
-        if (scan.attributes.report.failed) {
-            return m('.alert.alert-danger.my-5.py-5.text-center', [
-                m('p', m('strong', 'An error occured while performing this scan :(')),
-                m('p', 'The most likely cause is that the server took too long to answer multiple requests and caused the report to time out.'),
-                m('p', 'You may try scanning the website again later.'),
-                m('p', [
-                    'If the problem persists, don\'t hesitate to report the issue on ',
-                    m('a', {href: App.githubIssues}, 'GitHub'),
-                    ' or the ',
-                    m('a', {href: App.discuss}, 'Discuss thread'),
-                    '.',
-                ]),
-                m('p', [
-                    'Please include the following identifier when making a report: ',
-                    m('strong', scan.id),
-                ]),
-            ]);
-        }
-
         function reportKey(key, defaultValue = null) {
             const parts = ('attributes.report.' + key).split('.');
 
@@ -122,6 +103,31 @@ export default {
             }
 
             return data;
+        }
+
+        if (scan.attributes.report.failed) {
+            return [
+                m('.alert.alert-danger.my-5.py-5.text-center', [
+                    m('p', m('strong', 'An error occured while performing this scan :(')),
+                    m('p', 'The most likely cause is that the server took too long to answer multiple requests and caused the report to time out.'),
+                    m('p', 'You may try scanning the website again later.'),
+                    m('p', [
+                        'If the problem persists, don\'t hesitate to report the issue on ',
+                        m('a', {href: App.githubIssues}, 'GitHub'),
+                        ' or the ',
+                        m('a', {href: App.discuss}, 'Discuss thread'),
+                        '.',
+                    ]),
+                    m('p', [
+                        'Please include the following identifier when making a report: ',
+                        m('strong', scan.id),
+                    ]),
+                ]),
+                m('p', 'The following requests were made before the scan failed:'),
+                m(RequestsReport, {
+                    requests: reportKey('requests', []),
+                }),
+            ];
         }
 
         let suggestions = [];

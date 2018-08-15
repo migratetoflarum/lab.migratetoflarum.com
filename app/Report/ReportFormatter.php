@@ -20,7 +20,10 @@ class ReportFormatter implements Arrayable
         }
 
         if (array_has($this->report, 'failed')) {
-            return array_only($this->report, 'failed');
+            return array_only($this->report, [
+                'failed',
+                'requests',
+            ]);
         }
 
         return $this->report;
