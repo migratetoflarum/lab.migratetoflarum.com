@@ -17,16 +17,7 @@ class ScanResource extends Resource
     {
         $report = new ReportFormatter($this->resource->report);
 
-        $agent = cache()->remember(
-            "scan-{$this->resource->uid}-rating",
-            config('scanner.rating_cache'),
-            function (): RatingAgent {
-                $agent = new RatingAgent($this->resource);
-                $agent->rate();
-
-                return $agent;
-            }
-        );
+        $agent = null;
 
         if (is_null($this->resource->report)) {
             $extensions = [];
@@ -38,6 +29,19 @@ class ScanResource extends Resource
                     return $this->extensions($request, $report);
                 }
             );
+
+            // Only rate if the report is ready, otherwise we would always cache the rating
+            // of an empty scan when returning from the POST /scans API call
+            $agent = cache()->remember(
+                "scan-{$this->resource->uid}-rating",
+                config('scanner.rating_cache'),
+                function (): RatingAgent {
+                    $agent = new RatingAgent($this->resource);
+                    $agent->rate();
+
+                    return $agent;
+                }
+            );
         }
 
         return [
@@ -47,8 +51,8 @@ class ScanResource extends Resource
                 'hidden' => $this->resource->hidden,
                 'report' => $report->toArray(),
                 'scanned_at' => optional($this->resource->scanned_at)->toW3cString(),
-                'rating' => $agent->rating,
-                'rating_rules' => $agent->importantRules,
+                'rating' => $agent ? $agent->rating : '-',
+                'rating_rules' => $agent ? $agent->importantRules : [],
             ],
             'relationships' => [
                 'website' => [
