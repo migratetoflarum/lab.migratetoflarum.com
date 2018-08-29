@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Beta8JavascriptFileParser;
 use App\Events\ScanUpdated;
 use App\JavascriptFileParser;
 use App\Report\RatingAgent;
@@ -133,8 +134,9 @@ class WebsiteScan implements ShouldQueue
 
             $modules = null;
             $boot = null;
+            $flarumVersion = null;
 
-            $homepage->filter('body script')->each(function (Crawler $script) use (&$modules, &$boot) {
+            $homepage->filter('body script')->each(function (Crawler $script) use (&$modules, &$boot, &$flarumVersion) {
                 $content = $script->text();
 
                 if (!str_contains($content, 'app.boot')) {
@@ -142,9 +144,12 @@ class WebsiteScan implements ShouldQueue
                 }
 
                 $matches = [];
+                // Will only detect beta7 modules
+                // beta8 registers them inside the external script file
                 if (preg_match('~var modules = (\[[^\n]+\])~', $content, $matches) === 1) {
                     $readModules = json_decode($matches[1]);
 
+                    $flarumVersion = '0.1.0-beta.7';
                     $modules = [];
 
                     if (is_array($readModules)) {
@@ -157,12 +162,20 @@ class WebsiteScan implements ShouldQueue
                 }
 
                 $matches = [];
-                if (preg_match('~app\.boot\(([^\n]+)\)~', $content, $matches) === 1) {
-                    $boot = json_decode($matches[1], true);
+                // beta7 calls app.boot() with the payload
+                // beta8 calls app.load() with the payload then app.boot() without arguments
+                if (preg_match('~app\.(boot|load)\(([^\n]+)\)~', $content, $matches) === 1) {
+                    $bootArguments = json_decode($matches[2], true);
 
-                    if (is_array($boot)) {
-                        foreach (array_get($boot, 'resources', []) as $resource) {
+                    if (is_array($bootArguments)) {
+                        foreach (array_get($bootArguments, 'resources', []) as $resource) {
                             if (array_get($resource, 'type') === 'forums') {
+                                if ($matches[1] === 'boot') {
+                                    $flarumVersion = '0.1.0-beta.7';
+                                } else {
+                                    $flarumVersion = '0.1.0-beta.8';
+                                }
+
                                 $boot = [
                                     'base_url' => array_get($resource, 'attributes.baseUrl'),
                                     'base_path' => array_get($resource, 'attributes.basePath'),
@@ -179,10 +192,16 @@ class WebsiteScan implements ShouldQueue
 
             $homepageReport['modules'] = $modules;
             $homepageReport['boot'] = $boot;
+            $homepageReport['version'] = $flarumVersion;
 
             $maliciousAccess = [];
 
             $javascriptModules = [
+                'forum' => null,
+                'admin' => null,
+            ];
+
+            $javascriptExtensions = [
                 'forum' => null,
                 'admin' => null,
             ];
@@ -279,12 +298,23 @@ class WebsiteScan implements ShouldQueue
                         }
 
                         $content = $this->doRequest("$safeFlarumUrl/assets/$stack-$hash.js")->getBody()->getContents();
-                        $javascriptParser = new JavascriptFileParser($content);
 
-                        $javascriptModules[$stack] = [];
+                        if ($flarumVersion === '0.1.0-beta.8') {
+                            $javascriptParser = new Beta8JavascriptFileParser($content);
 
-                        foreach ($javascriptParser->modules() as $module) {
-                            $javascriptModules[$stack][array_get($module, 'module')] = md5(array_get($module, 'code'));
+                            $javascriptExtensions[$stack] = [];
+
+                            foreach ($javascriptParser->extensions() as $extension) {
+                                $javascriptExtensions[$stack][array_get($extension, 'id')] = md5(array_get($extension, 'code'));
+                            }
+                        } else {
+                            $javascriptParser = new JavascriptFileParser($content);
+
+                            $javascriptModules[$stack] = [];
+
+                            foreach ($javascriptParser->modules() as $module) {
+                                $javascriptModules[$stack][array_get($module, 'module')] = md5(array_get($module, 'code'));
+                            }
                         }
                     } catch (Exception $exception) {
                         // silence errors
@@ -295,6 +325,7 @@ class WebsiteScan implements ShouldQueue
             $this->report['homepage'] = $homepageReport;
             $this->report['malicious_access'] = $maliciousAccess;
             $this->report['javascript_modules'] = $javascriptModules;
+            $this->report['javascript_extensions'] = $javascriptExtensions;
         }
 
         $this->scan->report = $this->report;

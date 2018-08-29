@@ -26,7 +26,9 @@ class ReportFormatter implements Arrayable
             ]);
         }
 
-        return $this->report;
+        return $this->report + [
+                'extension_ids' => $this->flarumExtensionIds(),
+            ];
     }
 
     /**
@@ -37,6 +39,22 @@ class ReportFormatter implements Arrayable
     {
         if (is_null($this->report)) {
             return [];
+        }
+
+        $beta8Stacks = array_get($this->report, 'javascript_extensions');
+
+        if (is_array($beta8Stacks)) {
+            $beta8ExtensionsIds = [];
+
+            foreach ($beta8Stacks as $stack => $extensions) {
+                if (is_array($extensions)) {
+                    $beta8ExtensionsIds = array_merge($beta8ExtensionsIds, array_keys($extensions));
+                }
+            }
+
+            if (count($beta8ExtensionsIds)) {
+                return array_values(array_unique($beta8ExtensionsIds));
+            }
         }
 
         $modules = array_get($this->report, 'homepage.modules');

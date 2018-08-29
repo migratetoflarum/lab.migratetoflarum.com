@@ -9,6 +9,8 @@ import DomainReport from '../components/DomainReport';
 import ExtensionsReport from '../components/ExtensionsReport';
 import Rating from '../components/Rating';
 import RequestsReport from '../components/RequestsReport';
+import getObjectKey from '../helpers/getObjectKey';
+import FlarumVersionString from '../components/FlarumVersionString';
 
 export default {
     oninit(vnode) {
@@ -30,8 +32,14 @@ export default {
             });
         }
 
+        function makeRawReportAccessibleInBrowser() {
+            window.flarumLabReport = Store.get('scans', vnode.state.scanId)
+        }
+
         function listenForScanUpdate() {
             const scan = Store.get('scans', vnode.state.scanId);
+
+            makeRawReportAccessibleInBrowser();
 
             if (!vnode.state.listening && !scan.attributes.scanned_at) {
                 vnode.state.listening = true;
@@ -39,6 +47,8 @@ export default {
                 window.Echo.channel('scans.' + scan.id).listen('ScanUpdated', data => {
                     if (data.type === 'scans' && data.id === vnode.state.scanId) {
                         Store.load(data);
+
+                        makeRawReportAccessibleInBrowser();
 
                         m.redraw();
 
@@ -90,19 +100,7 @@ export default {
         }
 
         function reportKey(key, defaultValue = null) {
-            const parts = ('attributes.report.' + key).split('.');
-
-            let data = scan;
-
-            for (let part in parts) {
-                if (typeof data !== 'object' || data === null || typeof data[parts[part]] === 'undefined') {
-                    return defaultValue;
-                }
-
-                data = data[parts[part]];
-            }
-
-            return data;
+            return getObjectKey(scan, 'attributes.report.' + key, defaultValue);
         }
 
         if (scan.attributes.report.failed) {
@@ -269,6 +267,12 @@ export default {
                             m('h3.card-title', 'Details'),
                             m('p', 'Scan performed on ' + moment(scan.attributes.scanned_at).format('YYYY-MM-DD HH:mm:ss')),
                             m('p', 'Visibility: ' + (scan.attributes.hidden ? 'this scan won\'t show up on the homepage' : 'this scan might show up on the homepage' )),
+                            m('p', [
+                                'Flarum version: ',
+                                m(FlarumVersionString, {
+                                    version: reportKey('homepage.version'),
+                                }),
+                            ]),
                         ]),
                     ]),
                     m('.card.mt-3', [
