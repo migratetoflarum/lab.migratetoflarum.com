@@ -206,6 +206,8 @@ class WebsiteScan implements ShouldQueue
                 'admin' => null,
             ];
 
+            $vulnerabilities = [];
+
             if ($flarumUrl) {
                 // We check for $flarumUrl to know whether it's a Flarum install
                 // But we then use $canonicalUrl so we always have the proper protocol and can't be fooled into hitting another host
@@ -236,7 +238,7 @@ class WebsiteScan implements ShouldQueue
                     foreach ($urls as $url) {
                         try {
                             $fullUrl = "$safeFlarumUrl/$url";
-                            $response = $this->doRequest($fullUrl, true);
+                            $response = $this->doRequest($fullUrl, 'HEAD');
 
                             if ($response->getStatusCode() === 200) {
                                 $accessReport['access'] = true;
@@ -320,12 +322,26 @@ class WebsiteScan implements ShouldQueue
                         // silence errors
                     }
                 }
+
+                if ($flarumVersion === '0.1.0-beta.7') {
+                    try {
+                        $userRecord = \GuzzleHttp\json_decode($this->doRequest("$safeFlarumUrl/api/users/1", 'PATCH', true)->getBody()->getContents(), true);
+
+                        if (array_has($userRecord, 'data.attributes.email')) {
+                            $vulnerabilities[] = 'beta7.user-update-leak';
+                        }
+                    } catch (Exception $exception) {
+                        // silence errors
+                    }
+
+                }
             }
 
             $this->report['homepage'] = $homepageReport;
             $this->report['malicious_access'] = $maliciousAccess;
             $this->report['javascript_modules'] = $javascriptModules;
             $this->report['javascript_extensions'] = $javascriptExtensions;
+            $this->report['vulnerabilities'] = $vulnerabilities;
         }
 
         $this->scan->report = $this->report;
@@ -373,7 +389,7 @@ class WebsiteScan implements ShouldQueue
         $this->scan->save();
     }
 
-    protected function doRequest(string $url, bool $head = false): ResponseInterface
+    protected function doRequest(string $url, string $method = 'GET', $sensitive = false): ResponseInterface
     {
         if (!array_has($this->responses, $url)) {
             /**
@@ -385,7 +401,7 @@ class WebsiteScan implements ShouldQueue
             $requestTime = microtime(true);
 
             try {
-                $response = $client->request($head ? 'head' : 'get', $url);
+                $response = $client->request($method, $url);
                 $this->responses[$url] = $response;
 
                 $content = $response->getBody()->getContents();
@@ -397,11 +413,15 @@ class WebsiteScan implements ShouldQueue
                     $content = substr($content, 0, $maxSize) . "\n\n(response truncated. Original length $bodySize)";
                 }
 
+                if ($sensitive) {
+                    $content = '(potentially sensitive content redacted)';
+                }
+
                 $this->report['requests'][] = [
                     'request' => [
                         'date' => $requestDate,
                         'url' => $url,
-                        'method' => $head ? 'HEAD' : 'GET',
+                        'method' => $method,
                         'headers' => $client->getConfig('headers'),
                     ],
                     'response' => [

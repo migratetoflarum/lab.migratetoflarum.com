@@ -130,6 +130,63 @@ export default {
 
         let suggestions = [];
 
+        reportKey('vulnerabilities', []).forEach(vulnerability => {
+            switch (vulnerability) {
+                case 'beta7.user-update-leak':
+                    suggestions.push({
+                        danger: true,
+                        title: 'Security vulnerability',
+                        suggest: [
+                            'Your version of Flarum contains a security vulnerability discovered on November 9, 2018. ',
+                            'When exploited, the vulnerability allows an attacker to gain access to private user details. ',
+                            'Update to Flarum beta 7.2 as soon as possible to fix the issue. ',
+                            m('a', {
+                                href: 'https://discuss.flarum.org/d/17496-flarum-0-1-0-beta-7-2-released',
+                                rel: 'nofollow',
+                                target: '_blank',
+                            }, 'Click here to see the official message and upgrade instructions'),
+                            '.',
+                        ],
+                    });
+            }
+        });
+
+        if (reportKey('malicious_access.vendor.access') === true) {
+            suggestions.push({
+                danger: true,
+                title: 'Vendor folder',
+                suggest: [
+                    'Your vendor folder is currently being served by your webserver. ',
+                    'This could expose untrusted scripts to the world and compromise your security. ',
+                    'Use a rewrite rule to prevent your webserver from serving this folder.',
+                ],
+            });
+        }
+
+        if (reportKey('malicious_access.storage.access') === true) {
+            suggestions.push({
+                danger: true,
+                title: 'Storage folder',
+                suggest: [
+                    'Your storage folder is currently being served by your webserver. ',
+                    'This could expose private data (including access tokens) and compromise your security. ',
+                    'Use a rewrite rule to prevent your webserver from serving this folder.',
+                ],
+            });
+        }
+
+        if (reportKey('malicious_access.composer.access') === true) {
+            suggestions.push({
+                danger: true,
+                title: 'Composer files',
+                suggest: [
+                    'Your Composer files are currently being served by your webserver. ',
+                    'This could expose advanced information about your server configuration and installed packages. ',
+                    'Use a rewrite rule to prevent your webserver from serving the composer.json and composer.lock files.',
+                ],
+            });
+        }
+
         const urls = reportKey('urls', {});
 
         if (Object.keys(urls).some(key => key.split('-')[1] === 'http' && urls[key].type === 'ok')) {
@@ -161,39 +218,6 @@ export default {
                     'The config.php url setting of your Flarum does not match the canonical url used to access it. ',
                     'This will prevent Flarum from loading and working correctly. ',
                     'Set the url setting in your config.php to "' + expectedBaseUrl + '" to fix this (currently set to "' + reportKey('homepage.boot.base_url') + '").',
-                ],
-            });
-        }
-
-        if (reportKey('malicious_access.vendor.access') === true) {
-            suggestions.push({
-                title: 'Vendor folder',
-                suggest: [
-                    'Your vendor folder is currently being served by your webserver. ',
-                    'This could expose untrusted scripts to the world and compromise your security. ',
-                    'Use a rewrite rule to prevent your webserver from serving this folder.',
-                ],
-            });
-        }
-
-        if (reportKey('malicious_access.storage.access') === true) {
-            suggestions.push({
-                title: 'Storage folder',
-                suggest: [
-                    'Your storage folder is currently being served by your webserver. ',
-                    'This could expose private data (including access tokens) and compromise your security. ',
-                    'Use a rewrite rule to prevent your webserver from serving this folder.',
-                ],
-            });
-        }
-
-        if (reportKey('malicious_access.composer.access') === true) {
-            suggestions.push({
-                title: 'Composer files',
-                suggest: [
-                    'Your Composer files are currently being served by your webserver. ',
-                    'This could expose advanced information about your server configuration and installed packages. ',
-                    'Use a rewrite rule to prevent your webserver from serving the composer.json and composer.lock files.',
                 ],
             });
         }
@@ -236,7 +260,9 @@ export default {
                 m('h1', 'Report for ' + (reportKey('canonical_url') || website.attributes.normalized_url)),
             ]),
             suggestions.map(
-                suggestion => m('.alert.alert-danger', m('.row', [
+                suggestion => m('.alert', {
+                    className: suggestion.danger ? 'alert-danger' : 'alert-warning',
+                }, m('.row', [
                     m('.col-md-2', m('h5.mt-2', suggestion.title)),
                     m('.col-md-10', m('p', suggestion.suggest)),
                 ]))
@@ -356,6 +382,7 @@ export default {
                                     access.neutral,
                                 ])
                             )),
+                            (reportKey('vulnerabilities', []).length > 0 ? m('p.text-danger', 'Known Flarum vulnerabilities detected. See the top of the page for details') : null),
                         ]),
                     ]),
                 ]),

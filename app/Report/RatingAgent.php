@@ -37,6 +37,10 @@ class RatingAgent
                 'cap' => 'D',
                 'description' => 'Is exposing sensitive or untrusted files',
                 'check' => function (Scan $scan): bool {
+                    if (array_has($scan->report, 'vulnerabilities') && count(array_get($scan->report, 'vulnerabilities')) > 0) {
+                        return true;
+                    }
+
                     foreach (['vendor', 'storage', 'composer'] as $access) {
                         // Old format
                         if (array_get($scan->report, "malicious_access.$access") === true) {
