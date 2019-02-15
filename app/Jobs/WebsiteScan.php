@@ -440,7 +440,7 @@ class WebsiteScan implements ShouldQueue
                     'request' => [
                         'date' => $requestDate,
                         'url' => $url,
-                        'method' => 'GET',
+                        'method' => $method,
                         'headers' => $client->getConfig('headers'),
                     ],
                     'exception' => [
