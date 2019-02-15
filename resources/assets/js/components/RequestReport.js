@@ -46,7 +46,7 @@ export default {
                     m('dd.col-sm-9', m('a', {
                         href: request.request.url,
                         target: '_blank',
-                        rel: 'nofollow',
+                        rel: 'nofollow noopener',
                     }, request.request.url)),
                     (request.request.headers ? [
                         m('dt.col-sm-12', 'Headers'),

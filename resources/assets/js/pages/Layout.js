@@ -25,10 +25,12 @@ export default {
                             m('li.nav-item', m('a.nav-link', {
                                 href: App.flarumServices,
                                 target: '_blank',
+                                rel: 'noopener',
                             }, ['Flarum services by Clark Winkelmann ', icon('external-link')])),
                             m('li.nav-item', m('a.nav-link', {
                                 href: App.discuss,
                                 target: '_blank',
+                                rel: 'noopener',
                             }, ['Discuss thread ', icon('external-link')])),
                         ]),
                     ]),

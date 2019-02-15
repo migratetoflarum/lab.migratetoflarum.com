@@ -142,8 +142,8 @@ export default {
                             'Update to Flarum beta 7.2 as soon as possible to fix the issue. ',
                             m('a', {
                                 href: 'https://discuss.flarum.org/d/17496-flarum-0-1-0-beta-7-2-released',
-                                rel: 'nofollow',
                                 target: '_blank',
+                                rel: 'nofollow noopener',
                             }, 'Click here to see the official message and upgrade instructions'),
                             '.',
                         ],
@@ -310,7 +310,7 @@ export default {
                                 m('p', ['The forum canonical url is ', m('a', {
                                     href: reportKey('canonical_url'),
                                     target: '_blank',
-                                    rel: 'nofollow',
+                                    rel: 'nofollow noopener',
                                 }, reportKey('canonical_url'))]),
                             ]),
                             (baseUrl ? [

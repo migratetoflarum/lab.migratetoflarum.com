@@ -24,6 +24,7 @@ export default {
                     tool => m('a.list-group-item.list-group-item-action', {
                         href: tool.href,
                         target: '_blank',
+                        rel: 'noopener',
                     }, [
                         m('', tool.title),
                         m('em.text-muted', tool.href),

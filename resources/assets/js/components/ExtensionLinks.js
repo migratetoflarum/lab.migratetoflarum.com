@@ -9,13 +9,13 @@ export default {
             m('a.btn.btn-sm.btn-light', {
                 href: 'https://packagist.org/packages/' + extension.attributes.package,
                 target: '_blank',
-                rel: 'nofollow',
+                rel: 'nofollow noopener',
             }, [icon('download'), ' Packagist']),
             ' ',
             m('a.btn.btn-sm.btn-light', {
                 href: 'https://flagrow.io/packages/' + extension.attributes.package,
                 target: '_blank',
-                rel: 'nofollow',
+                rel: 'nofollow noopener',
             }, [icon('globe'), ' Flagrow.io']),
         ];
 
@@ -24,7 +24,7 @@ export default {
             links.push(m('a.btn.btn-sm.btn-light', {
                 href: extension.attributes.repository,
                 target: '_blank',
-                rel: 'nofollow',
+                rel: 'nofollow noopener',
             }, extension.attributes.repository.indexOf('https://github.com') === 0 ?
                 [icon('github'), ' GitHub'] :
                 [icon('code-fork'), ' Repository']));
@@ -35,7 +35,7 @@ export default {
             links.push(m('a.btn.btn-sm.btn-light', {
                 href: extension.attributes.discuss_url,
                 target: '_blank',
-                rel: 'nofollow',
+                rel: 'nofollow noopener',
             }, [m('span.fa.icon-flarum'), ' Discuss']));
         }
 
