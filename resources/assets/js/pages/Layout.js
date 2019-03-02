@@ -21,6 +21,7 @@ export default {
                     m('#navbar.collapse.navbar-collapse', [
                         m('ul.navbar-nav.ml-auto', [
                             m('li.nav-item', link('/', {className: 'nav-link'}, 'Scan a forum')),
+                            m('li.nav-item', link('/showcase', {className: 'nav-link'}, 'Showcase')),
                             m('li.nav-item', link('/extensions', {className: 'nav-link'}, 'Extension Analysis')),
                             m('li.nav-item', link('/opt-out', {className: 'nav-link'}, 'Opt Out')),
                             m('li.nav-item', m('a.nav-link', {

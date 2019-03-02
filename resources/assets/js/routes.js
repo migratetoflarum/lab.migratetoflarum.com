@@ -5,6 +5,7 @@ import ScanPage from './pages/ScanPage';
 import App from './utils/App';
 import ExtensionsPage from './pages/ExtensionsPage';
 import OptOutPage from './pages/OptOutPage';
+import ShowcasePage from "./pages/ShowcasePage";
 
 let root = document.getElementById('app');
 
@@ -15,6 +16,7 @@ const routes = {
     '/scans/:key': ScanPage,
     '/extensions': ExtensionsPage,
     '/opt-out': OptOutPage,
+    '/showcase': ShowcasePage,
 };
 
 let isFirstMatch = true;
