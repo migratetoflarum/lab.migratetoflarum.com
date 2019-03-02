@@ -22,8 +22,8 @@ export default {
                         scan.relationships.website.data.attributes.name,
                         ' - ',
                         m('span.text-muted', scan.relationships.website.data.attributes.normalized_url.replace(/\/$/, '')),
-                        (scan.attributes.hidden ? m('span.text-muted', {
-                            title: 'This scan won\'t show up for other users',
+                        (scan.attributes.hidden || scan.relationships.website.data.attributes.ignore ? m('span.text-muted', {
+                            title: 'This scan won\'t show up for other visitors, and the link will be hidden once you refresh the page',
                         }, [' ', icon('eye-slash')]) : null),
                     ]),
                     m('.text-muted', [

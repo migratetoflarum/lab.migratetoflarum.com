@@ -22,11 +22,7 @@ export default {
                         m('ul.navbar-nav.ml-auto', [
                             m('li.nav-item', link('/', {className: 'nav-link'}, 'Scan a forum')),
                             m('li.nav-item', link('/extensions', {className: 'nav-link'}, 'Extension Analysis')),
-                            m('li.nav-item', m('a.nav-link', {
-                                href: App.flarumServices,
-                                target: '_blank',
-                                rel: 'noopener',
-                            }, ['Flarum services by Clark Winkelmann ', icon('external-link')])),
+                            m('li.nav-item', link('/opt-out', {className: 'nav-link'}, 'Opt Out')),
                             m('li.nav-item', m('a.nav-link', {
                                 href: App.discuss,
                                 target: '_blank',

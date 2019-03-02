@@ -4,6 +4,7 @@ import HomePage from './pages/HomePage';
 import ScanPage from './pages/ScanPage';
 import App from './utils/App';
 import ExtensionsPage from './pages/ExtensionsPage';
+import OptOutPage from './pages/OptOutPage';
 
 let root = document.getElementById('app');
 
@@ -13,6 +14,7 @@ const routes = {
     '/': HomePage,
     '/scans/:key': ScanPage,
     '/extensions': ExtensionsPage,
+    '/opt-out': OptOutPage,
 };
 
 let isFirstMatch = true;

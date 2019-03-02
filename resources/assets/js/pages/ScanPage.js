@@ -292,7 +292,7 @@ export default {
                             ]),
                             m('h3.card-title', 'Details'),
                             m('p', 'Scan performed on ' + moment(scan.attributes.scanned_at).format('YYYY-MM-DD HH:mm:ss')),
-                            m('p', 'Visibility: ' + (scan.attributes.hidden ? 'this scan won\'t show up on the homepage' : 'this scan might show up on the homepage' )),
+                            m('p', 'Visibility: ' + (website.attributes.ignore ? 'This website has opted out and won\'t be visible on the homepage' : (scan.attributes.hidden ? 'this scan won\'t show up on the homepage' : 'this scan might show up on the homepage' ))),
                             m('p', [
                                 'Flarum version: ',
                                 m(FlarumVersionString, {

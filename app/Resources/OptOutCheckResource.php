@@ -2,25 +2,24 @@
 
 namespace App\Resources;
 
-use App\Website;
+use App\OptOutCheck;
 use Illuminate\Http\Resources\Json\Resource;
 
 /**
- * @property Website $resource
+ * @property OptOutCheck $resource
  */
-class WebsiteResource extends Resource
+class OptOutCheckResource extends Resource
 {
     public function toArray($request)
     {
         return [
-            'type' => 'websites',
+            'type' => 'opt-out-checks',
             'id' => $this->resource->uid,
             'attributes' => [
                 'normalized_url' => $this->resource->normalized_url,
-                'canonical_url' => $this->resource->canonical_url,
-                'name' => $this->resource->name,
-                'is_apex' => $this->resource->is_apex,
                 'ignore' => $this->resource->ignore,
+                'checked_at' => optional($this->resource->checked_at)->toW3cString(),
+                'created_at' => $this->resource->created_at->toW3cString(),
             ],
         ];
     }

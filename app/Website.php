@@ -15,6 +15,7 @@ use Pdp\Rules;
  * @property string $name
  * @property string $last_rating
  * @property Carbon $last_public_scanned_at
+ * @property boolean $ignore
  * @property Carbon $created_at
  * @property Carbon $updated_at
  *
@@ -25,6 +26,10 @@ class Website extends UidModel
 {
     protected $fillable = [
         'normalized_url',
+    ];
+
+    protected $casts = [
+        'ignore' => 'boolean',
     ];
 
     public function scans()
@@ -43,6 +48,12 @@ class Website extends UidModel
     public function scopePubliclyVisible(Builder $query)
     {
         $query
+            // TODO: can be replaced with simply ignore == 0 once most existing websites have been scanned again with an ignore check
+            ->where(function ($query) {
+                $query
+                    ->whereNull('ignore')
+                    ->orWhere('ignore', '=', 0);
+            })
             ->whereNotNull('canonical_url')
             ->whereNotNull('last_public_scanned_at')
             ->whereNotNull('name');
