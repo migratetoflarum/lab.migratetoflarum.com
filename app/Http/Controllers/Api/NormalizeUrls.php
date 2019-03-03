@@ -130,7 +130,11 @@ trait NormalizeUrls
 
             for ($i = 0; $i < $maxRedirects; $i++) {
                 try {
-                    $response = $client->get($destination);
+                    $response = $client->get($destination, [
+                        // We use a different, shorter timeout here
+                        // No need to wait for ages if the website entered does not exist
+                        'connect_timeout' => config('scanner.normalization_connect_timeout'),
+                    ]);
                 } catch (TransferException $exception) {
                     report($exception);
 

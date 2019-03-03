@@ -12,12 +12,14 @@ return [
 
     'client' => [
         'user_agent' => env('SCANNER_USER_AGENT', 'MigrateToFlarum Lab'),
-        'connect_timeout' => env('SCANNER_CONNECT_TIMEOUT', 30),
-        'timeout' => env('SCANNER_TIMEOUT', 30),
+        'connect_timeout' => env('SCANNER_CONNECT_TIMEOUT', 30), // seconds
+        'timeout' => env('SCANNER_TIMEOUT', 30), // seconds
     ],
 
+    'normalization_connect_timeout' => env('SCANNER_NORMALIZATION_TIMEOUT', 10), // seconds
+
     'ping' => [
-        'interval' => 15, // days between pings and showcase scans
-        'remove_after' => 30, // days during which it has not been possible to confirm it's a Flarum
+        'interval' => env('SCANNER_PING_INTERVAL', 15), // days between pings and showcase scans
+        'remove_after' => env('SCANNER_PING_REMOVE_AFTER', 30), // days during which it has not been possible to confirm it's a Flarum
     ],
 ];
