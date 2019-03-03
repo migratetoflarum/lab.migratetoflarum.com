@@ -16,6 +16,7 @@ use Pdp\Rules;
  * @property string $last_rating
  * @property Carbon $last_public_scanned_at
  * @property boolean $ignore
+ * @property array $showcase_meta
  * @property Carbon $created_at
  * @property Carbon $updated_at
  *
@@ -30,6 +31,7 @@ class Website extends UidModel
 
     protected $casts = [
         'ignore' => 'boolean',
+        'showcase_meta' => 'array',
     ];
 
     public function scans()

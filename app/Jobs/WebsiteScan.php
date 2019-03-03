@@ -381,6 +381,15 @@ class WebsiteScan implements ShouldQueue
         }
 
         event(new ScanUpdated($this->scan));
+
+        // If Flarum was detected and the website is public and the showcase meta is older than a day, update
+        if ($flarumUrl && !$this->scan->hidden && !$this->scan->website->ignore) {
+            $lastShowcaseUpdate = array_get($this->scan->website->showcase_meta, 'date');
+
+            if (!$lastShowcaseUpdate || Carbon::parse($lastShowcaseUpdate)->lt(now()->subDay())) {
+                ShowcaseUpdate::dispatch($this->scan->website);
+            }
+        }
     }
 
     protected function saveIntermediateScan()
