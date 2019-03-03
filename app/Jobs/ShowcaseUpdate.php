@@ -26,6 +26,15 @@ class ShowcaseUpdate implements ShouldQueue
 
     public function handle()
     {
+        if ($this->website->ignore || !$this->website->is_flarum) {
+            if ($this->website->showcase_meta) {
+                $this->website->showcase_meta = null;
+                $this->website->save();
+            }
+
+            return;
+        }
+
         /**
          * @var $client ScannerClient
          */

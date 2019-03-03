@@ -17,6 +17,9 @@ use Pdp\Rules;
  * @property Carbon $last_public_scanned_at
  * @property boolean $ignore
  * @property array $showcase_meta
+ * @property Carbon $pinged_at
+ * @property Carbon $confirmed_flarum_at
+ * @property boolean $is_flarum
  * @property Carbon $created_at
  * @property Carbon $updated_at
  *
@@ -32,6 +35,9 @@ class Website extends UidModel
     protected $casts = [
         'ignore' => 'boolean',
         'showcase_meta' => 'array',
+        'pinged_at' => 'datetime',
+        'confirmed_flarum_at' => 'datetime',
+        'is_flarum' => 'boolean',
     ];
 
     public function scans()
@@ -58,7 +64,7 @@ class Website extends UidModel
             })
             ->whereNotNull('canonical_url')
             ->whereNotNull('last_public_scanned_at')
-            ->whereNotNull('name');
+            ->where('is_flarum', '=', 1);
     }
 
     public function getIsApexAttribute(): bool
@@ -73,5 +79,17 @@ class Website extends UidModel
         $domain = $rules->resolve(array_get($parsedUrl, 'host'));
 
         return is_null($domain->getSubDomain());
+    }
+
+    public function updateIsFlarumStatus(bool $isFlarumNow)
+    {
+        if ($isFlarumNow) {
+            $this->confirmed_flarum_at = now();
+            $this->is_flarum = true;
+        } else if ($this->is_flarum && $this->confirmed_flarum_at && $this->confirmed_flarum_at->gt(now()->subDays(config('scanner.ping.remove_after')))) {
+            // Keep flarum status until the remove period is reached
+        } else {
+            $this->is_flarum = false;
+        }
     }
 }

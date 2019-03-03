@@ -376,6 +376,10 @@ class WebsiteScan implements ShouldQueue
             $this->scan->website->last_public_scanned_at = $this->scan->scanned_at;
         }
 
+        $this->scan->website->updateIsFlarumStatus(!is_null($flarumUrl));
+        // We don't update the ping date here, because otherwise updating the ping but not running the showcase would
+        // greatly delay the next scheduled ping+showcase
+
         if ($this->scan->website->isDirty()) {
             $this->scan->website->save();
         }
@@ -383,11 +387,16 @@ class WebsiteScan implements ShouldQueue
         event(new ScanUpdated($this->scan));
 
         // If Flarum was detected and the website is public and the showcase meta is older than a day, update
-        if ($flarumUrl && !$this->scan->hidden && !$this->scan->website->ignore) {
+        if ($this->scan->website->is_flarum && !$this->scan->website->ignore && !$this->scan->hidden) {
             $lastShowcaseUpdate = array_get($this->scan->website->showcase_meta, 'date');
 
             if (!$lastShowcaseUpdate || Carbon::parse($lastShowcaseUpdate)->lt(now()->subDay())) {
                 ShowcaseUpdate::dispatch($this->scan->website);
+
+                // If the showcase update was triggered, we can update the ping date so the
+                // next scheduled ping+showcase is postponed
+                $this->scan->website->pinged_at = now();
+                $this->scan->website->save();
             }
         }
     }

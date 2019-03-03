@@ -15,4 +15,9 @@ return [
         'connect_timeout' => env('SCANNER_CONNECT_TIMEOUT', 30),
         'timeout' => env('SCANNER_TIMEOUT', 30),
     ],
+
+    'ping' => [
+        'interval' => 15, // days between pings and showcase scans
+        'remove_after' => 30, // days during which it has not been possible to confirm it's a Flarum
+    ],
 ];
