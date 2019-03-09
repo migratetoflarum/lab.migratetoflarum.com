@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class WebsitesPing extends Command
 {
-    protected $signature = 'websites:ping {website?}';
+    protected $signature = 'websites:ping {website?} {--since-days=default}';
     protected $description = 'Ping all or a specific website';
 
     public function handle()
@@ -19,11 +19,13 @@ class WebsitesPing extends Command
         if ($this->argument('website')) {
             $websites = [Website::where('uid', $this->argument('website'))->firstOrFail()];
         } else {
+            $sinceDays = $this->option('since-days') === 'default' ? config('scanner.ping.interval') : $this->option('since-days');
+
             $websites = Website::where('ignore', '=', 0)
                 ->where('is_flarum', '=', 1)
-                ->where(function (Builder $query) {
+                ->where(function (Builder $query) use ($sinceDays) {
                     $query->whereNull('pinged_at')
-                        ->orWhere('pinged_at', '<', now()->subDays(config('scanner.ping.interval')));
+                        ->orWhere('pinged_at', '<', now()->subDays($sinceDays));
                 })
                 ->get();
         }
