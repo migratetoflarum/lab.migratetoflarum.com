@@ -52,7 +52,9 @@ export default {
                     rel: 'nofollow noopener',
                 }, website.attributes.normalized_url.replace(/\/$/, ''))),
                 meta ? [
-                    meta.description ? m('p', meta.description) : null,
+                    meta.description ? m('p.mt-2', {
+                        title: 'Forum description',
+                    }, meta.description) : null,
                     m('.row.text-center.mt-3', [
                         meta.version ? m('.col', m(FlarumVersionString, {version: meta.version})) : null,
                         discussionCount ? m('.col', {

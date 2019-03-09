@@ -43,9 +43,9 @@ class ShowcaseUpdate implements ShouldQueue
         $apiUrl = rtrim($this->website->canonical_url, '/') . '/api';
 
         try {
-            $forum = \GuzzleHttp\json_decode( $client->get($apiUrl, [
+            $forum = \GuzzleHttp\json_decode($client->get($apiUrl, [
                 'http_errors' => true,
-            ])->getBody()->getContents());
+            ])->getBody()->getContents(), true);
         } catch (ClientException $exception) {
             // Only available on beta 8
             if ($exception->getCode() === 404) {
@@ -77,16 +77,14 @@ class ShowcaseUpdate implements ShouldQueue
             $userCount = 50000;
         }
 
-        $description = trim(array_get($forum, 'description'));
+        $description = trim(array_get($forum, 'data.attributes.description'));
 
-        if ($forum && $title = trim(array_get($forum, 'title'))) {
+        if ($forum && $title = trim(array_get($forum, 'data.attributes.title'))) {
             $this->website->name = $title;
         }
         $this->website->showcase_meta = [
             'version' => $forum ? '0.1.0-beta.8' : '0.1.0-beta.7',
             'description' => $description ?: null,
-            'allowSignUp' => $forum ? !!array_get($forum, 'allowSignUp') : null,
-            'canViewDiscussions' => $forum ? !!array_get($forum, 'canViewDiscussions') : null,
             'discussionCount' => $discussionCount,
             'userCount' => $userCount,
             'date' => now()->toW3cString(),
