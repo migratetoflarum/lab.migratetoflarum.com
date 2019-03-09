@@ -148,6 +148,23 @@ export default {
                             '.',
                         ],
                     });
+                    break;
+                case 'insecure-public-folder':
+                    suggestions.push({
+                        title: 'Insecure public folder',
+                        suggest: [
+                            'It appears you didn\'t complete the path customization to use Flarum without a public folder. ',
+                            'This leaves all Flarum sensitive files unprotected. ',
+                            'Update your webserver root to point to the public folder or complete the instructions to remove the public folder and use the suggested rewrite rules to restrict access to the files instead. ',
+                            m('a', {
+                                href: 'https://flarum.org/docs/install.html#customizing-paths',
+                                target: '_blank',
+                                rel: 'nofollow noopener',
+                            }, 'Click here to go to the "Customizing Paths" of the Flarum install instructions'),
+                            '.',
+                        ],
+                    });
+                    break;
             }
         });
 

@@ -228,6 +228,12 @@ class WebsiteScan implements ShouldQueue
                     ],
                 ];
 
+                // If there's a public folder, there's a good chance this means a misconfigured root folder
+                // So we will check malicious access one level up as well
+                // The public folder warning will only be shown if at least one path is vulnerable
+                $usingPublicFolder = ends_with($safeFlarumUrl, '/public');
+                $publicFolderAndVulnerable = false;
+
                 foreach ($tryMaliciousAccess as $access => $urls) {
                     $accessReport = [
                         'access' => false,
@@ -253,9 +259,32 @@ class WebsiteScan implements ShouldQueue
                                 'exception_message' => $exception->getMessage(),
                             ];
                         }
+
+                        if ($usingPublicFolder) {
+                            try {
+                                $fullUrl = substr($safeFlarumUrl, 0, -6 /* length of "public" */) . $url;
+                                $response = $this->doRequest($fullUrl, 'HEAD');
+
+                                if ($response->getStatusCode() === 200) {
+                                    $accessReport['access'] = true;
+                                    $accessReport['urls'][] = $fullUrl;
+                                    $publicFolderAndVulnerable = true;
+                                }
+                            } catch (Exception $exception) {
+                                $accessReport['errors'][] = [
+                                    'url' => $fullUrl,
+                                    'exception_class' => get_class($exception),
+                                    'exception_message' => $exception->getMessage(),
+                                ];
+                            }
+                        }
                     }
 
                     $maliciousAccess[$access] = $accessReport;
+                }
+
+                if ($publicFolderAndVulnerable) {
+                    $vulnerabilities[] = 'insecure-public-folder';
                 }
 
                 $forumJsHash = null;
@@ -333,7 +362,6 @@ class WebsiteScan implements ShouldQueue
                     } catch (Exception $exception) {
                         // silence errors
                     }
-
                 }
             }
 
