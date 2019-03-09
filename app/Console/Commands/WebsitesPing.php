@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\ShowcaseScreenshot;
 use App\Jobs\ShowcaseUpdate;
 use App\Jobs\WebsitePing;
 use App\Website;
@@ -33,7 +34,8 @@ class WebsitesPing extends Command
              */
             $this->info('Dispatching ping for ' . $website->normalized_url);
             WebsitePing::withChain([
-                new ShowcaseUpdate($website)
+                new ShowcaseUpdate($website),
+                new ShowcaseScreenshot($website),
             ])->dispatch($website);
         }
     }

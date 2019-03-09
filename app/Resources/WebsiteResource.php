@@ -22,6 +22,7 @@ class WebsiteResource extends Resource
                 'is_apex' => $this->resource->is_apex,
                 'ignore' => $this->resource->ignore,
                 'showcase_meta' => $this->resource->showcase_meta,
+                'screenshot_url' => $this->resource->getFirstMediaUrl(Website::COLLECTION_SCREENSHOT),
             ],
         ];
     }

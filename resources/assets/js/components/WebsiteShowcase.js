@@ -35,25 +35,35 @@ export default {
            userCount = countFormatting(meta.userCount);
         }
 
-        return m('.card', m('.card-body', [
-            m('h5.card-title', website.attributes.name),
-            m('h6.card-subtitle', m('a', {
+        return m('.card', [
+            website.attributes.screenshot_url ? m('a.card-img-top.showcase-img', {
                 href: website.attributes.canonical_url,
                 target: '_blank',
                 rel: 'nofollow noopener',
-            }, website.attributes.normalized_url.replace(/\/$/, ''))),
-            meta ? [
-                meta.description ? m('p', meta.description) : null,
-                m('.row.text-center.mt-3', [
-                    meta.version ? m('.col', m(FlarumVersionString, {version: meta.version})) : null,
-                    discussionCount ? m('.col', {
-                        title: discussionCount.label,
-                    }, discussionCount.count + ' discussions') : null,
-                    userCount ? m('.col', {
-                        title: userCount.label,
-                    }, userCount.count + ' users') : null,
-                ]),
-            ] : null,
-        ]));
+                style: {
+                    backgroundImage: 'url(' + website.attributes.screenshot_url + ')',
+                },
+            }) : null,
+            m('.card-body', [
+                m('h5.card-title', website.attributes.name),
+                m('h6.card-subtitle', m('a', {
+                    href: website.attributes.canonical_url,
+                    target: '_blank',
+                    rel: 'nofollow noopener',
+                }, website.attributes.normalized_url.replace(/\/$/, ''))),
+                meta ? [
+                    meta.description ? m('p', meta.description) : null,
+                    m('.row.text-center.mt-3', [
+                        meta.version ? m('.col', m(FlarumVersionString, {version: meta.version})) : null,
+                        discussionCount ? m('.col', {
+                            title: discussionCount.label,
+                        }, discussionCount.count + ' discussions') : null,
+                        userCount ? m('.col', {
+                            title: userCount.label,
+                        }, userCount.count + ' users') : null,
+                    ]),
+                ] : null,
+            ]),
+        ]);
     }
 }

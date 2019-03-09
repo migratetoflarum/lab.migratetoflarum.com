@@ -429,6 +429,7 @@ class WebsiteScan implements ShouldQueue
 
             if (!$lastShowcaseUpdate || Carbon::parse($lastShowcaseUpdate)->lt(now()->subDay())) {
                 ShowcaseUpdate::dispatch($this->scan->website);
+                ShowcaseScreenshot::dispatch($this->scan->website);
 
                 // If the showcase update was triggered, we can update the ping date so the
                 // next scheduled ping+showcase is postponed

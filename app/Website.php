@@ -6,6 +6,8 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Pdp\Rules;
+use Spatie\MediaLibrary\HasMedia\HasMedia;
+use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
 
 /**
  * @property int $id
@@ -26,8 +28,12 @@ use Pdp\Rules;
  * @property Collection|Scan[] $scans
  * @property bool $is_apex
  */
-class Website extends UidModel
+class Website extends UidModel implements HasMedia
 {
+    use HasMediaTrait;
+
+    const COLLECTION_SCREENSHOT = 'screenshot';
+
     protected $fillable = [
         'normalized_url',
     ];
