@@ -121,7 +121,7 @@ export default {
             m('p', vnode.state.totalResults + ' websites matching current filter'),
             chunkArray(vnode.state.websites, 2).map(
                 websites => m('.row', websites.map(
-                    website => m('.col-md-6.mb-3', m(WebsiteShowcase, {website}))
+                    website => m('.col-md-6.mb-4', m(WebsiteShowcase, {website}))
                 ))
             ),
             (vnode.state.nextPage && vnode.state.websites.length ? m('button[type=button].btn.btn-secondary.btn-block.mt-3', {
