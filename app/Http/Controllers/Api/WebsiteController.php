@@ -21,18 +21,24 @@ class WebsiteController extends Controller
             case '-domain':
                 $query->orderBy('normalized_url', 'desc');
                 break;
-            case 'last_scan':
-                $query->orderBy('last_public_scanned_at');
-                break;
-            case '-last_scan':
-                $query->orderBy('last_public_scanned_at', 'desc');
+            case 'name':
+                $query->orderBy('name');
                 break;
             case '-name':
                 $query->orderBy('name', 'desc');
                 break;
-            case 'name':
+            case 'user_count':
+                $query->orderBy('showcase_meta->userCount');
+                break;
+            case '-user_count':
+                $query->orderBy('showcase_meta->userCount', 'desc');
+                break;
+            case 'discussion_count':
+                $query->orderBy('showcase_meta->discussionCount');
+                break;
+            case '-discussion_count':
             default:
-                $query->orderBy('name');
+                $query->orderBy('showcase_meta->discussionCount', 'desc');
                 break;
         }
 
@@ -43,7 +49,8 @@ class WebsiteController extends Controller
         if ($search) {
             $query->where(function ($query) use ($search) {
                 $query->where('normalized_url', 'like', '%' . $search . '%')
-                    ->orWhere('name', 'like', '%' . $search . '%');
+                    ->orWhere('name', 'like', '%' . $search . '%')
+                    ->orWhere('showcase_meta->description', 'like', '%' . $search . '%');
             });
         }
 

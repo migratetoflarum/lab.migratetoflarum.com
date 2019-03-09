@@ -5,16 +5,20 @@ import chunkArray from "../helpers/chunkArray";
 
 const SORTING = [
     {
+        key: 'discussion_count',
+        title: 'Discussion count',
+    },
+    {
+        key: 'user_count',
+        title: 'User count',
+    },
+    {
         key: 'domain',
         title: 'Domain name',
     },
     {
         key: 'name',
         title: 'Forum name',
-    },
-    {
-        key: 'last_scan',
-        title: 'Last scan',
     },
 ];
 
@@ -35,7 +39,7 @@ export default {
         vnode.state.nextPage = null;
         vnode.state.totalResults = 0;
         vnode.state.query = {
-            sort: 'name',
+            sort: '-discussion_count',
             filter: {},
         };
 
