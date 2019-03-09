@@ -219,14 +219,23 @@ class WebsiteScan implements ShouldQueue
                         'vendor/flarum/core/LICENSE',
                     ],
                     'storage' => [
+                        // Beta 7 paths likely to exist
                         'storage/logs/flarum.log',
-                        'storage/views/7dc8e518535b1d01db47bee524631424', // app.blade.php in beta7
+                        'storage/views/7dc8e518535b1d01db47bee524631424', // app.blade.php
                     ],
                     'composer' => [
                         'composer.json',
                         'composer.lock',
                     ],
                 ];
+
+                if ($flarumVersion === '0.1.0-beta.8') {
+                    $tryMaliciousAccess['storage'] = [
+                        // Beta 8 paths likely to exist
+                        'storage/logs/flarum-' . date('Y-m-d') . '.log',
+                        'storage/cache/77/e1/77e1ba46ee3a2b2d1558d7c5d07c4c0caa46c7bf', // sha1 of flarum.formatter
+                    ];
+                }
 
                 // If there's a public folder, there's a good chance this means a misconfigured root folder
                 // So we will check malicious access one level up as well
