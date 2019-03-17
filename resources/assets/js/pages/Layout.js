@@ -37,10 +37,18 @@ export default {
             m('.container.py-3', vnode.children),
             m('footer.py-3', m('.container.text-center.text-muted', [
                 m('p', [
-                    'This is a free and ',
+                    'Free and ',
                     m('a', {href: App.githubRepo}, 'open-source'),
-                    ' service created by ',
+                    ' service made with ',
+                    icon('far fa-heart'),
+                    ' for the Flarum community by ',
                     m('a[href=https://clarkwinkelmann.com/]', 'Clark Winkelmann'),
+                ]),
+                m('p', [
+                    'The ',
+                    m('a[href=https://flarum.org/]', 'Flarum'),
+                    ' name and logo are property of Toby Zerner. ',
+                    'This website is not affiliated with the Flarum team',
                 ]),
                 m('p', [
                     'Please report any issue on ',
