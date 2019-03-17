@@ -69,13 +69,24 @@ $navbar-dark-toggler-icon-bg: url(../images/navbar-toggle.svg);
     }
 }
 
-.icon-flarum {
-    width: 0.81em;
-    height: 0.9em;
+.icon-flarum,
+.icon-flagrow {
     vertical-align: baseline;
     margin-bottom: -0.1em;
     background-size: contain;
-    background: url(../images/flarum-mono.svg) no-repeat center center;
+    background: no-repeat center center;
+}
+
+.icon-flarum {
+    width: 0.81em;
+    height: 0.9em;
+    background-image: url(../images/flarum-mono.svg);
+}
+
+.icon-flagrow {
+    width: 1em;
+    height: 1em;
+    background-image: url(../images/flagrow-mono.svg);
 }
 
 .sponsoring {

@@ -16,7 +16,7 @@ export default {
                 href: 'https://flagrow.io/packages/' + extension.attributes.package,
                 target: '_blank',
                 rel: 'nofollow noopener',
-            }, [icon('globe'), ' Flagrow.io']),
+            }, [m('span.fab.icon-flagrow'), ' Flagrow.io']),
         ];
 
         if (extension.attributes.repository) {
