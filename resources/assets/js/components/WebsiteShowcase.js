@@ -1,5 +1,6 @@
 import m from 'mithril';
 import FlarumVersionString from "./FlarumVersionString";
+import icon from '../helpers/icon';
 
 function countFormatting(count) {
     if (typeof count === 'undefined' || count === null) {
@@ -31,8 +32,8 @@ export default {
         let discussionCount = null;
         let userCount = null;
         if (meta) {
-           discussionCount = countFormatting(meta.discussionCount);
-           userCount = countFormatting(meta.userCount);
+            discussionCount = countFormatting(meta.discussionCount);
+            userCount = countFormatting(meta.userCount);
         }
 
         return m('.card', [
@@ -46,11 +47,17 @@ export default {
             }) : null,
             m('.card-body', [
                 m('h5.card-title', website.attributes.name),
-                m('h6.card-subtitle', m('a', {
-                    href: website.attributes.canonical_url,
-                    target: '_blank',
-                    rel: 'nofollow noopener',
-                }, website.attributes.normalized_url.replace(/\/$/, ''))),
+                m('h6.card-subtitle', [
+                    website.attributes.canonical_url.indexOf('http://') === 0 ? [icon('lock-open', {
+                        className: 'text-danger',
+                        title: 'Website is not secured with HTTPS',
+                    }), ' '] : null,
+                    m('a', {
+                        href: website.attributes.canonical_url,
+                        target: '_blank',
+                        rel: 'nofollow noopener',
+                    }, website.attributes.normalized_url.replace(/\/$/, '')),
+                ]),
                 meta ? [
                     meta.description ? m('p.mt-2', {
                         title: 'Forum description',
