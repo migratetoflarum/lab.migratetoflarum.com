@@ -15,7 +15,7 @@ const HeaderReport = {
                 viewIcon = icon('check', {className: 'text-success'});
                 break;
             case 'neutral':
-                viewIcon = icon('meh-o', {className: 'text-warning'});
+                viewIcon = icon('meh', {className: 'text-warning'});
                 break;
             case 'bad':
                 viewIcon = icon('times', {className: 'text-danger'});
@@ -86,7 +86,7 @@ const UrlReport = {
                     }) : null),
                 ] : null),
                 (report.type === 'redirect' ? [
-                    m('p', [icon('long-arrow-right'), ' ' + (report.status === 301 ? 'Permanent' : 'Temporary') + ' redirect to ', (report.redirect_to ? report.redirect_to : m('em', '(no url)'))]),
+                    m('p', [icon('long-arrow-alt-right'), ' ' + (report.status === 301 ? 'Permanent' : 'Temporary') + ' redirect to ', (report.redirect_to ? report.redirect_to : m('em', '(no url)'))]),
                     (report.status === 302 && report.redirect_to ? [
                         m(Warning, {
                             description: report.redirect_to.indexOf('https://') === 0 ?

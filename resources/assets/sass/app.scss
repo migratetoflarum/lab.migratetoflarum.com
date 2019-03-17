@@ -2,7 +2,10 @@
 $navbar-dark-toggler-icon-bg: url(../images/navbar-toggle.svg);
 
 @import '~bootstrap/scss/bootstrap';
-@import "~font-awesome/scss/font-awesome";
+@import "~@fortawesome/fontawesome-free/scss/fontawesome";
+@import "~@fortawesome/fontawesome-free/scss/solid.scss";
+@import "~@fortawesome/fontawesome-free/scss/regular.scss";
+@import "~@fortawesome/fontawesome-free/scss/brands.scss";
 
 .page-home {
     padding-top: 18vh;

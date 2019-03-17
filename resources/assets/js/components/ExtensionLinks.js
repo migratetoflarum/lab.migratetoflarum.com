@@ -26,8 +26,8 @@ export default {
                 target: '_blank',
                 rel: 'nofollow noopener',
             }, extension.attributes.repository.indexOf('https://github.com') === 0 ?
-                [icon('github'), ' GitHub'] :
-                [icon('code-fork'), ' Repository']));
+                [icon('fab fa-github'), ' GitHub'] :
+                [icon('code-branch'), ' Repository']));
         }
 
         if (extension.attributes.discuss_url) {
@@ -36,7 +36,7 @@ export default {
                 href: extension.attributes.discuss_url,
                 target: '_blank',
                 rel: 'nofollow noopener',
-            }, [m('span.fa.icon-flarum'), ' Discuss']));
+            }, [m('span.fab.icon-flarum'), ' Discuss']));
         }
 
         return links;

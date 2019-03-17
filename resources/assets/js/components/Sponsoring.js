@@ -16,7 +16,7 @@ export default {
         }, [
             (App.sponsoring.opening ? m('span.font-weight-bold', App.sponsoring.opening + ': ') : null),
             App.sponsoring.text,
-            (App.sponsoring.link ? [' ', icon('external-link')] : null),
+            (App.sponsoring.link ? [' ', icon('external-link-alt')] : null),
         ])));
     },
 }

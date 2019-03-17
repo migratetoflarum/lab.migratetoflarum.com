@@ -28,7 +28,7 @@ export default {
                                 href: App.discuss,
                                 target: '_blank',
                                 rel: 'noopener',
-                            }, ['Discuss thread ', icon('external-link')])),
+                            }, ['Discuss thread ', icon('external-link-alt')])),
                         ]),
                     ]),
                 ])),
