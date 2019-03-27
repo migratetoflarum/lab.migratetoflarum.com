@@ -11,14 +11,19 @@
     },
     "dependencies": {
         "@fortawesome/fontawesome-free": "^5.7.2",
-        "bootstrap": "^4.0.0",
+        "bootstrap": "^4.3.1",
         "cross-env": "^5.1",
-        "jquery": "^3.2.1",
-        "laravel-echo": "^1.3.5",
-        "laravel-mix": "^2.0",
+        "jquery": "^3.3.1",
+        "laravel-echo": "^1.5.3",
+        "laravel-mix": "^4.0.15",
         "mithril": "^1.1.6",
         "moment": "^2.21.0",
-        "popper.js": "^1.12.5",
-        "pusher-js": "^4.2.2"
+        "popper.js": "^1.14.7",
+        "pusher-js": "^4.4.0",
+        "resolve-url-loader": "2.3.1",
+        "sass": "^1.17.3",
+        "sass-loader": "7.*",
+        "vue-template-compiler": "^2.6.10"
     }
 }
+
