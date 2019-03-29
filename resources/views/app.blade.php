@@ -15,6 +15,9 @@ $data = [
     'preload' => isset($preload) ? \GuzzleHttp\json_encode($preload) : '[]',
     'sponsoring' => \GuzzleHttp\json_encode(config('sponsoring')),
 ];
+if ($probability = config('scanner.secret_extensions_probability')) {
+    $data['secret-extension-probability'] = $probability;
+}
 ?>
 <div id="app" {!! collect($data)->map(function ($value, string $attr) {
         return 'data-' . $attr . '="' . e($value) . '"';

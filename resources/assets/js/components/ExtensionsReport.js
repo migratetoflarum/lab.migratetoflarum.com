@@ -1,5 +1,6 @@
 import m from 'mithril';
 import ExtensionReport from './ExtensionReport';
+import secretExtensions from "../helpers/secretExtensions";
 
 function isCoreExtension(extension) {
     return extension.attributes.package.indexOf('flarum/') === 0;
@@ -20,6 +21,8 @@ export default {
         const coreExtensionsCount = extensions.filter(isCoreExtension).length;
 
         const extensionsShown = vnode.state.showCoreExtensions ? extensions : extensions.filter(extension => !isCoreExtension(extension));
+
+        secretExtensions(scan, extensionsShown);
 
         if (!extensionIds.length) {
             return m('.card.mt-3', [

@@ -7,13 +7,13 @@ export default {
 
         let links = [
             m('a.btn.btn-sm.btn-light', {
-                href: 'https://packagist.org/packages/' + extension.attributes.package,
+                href: extension.attributes.customPackagistLink ? extension.attributes.customPackagistLink : 'https://packagist.org/packages/' + extension.attributes.package,
                 target: '_blank',
                 rel: 'nofollow noopener',
             }, [icon('download'), ' Packagist']),
             ' ',
             m('a.btn.btn-sm.btn-light', {
-                href: 'https://flagrow.io/extensions/' + extension.attributes.package,
+                href: extension.attributes.customFlagrowLink ? extension.attributes.customFlagrowLink : 'https://flagrow.io/extensions/' + extension.attributes.package,
                 target: '_blank',
                 rel: 'nofollow noopener',
             }, [m('span.fab.icon-flagrow'), ' Flagrow.io']),

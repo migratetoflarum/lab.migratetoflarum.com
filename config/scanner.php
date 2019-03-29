@@ -22,4 +22,6 @@ return [
         'interval' => env('SCANNER_PING_INTERVAL', 15), // days between pings and showcase scans
         'remove_after' => env('SCANNER_PING_REMOVE_AFTER', 30), // days during which it has not been possible to confirm it's a Flarum
     ],
+
+    'secret_extensions_probability' => env('SCANNER_SECRET_EXTENSIONS_PROBABILITY', 0), // From 0 (never) to 100 (always)
 ];
