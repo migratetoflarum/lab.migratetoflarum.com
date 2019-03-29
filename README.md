@@ -5,6 +5,13 @@
 This is a free and online tool to check the health of your Flarum install.
 Visit https://lab.migratetoflarum.com/ to get started.
 
+## Screenshots
+
+For screenshots, [Spatie Browsershot](https://github.com/spatie/browsershot#requirements) is used.
+Follow the requirements to install Puppeteer and Chrome Headless.
+
+Additionally on Ubuntu server install the package `fonts-noto-cjk` so Chrome can render websites in almost any language.
+
 ## A MigrateToFlarum service
 
 This is a free service by MigrateToFlarum, an online forum migration tool (launching soon).
