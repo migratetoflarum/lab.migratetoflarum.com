@@ -46,6 +46,9 @@ class Website extends UidModel implements HasMedia
         'is_flarum' => 'boolean',
     ];
 
+    // Multiple of 2, 3 and 4 so the pagination looks nicely in grids
+    protected $perPage = 24;
+
     public function scans()
     {
         return $this->hasMany(Scan::class);
