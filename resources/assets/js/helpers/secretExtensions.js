@@ -69,7 +69,7 @@ const EXTENSIONS = [
         icon: {
             name: 'fas fa-search-dollar',
             color: '#ffffff',
-            backgroundColor: '#4e0303',
+            backgroundColor: '#1955eb',
         },
     },
     {
@@ -90,6 +90,16 @@ const EXTENSIONS = [
             name: 'fas fa-wifi',
             color: '#65baf6',
             backgroundColor: '#dddddd',
+        },
+    },
+    {
+        package: 'flarum-ban',
+        title: 'Ban Flarum Team',
+        description: 'Hides posts with 140+ characters from the Flarum core team.',
+        icon: {
+            name: 'fas fa-eye-slash',
+            color: '#ffffff',
+            backgroundColor: '#dd541e',
         },
     },
 ];
