@@ -10,12 +10,30 @@ export default {
     supportEmail: 'lab@migratetoflarum.com',
     sponsoringEmail: 'sponsoring@migratetoflarum.com',
     secretExtensionProbability: 0,
+    baseDomain: null,
+    showcaseDomain: null,
     init(root) {
         this.csrfToken = root.dataset.csrf;
-        this.secretExtensionProbability = root.dataset.hasOwnProperty('secretExtensionProbability') ? parseInt(root.dataset.secretExtensionProbability) : 0;
-        this.sponsoring = JSON.parse(root.dataset.sponsoring);
 
-        const preload = JSON.parse(root.dataset.preload);
-        Store.load(preload);
+        if (root.dataset.hasOwnProperty('secretExtensionProbability')) {
+            this.secretExtensionProbability = parseInt(root.dataset.secretExtensionProbability);
+        }
+
+        if (root.dataset.hasOwnProperty('sponsoring')) {
+            this.sponsoring = JSON.parse(root.dataset.sponsoring);
+        }
+
+        if (root.dataset.hasOwnProperty('baseDomain')) {
+            this.baseDomain = root.dataset.baseDomain || null;
+        }
+
+        if (root.dataset.hasOwnProperty('showcaseDomain')) {
+            this.showcaseDomain = root.dataset.showcaseDomain || null;
+        }
+
+        if (root.dataset.hasOwnProperty('preload')) {
+            const preload = JSON.parse(root.dataset.preload);
+            Store.load(preload);
+        }
     },
 }

@@ -24,4 +24,6 @@ return [
     ],
 
     'secret_extensions_probability' => env('SCANNER_SECRET_EXTENSIONS_PROBABILITY', 0), // From 0 (never) to 100 (always)
+
+    'showcase_domain' => env('SHOWCASE_DOMAIN'),
 ];

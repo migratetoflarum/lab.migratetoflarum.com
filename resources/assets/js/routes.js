@@ -1,11 +1,10 @@
 import m from 'mithril';
-import Layout from './pages/Layout';
+import LabLayout from "./layouts/LabLayout";
 import HomePage from './pages/HomePage';
 import ScanPage from './pages/ScanPage';
 import App from './utils/App';
 import ExtensionsPage from './pages/ExtensionsPage';
 import OptOutPage from './pages/OptOutPage';
-import ShowcasePage from "./pages/ShowcasePage";
 
 let root = document.getElementById('app');
 
@@ -16,7 +15,6 @@ const routes = {
     '/scans/:key': ScanPage,
     '/extensions': ExtensionsPage,
     '/opt-out': OptOutPage,
-    '/showcase': ShowcasePage,
 };
 
 let isFirstMatch = true;
@@ -34,7 +32,7 @@ function createResolver(component) {
             isFirstMatch = false;
         },
         render: () => {
-            return m(Layout, {
+            return m(LabLayout, {
                 component,
             }, m(component, {
                 key: m.route.get(),

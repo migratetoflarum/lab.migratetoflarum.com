@@ -14,17 +14,12 @@ $data = [
     'csrf' => csrf_token(),
     'base-domain' => url(''),
     'showcase-domain' => config('scanner.showcase_domain'),
-    'preload' => isset($preload) ? \GuzzleHttp\json_encode($preload) : '[]',
-    'sponsoring' => \GuzzleHttp\json_encode(config('sponsoring')),
 ];
-if ($probability = config('scanner.secret_extensions_probability')) {
-    $data['secret-extension-probability'] = $probability;
-}
 ?>
 <div id="app" {!! collect($data)->map(function ($value, string $attr) {
         return 'data-' . $attr . '="' . e($value) . '"';
     })->implode(' ') !!}></div>
-<script src="{{ mix('js/app.js') }}"></script>
-@include('analytics', ['matomo' => config('services.matomo-lab')])
+<script src="{{ mix('js/showcase.js') }}"></script>
+@include('analytics', ['matomo' => config('services.matomo-showcase')])
 </body>
 </html>

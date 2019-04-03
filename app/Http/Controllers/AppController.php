@@ -68,4 +68,9 @@ class AppController extends Controller
 
         return $this->appView($preload);
     }
+
+    public function showcase()
+    {
+        return view('showcase');
+    }
 }

@@ -39,4 +39,14 @@ return [
         'api_access_token' => env('GITHUB_API_ACCESS_TOKEN'),
     ],
 
+    'matomo-lab' => [
+        'url' => env('MATOMO_LAB_URL', env('MATOMO_URL')),
+        'site_id' => env('MATOMO_LAB_SITE_ID'),
+    ],
+
+    'matomo-showcase' => [
+        'url' => env('MATOMO_SHOWCASE_URL', env('MATOMO_URL')),
+        'site_id' => env('MATOMO_SHOWCASE_SITE_ID'),
+    ],
+
 ];

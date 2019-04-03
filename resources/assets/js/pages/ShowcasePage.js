@@ -1,5 +1,5 @@
 import m from 'mithril';
-import link from "../helpers/link";
+import App from "../utils/App";
 import WebsiteShowcase from "../components/WebsiteShowcase";
 import chunkArray from "../helpers/chunkArray";
 
@@ -96,11 +96,12 @@ export default {
     },
     view(vnode) {
         return [
-            m('h1', 'Forum showcase'),
             m('p', [
                 'Here\'s the list of all forums submitted to the lab.',
                 'If you don\'t want your forum on the list, consider ',
-                link('/opt-out', 'opting out'),
+                m('a', {
+                    href: App.baseDomain + '/opt-out',
+                }, 'opting out'),
                 '.',
             ]),
             m('.form-group', m('input[type=text].form-control', {
