@@ -1,5 +1,5 @@
 @if (array_get($matomo, 'url') && array_get($matomo, 'site_id'))
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="{{ cspNonce() }}">
         var _paq = _paq || [];
         @if (auth()->check())
         _paq.push(['setUserId', {!! json_encode(auth()->user()->email) !!}]);
