@@ -96,33 +96,37 @@ export default {
     },
     view(vnode) {
         return [
-            m('p', [
-                'Here\'s the list of all forums submitted to the lab.',
-                'If you don\'t want your forum on the list, consider ',
+            m('.row', [
+                m('.col-md-6', m('.form-group', m('input[type=text].form-control', {
+                    value: vnode.state.query.filter.q,
+                    onchange: m.withAttr('value', value => {
+                        vnode.state.changeSearch(value);
+                    }),
+                    placeholder: 'Search for a forum name or url',
+                }))),
+                m('.col-md-6', m('.form-group', m('select.form-control', {
+                    value: vnode.state.query.sort,
+                    onchange: m.withAttr('value', value => {
+                        vnode.state.changeSort(value);
+                    }),
+                }, SORTING.map(sort => SORTING_ORDERS.map(order => m('option', {
+                    value: order.prefix + sort.key,
+                }, sort.title + ' (' + order.title + ')')))))),
+            ]),
+            m('p.text-center', [
+                'Add a new forum by scanning it publicly on the ',
+                m('a', {
+                    href: App.baseDomain + '/',
+                }, 'MigrateToFlarum Lab'),
+                '. If you don\'t want your forum on the list, consider ',
                 m('a', {
                     href: App.baseDomain + '/opt-out',
                 }, 'opting out'),
                 '.',
             ]),
-            m('.form-group', m('input[type=text].form-control', {
-                value: vnode.state.query.filter.q,
-                onchange: m.withAttr('value', value => {
-                    vnode.state.changeSearch(value);
-                }),
-                placeholder: 'Search for a forum name or url',
-            })),
-            m('.form-group', m('select.form-control', {
-                value: vnode.state.query.sort,
-                onchange: m.withAttr('value', value => {
-                    vnode.state.changeSort(value);
-                }),
-            }, SORTING.map(sort => SORTING_ORDERS.map(order => m('option', {
-                value: order.prefix + sort.key,
-            }, sort.title + ' (' + order.title + ')'))))),
-            m('p', vnode.state.totalResults + ' websites matching current filter'),
-            chunkArray(vnode.state.websites, 2).map(
+            chunkArray(vnode.state.websites, 3).map(
                 websites => m('.row', websites.map(
-                    website => m('.col-md-6.mb-4', m(WebsiteShowcase, {website}))
+                    website => m('.col-md-6.col-xl-4.mb-4', m(WebsiteShowcase, {website}))
                 ))
             ),
             (vnode.state.nextPage && vnode.state.websites.length ? m('button[type=button].btn.btn-secondary.btn-block.mt-3', {
@@ -130,6 +134,7 @@ export default {
                     vnode.state.loadPage();
                 },
             }, 'Load more') : null),
+            m('p.text-center', vnode.state.totalResults + ' websites matching current filter'),
         ];
     },
 }

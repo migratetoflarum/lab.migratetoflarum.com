@@ -110,3 +110,14 @@ $navbar-dark-toggler-icon-bg: url(../images/navbar-toggle.svg);
 .showcase-app {
     background: #e4ded2;
 }
+
+.builtwithflarum-logo {
+    background-repeat: no-repeat;
+    background-image: url(../images/builtwithflarum.svg);
+    background-size: contain;
+    background-position: left center;
+    height: 30px;
+    width: 300px;
+    text-indent: -9999px;
+    overflow: hidden;
+}

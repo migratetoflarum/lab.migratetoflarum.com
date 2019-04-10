@@ -1,6 +1,5 @@
 import m from 'mithril';
 import link from '../helpers/link';
-import icon from '../helpers/icon';
 import App from '../utils/App';
 import Footer from "./Footer";
 
@@ -10,12 +9,13 @@ export default {
             'data-url': m.route.get(),
         }, [
             m('header', [
-                m('nav.navbar.navbar-expand-lg.navbar-dark.bg-success', m('.container', [
+                m('nav.navbar.navbar-expand-lg.navbar-light', m('.container', [
                     link('/', {
                         className: 'navbar-brand',
-                    }, [icon('tools'), ' builtWithFlarum.com']),
+                    }, m('.builtwithflarum-logo', 'built with Flarum')),
                     m('button.navbar-toggler[type=button][data-toggle=collapse][data-target=#navbar][aria-controls=navbar][aria-expanded=false][aria-label=Toggle navigation]', m('span.navbar-toggler-icon')),
                     m('#navbar.collapse.navbar-collapse', [
+                        m('em.navbar-text.text-muted', 'The user-submitted list of forums powered by Flarum'),
                         m('ul.navbar-nav.ml-auto', [
                             m('li.nav-item', m('a.nav-link', {
                                 href: App.baseDomain + '/',
