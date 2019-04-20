@@ -1,5 +1,6 @@
 import m from 'mithril';
 import link from '../helpers/link';
+import icon from '../helpers/icon';
 import App from '../utils/App';
 import Footer from "./Footer";
 
@@ -19,7 +20,10 @@ export default {
                         m('ul.navbar-nav.ml-auto', [
                             m('li.nav-item', m('a.nav-link', {
                                 href: App.baseDomain + '/',
-                            }, 'Back to the Lab')),
+                            }, [
+                                icon('flask'),
+                                ' Submit forum',
+                            ])),
                         ]),
                     ]),
                 ])),

@@ -97,18 +97,40 @@ $navbar-dark-toggler-icon-bg: url(../images/navbar-toggle.svg);
 .showcase-img {
     display: block;
     overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.03);
     background-size: cover;
-    box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.4);
+    box-shadow: inset 0 0 1px rgba(0, 0, 0, 0.4);
     padding-top: 50%; // screenshot ratio
     transition: box-shadow 0.1s;
 
     &:hover {
-        box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.4);
+        box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.4);
     }
+
+    .showcase-missing-img {
+        text-align: center;
+        margin-top: -25%;
+        line-height: 0;
+        color: #bbb;
+        font-weight: bold;
+    }
+}
+
+.showcase-description {
+    font-size: 0.9em;
 }
 
 .showcase-app {
     background: #e4ded2;
+
+    .container {
+        @include make-container-max-widths((
+            sm: 540px,
+            md: 720px,
+            lg: 960px,
+            xl: 1400px // Wider container on large screens
+        ));
+    }
 }
 
 .builtwithflarum-logo {

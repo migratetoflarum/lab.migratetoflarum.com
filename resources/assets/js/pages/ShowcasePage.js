@@ -124,7 +124,7 @@ export default {
                 }, 'opting out'),
                 '.',
             ]),
-            chunkArray(vnode.state.websites, 3).map(
+            chunkArray(vnode.state.websites, 6).map(
                 websites => m('.row', websites.map(
                     website => m('.col-md-6.col-xl-4.mb-4', m(WebsiteShowcase, {website}))
                 ))

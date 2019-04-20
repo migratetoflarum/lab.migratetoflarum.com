@@ -24,6 +24,9 @@ function countFormatting(count) {
 }
 
 export default {
+    oninit(vnode) {
+        vnode.state.showFullDescription = false;
+    },
     view(vnode) {
         const {website} = vnode.attrs;
 
@@ -36,43 +39,78 @@ export default {
             userCount = countFormatting(meta.userCount);
         }
 
-        return m('.card', [
-            website.attributes.screenshot_url ? m('a.card-img-top.showcase-img', {
+        let needForEllipsis = false;
+        let description = null;
+
+        if (meta && meta.description) {
+            const maxLength = 150;
+            needForEllipsis = meta.description.length > maxLength;
+
+            if (needForEllipsis && !vnode.state.showFullDescription) {
+                const words = meta.description.split(' ');
+
+                let lengthSoFar = 0;
+                for (let i = 0; i < words.length; i++) {
+                    lengthSoFar += words[i].length + (i === 0 ? 0 : 1); // +1 for space
+
+                    if (lengthSoFar > maxLength) {
+                        if (i === 0) {
+                            description = meta.description.slice(0, maxLength);
+                        } else {
+                            description = words.slice(0, i).join(' ');
+                        }
+                        break;
+                    }
+                }
+            } else {
+                description = meta.description;
+            }
+        }
+
+        return m('.card.h-100', [
+            m('a.card-img-top.showcase-img', {
                 href: website.attributes.canonical_url,
                 target: '_blank',
                 rel: 'nofollow noopener',
-                style: {
+                style: website.attributes.screenshot_url ? {
                     backgroundImage: 'url(' + website.attributes.screenshot_url + ')',
-                },
-            }) : null,
+                } : {},
+            }, website.attributes.screenshot_url ? null : m('.showcase-missing-img', 'No screenshot available')),
             m('.card-body', [
                 m('h5.card-title', website.attributes.name),
                 m('h6.card-subtitle', [
-                    website.attributes.canonical_url.indexOf('http://') === 0 ? [icon('lock-open', {
-                        className: 'text-danger',
-                        title: 'Website is not secured with HTTPS',
-                    }), ' '] : null,
-                    m('a', {
+                    m('a.text-muted', {
                         href: website.attributes.canonical_url,
                         target: '_blank',
                         rel: 'nofollow noopener',
                     }, website.attributes.normalized_url.replace(/\/$/, '')),
                 ]),
-                meta ? [
-                    meta.description ? m('p.mt-2', {
-                        title: 'Forum description',
-                    }, meta.description) : null,
-                    m('.row.text-center.mt-3', [
-                        meta.version ? m('.col', m(FlarumVersionString, {version: meta.version})) : null,
-                        discussionCount ? m('.col', {
-                            title: discussionCount.label,
-                        }, discussionCount.count + ' discussions') : null,
-                        userCount ? m('.col', {
-                            title: userCount.label,
-                        }, userCount.count + ' users') : null,
-                    ]),
-                ] : null,
+                description ? m('p.mt-2.showcase-description', {
+                    title: 'Forum description',
+                }, [
+                    description,
+                    needForEllipsis ? m('span.text-muted', [
+                        vnode.state.showFullDescription ? null : '...',
+                        ' ',
+                        m('a.text-muted', {
+                            href: '#',
+                            onclick(event) {
+                                event.preventDefault();
+                                vnode.state.showFullDescription = !vnode.state.showFullDescription;
+                            },
+                        }, vnode.state.showFullDescription ? 'Less' : 'More')
+                    ]) : null,
+                ]) : null,
             ]),
+            m('.card-footer', meta ? m('.row.text-center', [
+                meta.version ? m('.col', m(FlarumVersionString, {version: meta.version})) : null,
+                discussionCount ? m('.col', {
+                    title: discussionCount.label,
+                }, discussionCount.count + ' discussions') : null,
+                userCount ? m('.col', {
+                    title: userCount.label,
+                }, userCount.count + ' users') : null,
+            ]) : null),
         ]);
     }
 }
