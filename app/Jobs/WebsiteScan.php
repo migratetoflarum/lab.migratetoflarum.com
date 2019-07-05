@@ -4,6 +4,8 @@ namespace App\Jobs;
 
 use App\Beta8JavascriptFileParser;
 use App\Events\ScanUpdated;
+use App\FlarumVersion;
+use App\FlarumVersionGuesser;
 use App\JavascriptFileParser;
 use App\Report\RatingAgent;
 use App\Scan;
@@ -117,10 +119,10 @@ class WebsiteScan implements ShouldQueue
             }
         }
 
+        $flarumUrl = null;
+
         if ($homepage) {
             $homepageReport = [];
-
-            $flarumUrl = null;
 
             $homepage->filter('head link[rel="stylesheet"]')->each(function (Crawler $link) use (&$flarumUrl) {
                 $href = $link->attr('href');
@@ -134,14 +136,17 @@ class WebsiteScan implements ShouldQueue
 
             $modules = null;
             $boot = null;
-            $flarumVersion = null;
+            $flarumVersions = [];
 
-            $homepage->filter('body script')->each(function (Crawler $script) use (&$modules, &$boot, &$flarumVersion) {
+            $homepage->filter('body script')->each(function (Crawler $script) use (&$modules, &$boot, &$flarumVersions) {
                 $content = $script->text();
 
                 if (!str_contains($content, 'app.boot')) {
                     return;
                 }
+
+                $versionGuesser = new FlarumVersionGuesser();
+                $flarumVersions = $versionGuesser->guess($content);
 
                 $matches = [];
                 // Will only detect beta7 modules
@@ -149,7 +154,6 @@ class WebsiteScan implements ShouldQueue
                 if (preg_match('~var modules = (\[[^\n]+\])~', $content, $matches) === 1) {
                     $readModules = json_decode($matches[1]);
 
-                    $flarumVersion = '0.1.0-beta.7';
                     $modules = [];
 
                     if (is_array($readModules)) {
@@ -170,12 +174,6 @@ class WebsiteScan implements ShouldQueue
                     if (is_array($bootArguments)) {
                         foreach (array_get($bootArguments, 'resources', []) as $resource) {
                             if (array_get($resource, 'type') === 'forums') {
-                                if ($matches[1] === 'boot') {
-                                    $flarumVersion = '0.1.0-beta.7';
-                                } else {
-                                    $flarumVersion = '0.1.0-beta.8';
-                                }
-
                                 $boot = [
                                     'base_url' => array_get($resource, 'attributes.baseUrl'),
                                     'base_path' => array_get($resource, 'attributes.basePath'),
@@ -192,7 +190,7 @@ class WebsiteScan implements ShouldQueue
 
             $homepageReport['modules'] = $modules;
             $homepageReport['boot'] = $boot;
-            $homepageReport['version'] = $flarumVersion;
+            $homepageReport['versions'] = $flarumVersions;
 
             $maliciousAccess = [];
 
@@ -229,7 +227,7 @@ class WebsiteScan implements ShouldQueue
                     ],
                 ];
 
-                if ($flarumVersion === '0.1.0-beta.8') {
+                if (FlarumVersion::isBeta8OrAbove($flarumVersions)) {
                     $tryMaliciousAccess['storage'] = [
                         // Beta 8 paths likely to exist
                         'storage/logs/flarum-' . date('Y-m-d') . '.log',
@@ -339,7 +337,7 @@ class WebsiteScan implements ShouldQueue
 
                         $content = $this->doRequest("$safeFlarumUrl/assets/$stack-$hash.js")->getBody()->getContents();
 
-                        if ($flarumVersion === '0.1.0-beta.8') {
+                        if (FlarumVersion::isBeta8OrAbove($flarumVersions)) {
                             $javascriptParser = new Beta8JavascriptFileParser($content);
 
                             $javascriptExtensions[$stack] = [];
@@ -355,18 +353,6 @@ class WebsiteScan implements ShouldQueue
                             foreach ($javascriptParser->modules() as $module) {
                                 $javascriptModules[$stack][array_get($module, 'module')] = md5(array_get($module, 'code'));
                             }
-                        }
-                    } catch (Exception $exception) {
-                        // silence errors
-                    }
-                }
-
-                if ($flarumVersion === '0.1.0-beta.7') {
-                    try {
-                        $userRecord = \GuzzleHttp\json_decode($this->doRequest("$safeFlarumUrl/api/users/1", 'PATCH', true)->getBody()->getContents(), true);
-
-                        if (array_has($userRecord, 'data.attributes.email')) {
-                            $vulnerabilities[] = 'beta7.user-update-leak';
                         }
                     } catch (Exception $exception) {
                         // silence errors

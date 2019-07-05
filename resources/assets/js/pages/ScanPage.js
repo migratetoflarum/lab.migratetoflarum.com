@@ -130,25 +130,28 @@ export default {
 
         let suggestions = [];
 
+        const versions = reportKey('homepage.versions', []);
+        const version = reportKey('homepage.version');
+
+        if (version) {
+            versions.push(version);
+        }
+
+        if (versions.some(v => v === '0.1.0-beta.7' || v === '0.1.0-beta.8')) {
+            suggestions.push({
+                danger: true,
+                title: 'Security vulnerability',
+                suggest: [
+                    'The forum is running a vulnerable Flarum version. ',
+                    versions.some(v => v === '0.1.0-beta.7') ? 'Beta 7 was affected by a user details exposure. ' : '',
+                    'Beta 8 and earlier were affected by a CSRF bypass issue. ',
+                    'Update to beta 9 to fix those issues',
+                ],
+            });
+        }
+
         reportKey('vulnerabilities', []).forEach(vulnerability => {
             switch (vulnerability) {
-                case 'beta7.user-update-leak':
-                    suggestions.push({
-                        danger: true,
-                        title: 'Security vulnerability',
-                        suggest: [
-                            'Your version of Flarum contains a security vulnerability discovered on November 9, 2018. ',
-                            'When exploited, the vulnerability allows an attacker to gain access to private user details. ',
-                            'Update to Flarum beta 7.2 as soon as possible to fix the issue. ',
-                            m('a', {
-                                href: 'https://discuss.flarum.org/d/17496-flarum-0-1-0-beta-7-2-released',
-                                target: '_blank',
-                                rel: 'nofollow noopener',
-                            }, 'Click here to see the official message and upgrade instructions'),
-                            '.',
-                        ],
-                    });
-                    break;
                 case 'insecure-public-folder':
                     suggestions.push({
                         title: 'Insecure public folder',
@@ -309,11 +312,12 @@ export default {
                             ]),
                             m('h3.card-title', 'Details'),
                             m('p', 'Scan performed on ' + moment(scan.attributes.scanned_at).format('YYYY-MM-DD HH:mm:ss')),
-                            m('p', 'Visibility: ' + (website.attributes.ignore ? 'This website has opted out and won\'t be visible on the homepage' : (scan.attributes.hidden ? 'this scan won\'t show up on the homepage' : 'this scan might show up on the homepage' ))),
+                            m('p', 'Visibility: ' + (website.attributes.ignore ? 'This website has opted out and won\'t be visible on the homepage' : (scan.attributes.hidden ? 'this scan won\'t show up on the homepage' : 'this scan might show up on the homepage'))),
                             m('p', [
                                 'Flarum version: ',
                                 m(FlarumVersionString, {
-                                    version: reportKey('homepage.version'),
+                                    versions: reportKey('homepage.versions'),
+                                    version: reportKey('homepage.version'), // Backward compatibility
                                 }),
                             ]),
                         ]),

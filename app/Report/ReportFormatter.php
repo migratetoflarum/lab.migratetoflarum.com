@@ -27,8 +27,8 @@ class ReportFormatter implements Arrayable
         }
 
         // We know Discuss will always run dev-master
-        if (array_get($this->report, 'base_address') === 'discuss.flarum.org/' && array_has($this->report, 'homepage.version')) {
-            $this->report['homepage']['version'] = 'dev-master';
+        if (array_get($this->report, 'base_address') === 'discuss.flarum.org/' && array_has($this->report, 'homepage.versions')) {
+            $this->report['homepage']['versions'] = ['dev-master'];
         }
 
         return $this->report + [

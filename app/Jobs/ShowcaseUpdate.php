@@ -83,6 +83,7 @@ class ShowcaseUpdate implements ShouldQueue
             $this->website->name = $title;
         }
         $this->website->showcase_meta = [
+            // TODO: we can no longer tell version from /api query alone. No difference between beta 8 and 9 there
             'version' => $forum ? '0.1.0-beta.8' : '0.1.0-beta.7',
             'description' => $description ?: null,
             'discussionCount' => $discussionCount,

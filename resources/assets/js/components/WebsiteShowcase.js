@@ -103,7 +103,7 @@ export default {
                 ]) : null,
             ]),
             m('.card-footer', meta ? m('.row.text-center', [
-                meta.version ? m('.col', m(FlarumVersionString, {version: meta.version})) : null,
+                meta.version ? m('.col', m(FlarumVersionString, {versions: [meta.version]})) : null,
                 discussionCount ? m('.col', {
                     title: discussionCount.label,
                 }, discussionCount.count + ' discussions') : null,

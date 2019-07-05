@@ -159,6 +159,22 @@ class RatingTest extends TestCase
                 ],
             ],
         ]), 'D');
+
+        $this->assertReportRating($this->alterGoodReport([
+            'homepage' => [
+                'versions' => [
+                    '0.1.0-beta.7',
+                ],
+            ],
+        ]), 'D');
+
+        $this->assertReportRating($this->alterGoodReport([
+            'homepage' => [
+                'versions' => [
+                    '0.1.0-beta.8',
+                ],
+            ],
+        ]), 'D');
     }
 
     public function testHttpErrors()

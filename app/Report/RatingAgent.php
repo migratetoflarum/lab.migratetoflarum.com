@@ -2,6 +2,7 @@
 
 namespace App\Report;
 
+use App\FlarumVersion;
 use App\Scan;
 
 class RatingAgent
@@ -35,8 +36,15 @@ class RatingAgent
             ],
             [
                 'cap' => 'D',
-                'description' => 'Is exposing sensitive or untrusted files',
+                'description' => 'Suffers from security vulnerabilities',
                 'check' => function (Scan $scan): bool {
+                    $versions = array_get($scan->report, 'homepage.versions', []);
+
+                    if (in_array(FlarumVersion::BETA_7, $versions) || in_array(FlarumVersion::BETA_8, $versions)) {
+                        return true;
+                    }
+
+
                     if (array_has($scan->report, 'vulnerabilities') && count(array_get($scan->report, 'vulnerabilities')) > 0) {
                         return true;
                     }

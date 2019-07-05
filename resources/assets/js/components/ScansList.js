@@ -28,7 +28,8 @@ export default {
                     ]),
                     m('.text-muted', [
                         m(FlarumVersionString, {
-                            version: getObjectKey(scan, 'attributes.report.homepage.version'),
+                            versions: getObjectKey(scan, 'attributes.report.homepage.versions'),
+                            version: getObjectKey(scan, 'attributes.report.homepage.version'), // Backward compatibility
                         }),
                         ' - ',
                         (scan.relationships.extensions ? scan.relationships.extensions.data.length : '?') + ' extensions',
