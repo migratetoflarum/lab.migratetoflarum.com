@@ -5,7 +5,7 @@ return [
     'website_opt_out_wait' => env('SCANNER_OPT_OUT_WAIT', 5), // minutes
     'show_recent_count' => env('SCANNER_SHOW_RECENT', 5),
     'show_best_count' => env('SCANNER_SHOW_BEST', 5),
-    'keep_max_response_body_size' => env('SCANNER_KEEP_RESPONSE_SIZE', 50000),
+    'keep_max_response_body_size' => env('SCANNER_KEEP_RESPONSE_SIZE', 500000), // chars
     'extension_versions_cache' => env('SCANNER_EXTENSION_VERSIONS_CACHE', 1440), // minutes
     'rating_cache' => env('SCANNER_RATING_CACHE', 1440), // minutes
     'best_scans_cache' => env('SCANNER_BEST_SCANS_CACHE', 720), // minutes

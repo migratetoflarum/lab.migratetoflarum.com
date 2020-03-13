@@ -4,7 +4,16 @@ import icon from '../helpers/icon';
 import link from '../helpers/link';
 import Rating from './Rating';
 import FlarumVersionString from './FlarumVersionString';
-import getObjectKey from '../helpers/getObjectKey';
+
+function getVersions(scan) {
+    const task = scan.relationships.tasks && scan.relationships.tasks.data.find(t => t.attributes.job === 'ScanHomePage');
+
+    if (task && task.attributes.data.versions) {
+        return task.attributes.data.versions;
+    }
+
+    return [];
+}
 
 export default {
     view(vnode) {
@@ -28,8 +37,7 @@ export default {
                     ]),
                     m('.text-muted', [
                         m(FlarumVersionString, {
-                            versions: getObjectKey(scan, 'attributes.report.homepage.versions'),
-                            version: getObjectKey(scan, 'attributes.report.homepage.version'), // Backward compatibility
+                            versions: getVersions(scan),
                         }),
                         ' - ',
                         (scan.relationships.extensions ? scan.relationships.extensions.data.length : '?') + ' extensions',

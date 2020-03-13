@@ -2,9 +2,15 @@
 
 namespace Tests\Unit;
 
+use App\Jobs\ScanAlternateUrlsAndHeaders;
+use App\Jobs\ScanExposedFiles;
+use App\Jobs\ScanHomePage;
+use App\Jobs\ScanResolveCanonical;
 use App\Report\RatingAgent;
 use App\Scan;
+use App\Task;
 use App\Website;
+use Illuminate\Support\Arr;
 use Tests\TestCase;
 
 class RatingTest extends TestCase
@@ -12,7 +18,7 @@ class RatingTest extends TestCase
     protected function alterGoodReport(array $report = []): array
     {
         return array_replace_recursive([
-            'urls' => [
+            ScanAlternateUrlsAndHeaders::class => [
                 'www-http' => [
                     'type' => 'redirect',
                     'status' => 301,
@@ -44,22 +50,18 @@ class RatingTest extends TestCase
                         'Server' => ['test'],
                     ],
                 ],
+                'multipleUrls' => false,
+                'wwwShouldWork' => true,
             ],
-            'homepage' => [
-                'boot' => [
-                    'debug' => false,
-                    'title' => 'Test Forum',
-                    'base_url' => 'https://example.com',
-                ],
-                'modules' => [
-                    'locale',
-                    'flarum/tags/main',
-                ],
+            ScanHomePage::class => [
+                'debug' => false,
+                'bootTitle' => 'Test Forum',
+                'bootBaseUrl' => 'https://example.com',
             ],
-            'base_address' => 'example.com/',
-            'canonical_url' => 'https://example.com',
-            'multiple_urls' => false,
-            'malicious_access' => [
+            ScanResolveCanonical::class => [
+                'destinationUrl' => 'https://example.com'
+            ],
+            ScanExposedFiles::class => [
                 'vendor' => [
                     'access' => false,
                     'urls' => [],
@@ -79,7 +81,16 @@ class RatingTest extends TestCase
         ], $report);
     }
 
-    protected function assertReportRating(array $report = null, string $rating, string $url = 'example.com/')
+    protected function createTaskFromArray(string $job, array $report)
+    {
+        $task = new Task();
+        $task->job = $job;
+        $task->data = Arr::get($report, $job);
+
+        return $task;
+    }
+
+    protected function assertReportRating(array $report, string $rating, string $url = 'example.com/')
     {
         $website = new Website();
         $website->normalized_url = $url;
@@ -88,7 +99,12 @@ class RatingTest extends TestCase
         $scan->report = $report;
         $scan->website()->associate($website);
 
-        $agent = new RatingAgent($scan);
+        $agent = new RatingAgent(
+            $this->createTaskFromArray(ScanResolveCanonical::class, $report),
+            $this->createTaskFromArray(ScanHomePage::class, $report),
+            $this->createTaskFromArray(ScanAlternateUrlsAndHeaders::class, $report),
+            $this->createTaskFromArray(ScanExposedFiles::class, $report)
+        );
         $agent->rate();
 
         try {
@@ -100,44 +116,11 @@ class RatingTest extends TestCase
         }
     }
 
-    public function testIncomplete()
-    {
-        $this->assertReportRating(null, '-');
-    }
-
-    public function testNotFlarum()
-    {
-        $this->assertReportRating($this->alterGoodReport([
-            'homepage' => [
-                'boot' => null,
-            ],
-        ]), '-');
-    }
-
     public function testInsecure()
     {
-        // These are tests for the old syntax that used a single boolean value
-        $this->assertReportRating($this->alterGoodReport([
-            'malicious_access' => [
-                'vendor' => true,
-            ],
-        ]), 'D');
-
-        $this->assertReportRating($this->alterGoodReport([
-            'malicious_access' => [
-                'storage' => true,
-            ],
-        ]), 'D');
-
-        $this->assertReportRating($this->alterGoodReport([
-            'malicious_access' => [
-                'composer' => true,
-            ],
-        ]), 'D');
-
         // These are the tests for the current syntax with more details
         $this->assertReportRating($this->alterGoodReport([
-            'malicious_access' => [
+            ScanExposedFiles::class => [
                 'vendor' => [
                     'access' => true,
                 ],
@@ -145,7 +128,7 @@ class RatingTest extends TestCase
         ]), 'D');
 
         $this->assertReportRating($this->alterGoodReport([
-            'malicious_access' => [
+            ScanExposedFiles::class => [
                 'storage' => [
                     'access' => true,
                 ],
@@ -153,7 +136,7 @@ class RatingTest extends TestCase
         ]), 'D');
 
         $this->assertReportRating($this->alterGoodReport([
-            'malicious_access' => [
+            ScanExposedFiles::class => [
                 'composer' => [
                     'access' => true,
                 ],
@@ -161,7 +144,7 @@ class RatingTest extends TestCase
         ]), 'D');
 
         $this->assertReportRating($this->alterGoodReport([
-            'homepage' => [
+            ScanHomePage::class => [
                 'versions' => [
                     '0.1.0-beta.7',
                 ],
@@ -169,7 +152,7 @@ class RatingTest extends TestCase
         ]), 'D');
 
         $this->assertReportRating($this->alterGoodReport([
-            'homepage' => [
+            ScanHomePage::class => [
                 'versions' => [
                     '0.1.0-beta.8',
                 ],
@@ -180,7 +163,7 @@ class RatingTest extends TestCase
     public function testHttpErrors()
     {
         $this->assertReportRating($this->alterGoodReport([
-            'urls' => [
+            ScanAlternateUrlsAndHeaders::class => [
                 'apex-http' => [
                     'type' => 'error',
                 ],
@@ -188,7 +171,7 @@ class RatingTest extends TestCase
         ]), 'B');
 
         $this->assertReportRating($this->alterGoodReport([
-            'urls' => [
+            ScanAlternateUrlsAndHeaders::class => [
                 'www-https' => [
                     'type' => 'error',
                 ],
@@ -197,31 +180,27 @@ class RatingTest extends TestCase
 
         // Error at 4th level shouldn't count when subdomain
         $this->assertReportRating($this->alterGoodReport([
-            'urls' => [
+            ScanAlternateUrlsAndHeaders::class => [
                 'www-https' => [
                     'type' => 'error',
                 ],
+                'wwwShouldWork' => false,
             ],
         ]), 'A', 'forum.example.com/');
 
         // Should still count if canonical
         $this->assertReportRating($this->alterGoodReport([
-            'urls' => [
+            ScanAlternateUrlsAndHeaders::class => [
                 'www-http' => [
                     'type' => 'error',
                 ],
-            ],
-            'canonical_url' => 'https://www.forum.example.com',
-            'homepage' => [
-                'boot' => [
-                    'base_url' => 'https://www.forum.example.com',
-                ],
+                'wwwShouldWork' => true,
             ],
         ]), 'B', 'forum.example.com/');
 
         // Should still count if it's not a subdomain
         $this->assertReportRating($this->alterGoodReport([
-            'urls' => [
+            ScanAlternateUrlsAndHeaders::class => [
                 'www-https' => [
                     'type' => 'error',
                 ],
@@ -232,7 +211,7 @@ class RatingTest extends TestCase
     public function testBadRedirects()
     {
         $this->assertReportRating($this->alterGoodReport([
-            'urls' => [
+            ScanAlternateUrlsAndHeaders::class => [
                 'www-http' => [
                     'status' => 302,
                 ],
@@ -240,7 +219,7 @@ class RatingTest extends TestCase
         ]), 'B');
 
         $this->assertReportRating($this->alterGoodReport([
-            'urls' => [
+            ScanAlternateUrlsAndHeaders::class => [
                 'www-https' => [
                     'redirect_to' => 'http://example.com',
                 ],
@@ -251,10 +230,8 @@ class RatingTest extends TestCase
     public function testGoodReportWithDebug()
     {
         $this->assertReportRating($this->alterGoodReport([
-            'homepage' => [
-                'boot' => [
-                    'debug' => true,
-                ],
+            ScanHomePage::class => [
+                'debug' => true,
             ],
         ]), 'A-');
     }
@@ -268,7 +245,7 @@ class RatingTest extends TestCase
     {
         // 7 days
         $this->assertReportRating($this->alterGoodReport([
-            'urls' => [
+            ScanAlternateUrlsAndHeaders::class => [
                 'www-https' => [
                     'headers' => [
                         'Strict-Transport-Security' => ['max-age=604800; includeSubDomains; preload'],
@@ -284,7 +261,7 @@ class RatingTest extends TestCase
 
         // 6 months
         $this->assertReportRating($this->alterGoodReport([
-            'urls' => [
+            ScanAlternateUrlsAndHeaders::class => [
                 'www-https' => [
                     'headers' => [
                         'Strict-Transport-Security' => ['max-age=15552000; includeSubDomains; preload'],
@@ -300,7 +277,7 @@ class RatingTest extends TestCase
 
         // 12 months
         $this->assertReportRating($this->alterGoodReport([
-            'urls' => [
+            ScanAlternateUrlsAndHeaders::class => [
                 'www-https' => [
                     'headers' => [
                         'Strict-Transport-Security' => ['max-age=31536000; includeSubDomains; preload'],

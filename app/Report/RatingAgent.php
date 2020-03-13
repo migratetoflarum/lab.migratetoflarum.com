@@ -3,60 +3,50 @@
 namespace App\Report;
 
 use App\FlarumVersion;
-use App\Scan;
+use App\Task;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 class RatingAgent
 {
-    protected $scan;
+    protected $canonical;
+    protected $homepage;
+    protected $alternate;
+    protected $exposed;
 
     public $rating = '-';
     public $importantRules = [];
 
-    public function __construct(Scan $scan)
+    public function __construct(Task $canonical, Task $homepage, Task $alternate, Task $exposed)
     {
-        $this->scan = $scan;
-    }
-
-    protected function shouldExpectWwwToWork(Scan $scan): bool
-    {
-        $wwwIsCanonical = starts_with(array_get($scan->report, 'canonical_url'), ['https://www.', 'http://www.']);
-
-        return array_has($scan->report, 'urls.www-http') && ($wwwIsCanonical || $scan->website->is_apex);
+        $this->canonical = $canonical;
+        $this->homepage = $homepage;
+        $this->alternate = $alternate;
+        $this->exposed = $exposed;
     }
 
     public function rate()
     {
         $rules = [
             [
-                'cap' => '-',
-                'description' => 'Is not a Flarum install',
-                'check' => function (Scan $scan): bool {
-                    return is_null($scan->report) || !array_get($scan->report, 'homepage.boot.base_url');
-                },
-            ],
-            [
                 'cap' => 'D',
-                'description' => 'Suffers from security vulnerabilities',
-                'check' => function (Scan $scan): bool {
-                    $versions = array_get($scan->report, 'homepage.versions', []);
+                'description' => 'Vulnerable Flarum version',
+                'check' => function (): bool {
+                    $versions = $this->homepage->getData('versions', []);
 
                     if (in_array(FlarumVersion::BETA_7, $versions) || in_array(FlarumVersion::BETA_8, $versions)) {
                         return true;
                     }
 
-
-                    if (array_has($scan->report, 'vulnerabilities') && count(array_get($scan->report, 'vulnerabilities')) > 0) {
-                        return true;
-                    }
-
+                    return false;
+                },
+            ],
+            [
+                'cap' => 'D',
+                'description' => 'Misconfiguration of server paths',
+                'check' => function (): bool {
                     foreach (['vendor', 'storage', 'composer'] as $access) {
-                        // Old format
-                        if (array_get($scan->report, "malicious_access.$access") === true) {
-                            return true;
-                        }
-
-                        // Current format
-                        if (array_get($scan->report, "malicious_access.$access.access") === true) {
+                        if ($this->exposed->getData("$access.access") === true) {
                             return true;
                         }
                     }
@@ -67,24 +57,24 @@ class RatingAgent
             [
                 'cap' => 'C',
                 'description' => 'Is answering on HTTP instead of redirecting',
-                'check' => function (Scan $scan): bool {
-                    return array_get($scan->report, 'urls.apex-http.type') === 'ok' ||
-                        array_get($scan->report, 'urls.www-http.type') === 'ok';
+                'check' => function (): bool {
+                    return $this->alternate->getData('apex-http.type') === 'ok' ||
+                        $this->alternate->getData('www-http.type') === 'ok';
                 },
             ],
             [
                 'cap' => 'C',
                 'description' => 'Is answering on multiple urls',
-                'check' => function (Scan $scan): bool {
-                    return !!array_get($scan->report, 'multiple_urls');
+                'check' => function (): bool {
+                    return !!$this->alternate->getData('multipleUrls');
                 },
             ],
             [
                 'cap' => 'C',
                 'description' => 'Is using an invalid base url',
-                'check' => function (Scan $scan): bool {
-                    $baseUrl = array_get($scan->report, 'homepage.boot.base_url');
-                    $expectedBaseUrl = rtrim(array_get($scan->report, 'canonical_url'), '/');
+                'check' => function (): bool {
+                    $baseUrl = $this->homepage->getData('bootBaseUrl');
+                    $expectedBaseUrl = rtrim($this->canonical->getData('destinationUrl'), '/');
 
                     return $baseUrl !== $expectedBaseUrl;
                 },
@@ -92,19 +82,19 @@ class RatingAgent
             [
                 'cap' => 'B',
                 'description' => 'Is using non-permanent redirects',
-                'check' => function (Scan $scan): bool {
-                    return array_get($scan->report, 'urls.apex-http.status') !== 301 ||
-                        ($this->shouldExpectWwwToWork($scan) && array_get($scan->report, 'urls.www-http.status') !== 301);
+                'check' => function (): bool {
+                    return $this->alternate->getData('apex-http.status') !== 301 ||
+                        ($this->alternate->getData('wwwShouldWork') && $this->alternate->getData('www-http.status') !== 301);
                 },
             ],
             [
                 'cap' => 'B',
                 'description' => 'Is redirecting from https to http',
-                'check' => function (Scan $scan): bool {
+                'check' => function (): bool {
                     foreach (['www', 'apex'] as $domain) {
-                        $redirect = array_get($scan->report, "urls.$domain-https.redirect_to");
+                        $redirect = $this->alternate->getData("$domain-https.redirect_to");
 
-                        if ($redirect && starts_with($redirect, 'http://')) {
+                        if ($redirect && Str::startsWith($redirect, 'http://')) {
                             return true;
                         }
                     }
@@ -115,16 +105,16 @@ class RatingAgent
             [
                 'cap' => 'B',
                 'description' => 'Some urls are returning errors',
-                'check' => function (Scan $scan): bool {
+                'check' => function (): bool {
                     $domains = ['apex'];
 
-                    if ($this->shouldExpectWwwToWork($scan)) {
+                    if ($this->alternate->getData('wwwShouldWork')) {
                         $domains[] = 'www';
                     }
 
                     foreach ($domains as $domain) {
                         foreach (['http', 'https'] as $proto) {
-                            if (array_get($scan->report, "urls.$domain-$proto.type") === 'error') {
+                            if ($this->alternate->getData("$domain-$proto.type") === 'error') {
                                 return true;
                             }
                         }
@@ -136,22 +126,22 @@ class RatingAgent
             [
                 'bonus' => '-',
                 'description' => 'Debug mode is on',
-                'check' => function (Scan $scan): bool {
-                    return array_get($scan->report, "homepage.boot.debug") === true;
+                'check' => function (): bool {
+                    return $this->homepage->getData('debug') === true;
                 },
             ],
             [
                 'bonus' => '+',
                 'description' => 'Is using HSTS with a max-age of 6 months or more',
-                'check' => function (Scan $scan): bool {
+                'check' => function (): bool {
                     $domains = ['apex'];
 
-                    if ($this->shouldExpectWwwToWork($scan)) {
+                    if ($this->alternate->getData('wwwShouldWork')) {
                         $domains[] = 'www';
                     }
 
                     foreach ($domains as $domain) {
-                        $hsts = array_get($scan->report, "urls.$domain-https.headers.Strict-Transport-Security");
+                        $hsts = $this->alternate->getData("$domain-https.headers.Strict-Transport-Security");
 
                         if (!is_array($hsts)) {
                             return false;
@@ -175,14 +165,9 @@ class RatingAgent
             ],
         ];
 
-        $matched = array_filter($rules, function (array $rule, int $key): bool {
-            // Only try the first rule if there is no report
-            if (is_null($this->scan->report) && $key > 0) {
-                return false;
-            }
-
-            return array_get($rule, 'check')($this->scan);
-        }, ARRAY_FILTER_USE_BOTH);
+        $matched = array_filter($rules, function (array $rule): bool {
+            return call_user_func(Arr::get($rule, 'check'));
+        });
 
         $rating = 'A';
         $bonus = '';
@@ -196,16 +181,16 @@ class RatingAgent
         ];
 
         foreach ($matched as $rule) {
-            if ($cap = array_get($rule, 'cap')) {
-                $newGrade = array_get($grades, $cap);
-                $currentGrade = array_get($grades, $rating);
+            if ($cap = Arr::get($rule, 'cap')) {
+                $newGrade = Arr::get($grades, $cap);
+                $currentGrade = Arr::get($grades, $rating);
 
                 if ($newGrade < $currentGrade) {
                     $rating = $cap;
                 }
             }
 
-            if ($bonus !== '-' && $newBonus = array_get($rule, 'bonus')) {
+            if ($bonus !== '-' && $newBonus = Arr::get($rule, 'bonus')) {
                 $bonus = $newBonus;
             }
         }
@@ -223,13 +208,13 @@ class RatingAgent
         $this->rating = $rating . $bonus;
 
         $this->importantRules = array_values(array_map(function (array $rule): array {
-            return array_only($rule, [
+            return Arr::only($rule, [
                 'description',
                 'cap',
                 'bonus',
             ]);
         }, array_filter($matched, function (array $rule) use ($rating, $bonus): bool {
-            return array_get($rule, 'cap') === $rating || array_get($rule, 'bonus') === $bonus;
+            return Arr::get($rule, 'cap') === $rating || Arr::get($rule, 'bonus') === $bonus;
         })));
     }
 }

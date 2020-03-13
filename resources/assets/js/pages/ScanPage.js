@@ -11,6 +11,7 @@ import Rating from '../components/Rating';
 import RequestsReport from '../components/RequestsReport';
 import getObjectKey from '../helpers/getObjectKey';
 import FlarumVersionString from '../components/FlarumVersionString';
+import TasksReport from '../components/TasksReport';
 
 export default {
     oninit(vnode) {
@@ -18,6 +19,8 @@ export default {
         vnode.state.found = true;
         vnode.state.loading = false;
         vnode.state.listening = false;
+        vnode.state.tasks = [];
+        vnode.state.requests = [];
 
         function fetchScanData() {
             m.request({
@@ -32,14 +35,19 @@ export default {
             });
         }
 
-        function makeRawReportAccessibleInBrowser() {
-            window.flarumLabReport = Store.get('scans', vnode.state.scanId)
+        function loadScanRelationships() {
+            const scan = Store.get('scans', vnode.state.scanId);
+
+            window.flarumLabReport = scan;
+
+            vnode.state.tasks = scan.relationships.tasks.data;
+            vnode.state.requests = scan.relationships.requests.data;
         }
 
         function listenForScanUpdate() {
             const scan = Store.get('scans', vnode.state.scanId);
 
-            makeRawReportAccessibleInBrowser();
+            loadScanRelationships();
 
             if (!vnode.state.listening && !scan.attributes.scanned_at) {
                 vnode.state.listening = true;
@@ -48,12 +56,62 @@ export default {
                     if (data.type === 'scans' && data.id === vnode.state.scanId) {
                         Store.load(data);
 
-                        makeRawReportAccessibleInBrowser();
+                        loadScanRelationships();
 
                         m.redraw();
 
                         // Fetch full data
                         fetchScanData();
+
+                        return;
+                    }
+
+                    alert('An error occurred with the sockets !');
+
+                    console.error(data);
+                });
+
+                window.Echo.channel('scans.' + scan.id).listen('TaskUpdated', data => {
+                    if (data.type === 'tasks') {
+                        const taskIndex = vnode.state.tasks.findIndex(t => t.id === data.id);
+
+                        if (taskIndex !== -1) {
+                            vnode.state.tasks[taskIndex] = data;
+                        } else {
+                            vnode.state.tasks.push(data);
+                        }
+
+                        m.redraw();
+
+                        return;
+                    }
+
+                    alert('An error occurred with the sockets !');
+
+                    console.error(data);
+                });
+
+                window.Echo.channel('scans.' + scan.id).listen('TaskLog', data => {
+                    const task = vnode.state.tasks.find(t => t.id === data.task_id);
+
+                    if (task) {
+                        if (!task.attributes.public_log) {
+                            task.attributes.public_log = '';
+                        }
+
+                        task.attributes.public_log += '\n[' + data.time + '] ' + data.message;
+
+                        m.redraw();
+                    }
+
+                    console.warn('Received task log for unknown task ' + data.task_id);
+                });
+
+                window.Echo.channel('scans.' + scan.id).listen('RequestUpdated', data => {
+                    if (data.type === 'requests') {
+                        vnode.state.requests.push(data);
+
+                        m.redraw();
 
                         return;
                     }
@@ -86,24 +144,27 @@ export default {
         }
 
         if (!scan.attributes.scanned_at) {
-            return m(LoadingScreen, {
-                text: 'Scan in progress...',
-            });
+            return m('div', [
+                m(TasksReport, {
+                    tasks: vnode.state.tasks,
+                }),
+                m(RequestsReport, {
+                    requests: vnode.state.requests,
+                }),
+                m(LoadingScreen, {
+                    text: 'Scan in progress...',
+                }),
+            ]);
         }
 
-        // If scanned_at is set but report is null it means part of the data was sent over socket
-        // and the report is now being fetched via the API
-        if (scan.attributes.report === null) {
-            return m(LoadingScreen, {
-                text: 'Loading report...',
-            });
+        if (scan.attributes.scanned_at && vnode.state.tasks.length === 0) {
+            return m('div', [
+                m('.alert.alert-info', 'You are looking at a report created before march 2020. Only the raw data can still be accessed'),
+                m('details', m('pre', JSON.stringify(scan.attributes.report, null, 4))),
+            ]);
         }
 
-        function reportKey(key, defaultValue = null) {
-            return getObjectKey(scan, 'attributes.report.' + key, defaultValue);
-        }
-
-        if (scan.attributes.report.failed) {
+        if (scan.attributes.report && scan.attributes.report.failed) {
             return [
                 m('.alert.alert-danger.my-5.py-5.text-center', [
                     m('p', m('strong', 'An error occured while performing this scan :(')),
@@ -123,19 +184,44 @@ export default {
                 ]),
                 m('p', 'The following requests were made before the scan failed:'),
                 m(RequestsReport, {
-                    requests: reportKey('requests', []),
+                    requests: vnode.state.requests,
                 }),
             ];
         }
 
         let suggestions = [];
 
-        const versions = reportKey('homepage.versions', []);
-        const version = reportKey('homepage.version');
+        const tasksKeyedByJob = {};
+        let hasFailedTasks = false;
 
-        if (version) {
-            versions.push(version);
+        vnode.state.tasks.forEach(task => {
+            tasksKeyedByJob[task.attributes.job] = task;
+
+            if (!hasFailedTasks && task.attributes.failed_at) {
+                hasFailedTasks = true;
+                suggestions.push({
+                    danger: true,
+                    title: 'Scan failed',
+                    suggest: [
+                        'One or more background tasks failed. The scan might be incomplete.',
+                    ],
+                });
+            }
+        });
+
+        function reportKey(job, key, defaultValue = null) {
+            const task = tasksKeyedByJob[job];
+
+            if (!task) {
+                console.warn('Trying to access unknown job ' + job);
+
+                return defaultValue;
+            }
+
+            return getObjectKey(task.attributes.data, key, defaultValue);
         }
+
+        const versions = reportKey('ScanHomePage', 'versions', []);
 
         if (versions.some(v => v === '0.1.0-beta.7' || v === '0.1.0-beta.8')) {
             suggestions.push({
@@ -150,7 +236,7 @@ export default {
             });
         }
 
-        reportKey('vulnerabilities', []).forEach(vulnerability => {
+        reportKey('ScanExposedFiles', 'vulnerabilities', []).forEach(vulnerability => {
             switch (vulnerability) {
                 case 'insecure-public-folder':
                     suggestions.push({
@@ -171,7 +257,7 @@ export default {
             }
         });
 
-        if (reportKey('malicious_access.vendor.access') === true) {
+        if (reportKey('ScanExposedFiles', 'vendor.access') === true) {
             suggestions.push({
                 danger: true,
                 title: 'Vendor folder',
@@ -183,7 +269,7 @@ export default {
             });
         }
 
-        if (reportKey('malicious_access.storage.access') === true) {
+        if (reportKey('ScanExposedFiles', 'storage.access') === true) {
             suggestions.push({
                 danger: true,
                 title: 'Storage folder',
@@ -195,7 +281,7 @@ export default {
             });
         }
 
-        if (reportKey('malicious_access.composer.access') === true) {
+        if (reportKey('ScanExposedFiles', 'composer.access') === true) {
             suggestions.push({
                 danger: true,
                 title: 'Composer files',
@@ -207,9 +293,7 @@ export default {
             });
         }
 
-        const urls = reportKey('urls', {});
-
-        if (Object.keys(urls).some(key => key.split('-')[1] === 'http' && urls[key].type === 'ok')) {
+        if (['www-http', 'apex-http'].some(key => reportKey('ScanAlternateUrlsAndHeaders', key, {}).type === 'ok')) {
             suggestions.push({
                 title: 'HTTP',
                 suggest: [
@@ -219,16 +303,16 @@ export default {
             });
         }
 
-        const expectedBaseUrl = (reportKey('canonical_url') || '').replace(/\/$/, '');
-        const baseUrl = reportKey('homepage.boot.base_url');
+        const expectedBaseUrl = (reportKey('ScanResolveCanonical', 'destinationUrl') || '').replace(/\/$/, '');
+        const baseUrl = reportKey('ScanHomePage', 'bootBaseUrl');
 
-        if (reportKey('multiple_urls') === true) {
+        if (reportKey('ScanAlternateUrlsAndHeaders', 'multipleUrls') === true) {
             suggestions.push({
                 title: 'Multiple urls',
                 suggest: [
                     'This Flarum is accepting connections via multiple urls which will result in an invalid config.url value being used for some of them. ',
                     'This will also impact your search engine ranking by creating duplicate content. ',
-                    'Setup redirects so only the url defined in your config.php (' + reportKey('homepage.boot.base_url') + ') can be used to access the forum to fix it.',
+                    'Setup redirects so only the url defined in your config.php (' + baseUrl + ') can be used to access the forum to fix it.',
                 ],
             });
         } else if (baseUrl && expectedBaseUrl !== baseUrl) {
@@ -237,7 +321,7 @@ export default {
                 suggest: [
                     'The config.php url setting of your Flarum does not match the canonical url used to access it. ',
                     'This will prevent Flarum from loading and working correctly. ',
-                    'Set the url setting in your config.php to "' + expectedBaseUrl + '" to fix this (currently set to "' + reportKey('homepage.boot.base_url') + '").',
+                    'Set the url setting in your config.php to "' + expectedBaseUrl + '" to fix this (currently set to "' + baseUrl + '").',
                 ],
             });
         }
@@ -277,7 +361,7 @@ export default {
                         });
                     },
                 }, 'Scan again'),
-                m('h1', 'Report for ' + (reportKey('canonical_url') || website.attributes.normalized_url)),
+                m('h1', 'Report for ' + (reportKey('ScanResolveCanonical', 'normalizedUrl') || website.attributes.normalized_url)),
             ]),
             suggestions.map(
                 suggestion => m('.alert', {
@@ -295,11 +379,11 @@ export default {
                             m('.row.ScanRatingDetails', [
                                 m('.col-md-2.text-center', [
                                     m(Rating, {
-                                        rating: scan.attributes.rating,
+                                        rating: reportKey('ScanRate', 'rating'),
                                     }),
                                 ]),
                                 m('.col-md-10', [
-                                    m('ul.list-group.list-group-flush', scan.attributes.rating_rules.map(
+                                    m('ul.list-group.list-group-flush', reportKey('ScanRate', 'criteria', []).map(
                                         rule => m('li.list-group-item', [
                                             (rule.cap ? (rule.cap === '-' ? 'Not rating' : 'Capped to ' + rule.cap) : ''),
                                             (rule.bonus === '+' ? 'Bonus' : ''),
@@ -316,8 +400,7 @@ export default {
                             m('p', [
                                 'Flarum version: ',
                                 m(FlarumVersionString, {
-                                    versions: reportKey('homepage.versions'),
-                                    version: reportKey('homepage.version'), // Backward compatibility
+                                    versions: reportKey('ScanHomePage', 'versions'),
                                 }),
                             ]),
                         ]),
@@ -325,15 +408,15 @@ export default {
                     m('.card.mt-3', [
                         m('.card-body', [
                             m('h2.card-title', 'Canonical url'),
-                            (reportKey('multiple_urls') ? [
+                            reportKey('ScanAlternateUrlsAndHeaders', 'multipleUrls') ? [
                                 m('.alert.alert-warning', m('p', 'Your forum is answering to multiple urls. Set redirects to a single canonical url. Assets won\'t load correctly on the non-canonical domains')),
                             ] : [
                                 m('p', ['The forum canonical url is ', m('a', {
-                                    href: reportKey('canonical_url'),
+                                    href: expectedBaseUrl,
                                     target: '_blank',
                                     rel: 'nofollow noopener',
-                                }, reportKey('canonical_url'))]),
-                            ]),
+                                }, expectedBaseUrl)]),
+                            ],
                             (baseUrl ? [
                                 m('p', ['config.url is ', m('code', baseUrl)]),
                             ] : [
@@ -342,15 +425,15 @@ export default {
                             m('.list-group', [
                                 m(DomainReport, {
                                     website,
-                                    address: reportKey('base_address'),
-                                    httpReport: reportKey('urls.apex-http'),
-                                    httpsReport: reportKey('urls.apex-https'),
+                                    address: reportKey('ScanResolveCanonical', 'normalizedUrl'),
+                                    httpReport: reportKey('ScanAlternateUrlsAndHeaders', 'apex-http'),
+                                    httpsReport: reportKey('ScanAlternateUrlsAndHeaders', 'apex-https'),
                                 }),
                                 m(DomainReport, {
                                     website,
-                                    address: 'www.' + reportKey('base_address'),
-                                    httpReport: reportKey('urls.www-http'),
-                                    httpsReport: reportKey('urls.www-https'),
+                                    address: 'www.' + reportKey('ScanResolveCanonical', 'normalizedUrl'),
+                                    httpReport: reportKey('ScanAlternateUrlsAndHeaders', 'www-http'),
+                                    httpsReport: reportKey('ScanAlternateUrlsAndHeaders', 'www-https'),
                                 }),
                             ]),
                         ]),
@@ -365,35 +448,39 @@ export default {
                             m('h2.card-title', 'Security'),
                             m('ul', [
                                 {
-                                    key: 'malicious_access.vendor.access',
+                                    job: 'ScanExposedFiles',
+                                    key: 'vendor.access',
                                     good: 'vendor folder seem protected',
                                     bad: 'your vendor folder is publicly reachable',
                                     neutral: 'Skipped vendor folder check',
                                 },
                                 {
-                                    key: 'malicious_access.storage.access',
+                                    job: 'ScanExposedFiles',
+                                    key: 'storage.access',
                                     good: 'storage folder seem protected',
                                     bad: 'your storage folder is publicly reachable',
                                     neutral: 'Skipped storage folder check',
                                 },
                                 {
-                                    key: 'malicious_access.composer.access',
+                                    job: 'ScanExposedFiles',
+                                    key: 'composer.access',
                                     good: 'Composer files not exposed',
                                     bad: 'your composer.json and/or composer.lock files are publicly readable',
                                     neutral: 'Skipped composer files check',
                                 },
                                 {
-                                    key: 'homepage.boot.debug',
+                                    job: 'ScanHomePage',
+                                    key: 'debug',
                                     good: 'Debug mode is off',
                                     bad: 'Debug mode is on',
                                     neutral: 'Skipped debug mode check',
                                 },
                             ].map(
-                                access => m('li', reportKey(access.key) === true ? [
+                                access => m('li', reportKey(access.job, access.key) === true ? [
                                     icon('times', {className: 'text-danger'}),
                                     ' ',
                                     access.bad,
-                                ] : (reportKey(access.key) === false) ? [
+                                ] : (reportKey(access.job, access.key) === false) ? [
                                     icon('check', {className: 'text-success'}),
                                     ' ',
                                     access.good,
@@ -403,13 +490,16 @@ export default {
                                     access.neutral,
                                 ])
                             )),
-                            (reportKey('vulnerabilities', []).length > 0 ? m('p.text-danger', 'Known Flarum vulnerabilities detected. See the top of the page for details') : null),
+                            reportKey('ScanExposedFiles', 'vulnerabilities', []).length > 0 ? m('p.text-danger', 'Known Flarum vulnerabilities detected. See the top of the page for details') : null,
                         ]),
                     ]),
                 ]),
             ]),
             m(RequestsReport, {
-                requests: reportKey('requests', []),
+                requests: vnode.state.requests,
+            }),
+            m(TasksReport, {
+                tasks: vnode.state.tasks,
             }),
             m(OtherTools),
         ];

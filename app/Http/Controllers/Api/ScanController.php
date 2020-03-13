@@ -4,13 +4,14 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Jobs\IgnoreCheck;
-use App\Jobs\WebsiteScan;
+use App\Jobs\ScanTaskManager;
 use App\OptOutCheck;
 use App\Resources\ScanResource;
 use App\Scan;
 use App\Website;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 
 class ScanController extends Controller
@@ -43,6 +44,7 @@ class ScanController extends Controller
 
             $url = $request->get('url');
 
+            // TODO: move to ScanResolveCanonical
             $destination = $this->getDestinationUrl($url);
 
             $normalized = $this->getNormalizedUrl($destination);
@@ -50,8 +52,10 @@ class ScanController extends Controller
             /**
              * @var $website Website
              */
-            $website = Website::firstOrCreate([
+            $website = Website::query()->firstOrCreate([
                 'normalized_url' => $normalized,
+            ], [
+                'canonical_url' => $destination, // So that if we re-scan a website that never successfully scanned, we still have a url to use
             ]);
 
             $wantsNewScan = false;
@@ -76,15 +80,18 @@ class ScanController extends Controller
                 $scan->hidden = true;
             }
 
+            $scan->url = $destination ?: $website->canonical_url;
+
             $website->scans()->save($scan);
 
-            $this->dispatch(new WebsiteScan($scan));
+            $manager = new ScanTaskManager($scan);
+            $manager->start();
 
             $canonicalUrl = $website->canonical_url ?: $destination;
 
             if (is_null($website->ignore) && $canonicalUrl) {
                 $parsed = $this->getParsedUrl($canonicalUrl);
-                $domain = array_get($parsed, 'host');
+                $domain = Arr::get($parsed, 'host');
 
                 $check = new OptOutCheck();
                 $check->source = 'scan';

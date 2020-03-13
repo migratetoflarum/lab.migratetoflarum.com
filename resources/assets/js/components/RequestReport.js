@@ -6,14 +6,14 @@ export default {
         vnode.state.extended = false;
     },
     view(vnode) {
-        const request = vnode.attrs.request;
+        const request = vnode.attrs.request.attributes;
 
         let resultClass = 'secondary';
         let resultMessage = '??';
 
-        if (request.response) {
+        if (request.response_status_code) {
             resultClass = 'success';
-            resultMessage = request.response.status_code + ' ' + request.response.reason_phrase + ', ' + request.response.time + 'ms';
+            resultMessage = request.response_status_code + ' ' + request.response_reason_phrase + ', ' + request.duration + 'ms';
         } else if (request.exception) {
             resultClass = 'warning';
             resultMessage = 'Error';
@@ -32,7 +32,7 @@ export default {
                     icon(vnode.state.extended ? 'chevron-up' : 'chevron-down', {
                         className: 'float-right',
                     }),
-                    m('code', request.request.method + ' ' + request.request.url),
+                    m('code', request.method + ' ' + request.url),
                     ' ',
                     m('.badge.badge-' + resultClass, resultMessage),
                 ]),
@@ -41,37 +41,37 @@ export default {
                 m('h5', 'Request'),
                 m('dl.row', [
                     m('dt.col-sm-3', 'Date'),
-                    m('dd.col-sm-9', request.request.time),
+                    m('dd.col-sm-9', request.fetched_at),
                     m('dt.col-sm-3', 'URL'),
                     m('dd.col-sm-9', m('a', {
-                        href: request.request.url,
+                        href: request.url,
                         target: '_blank',
                         rel: 'nofollow noopener',
-                    }, request.request.url)),
-                    (request.request.headers ? [
+                    }, request.url)),
+                    (request.request_headers ? [
                         m('dt.col-sm-12', 'Headers'),
-                        Object.keys(request.request.headers).map(headerName => [
+                        Object.keys(request.request_headers).map(headerName => [
                             m('dt.col-sm-3', m('code', headerName)),
-                            m('dd.col-sm-9', request.request.headers[headerName]),
+                            m('dd.col-sm-9', request.request_headers[headerName]),
                         ])
                     ] : null),
                 ]),
                 m('h5', 'Response'),
-                (request.response ? [
+                (request.response_status_code ? [
                     m('dl.row', [
                         m('dt.col-sm-3', 'Time'),
                         m('dd.col-sm-9', [
-                            request.response.time + 'ms',
+                            request.duration + 'ms',
                         ]),
-                        (request.response.headers ? [
+                        (request.response_headers ? [
                             m('dt.col-sm-12', 'Headers'),
-                            Object.keys(request.response.headers).map(headerName => [
+                            Object.keys(request.response_headers).map(headerName => [
                                 m('dt.col-sm-3', m('code', headerName)),
-                                m('dd.col-sm-9', request.response.headers[headerName]),
+                                m('dd.col-sm-9', request.response_headers[headerName]),
                             ])
                         ] : null),
                     ]),
-                    (request.request.method === 'HEAD' ? m('div', m('em', 'Only headers were fetched to save time')) : m('pre', request.response.body)),
+                    (request.method === 'HEAD' ? m('div', m('em', 'Only headers were fetched to save time')) : m('pre', request.response_body)),
                 ] : null),
                 (request.exception ? [
                     m('.alert.alert-warning', request.exception.message),

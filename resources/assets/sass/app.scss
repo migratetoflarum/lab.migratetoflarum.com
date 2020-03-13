@@ -143,3 +143,8 @@ $navbar-dark-toggler-icon-bg: url(../images/navbar-toggle.svg);
     text-indent: -9999px;
     overflow: hidden;
 }
+
+.taskslist pre {
+    max-width: 300px;
+    overflow-y: scroll;
+}

@@ -28,7 +28,12 @@ class AppController extends Controller
         $recentWebsites->load('lastPubliclyVisibleScan');
 
         $recentScans = new Collection($recentWebsites->pluck('lastPubliclyVisibleScan'));
-        $recentScans->load('website');
+        $recentScans->load([
+            'website',
+            'tasks',
+            'requests',
+            'extensions',
+        ]);
 
         $bestWebsitesSerialized = cache()->remember('best-websites-preload', config('scanner.best_scans_cache'), function () {
             /**
@@ -43,7 +48,12 @@ class AppController extends Controller
             $bestWebsites->load('lastPubliclyVisibleScan');
 
             $bestScans = new Collection($bestWebsites->pluck('lastPubliclyVisibleScan'));
-            $bestScans->load('website');
+            $bestScans->load([
+                'website',
+                'tasks',
+                'requests',
+                'extensions',
+            ]);
 
             return ScanResource::collection($bestScans)->jsonSerialize();
         });
