@@ -2,9 +2,13 @@
 
 namespace App\Resources;
 
+use App\Extension;
 use Composer\Semver\Comparator;
 use Illuminate\Http\Resources\Json\Resource;
 
+/**
+ * @property Extension $resource
+ */
 class ExtensionResource extends Resource
 {
     public function toArray($request)
@@ -21,12 +25,6 @@ class ExtensionResource extends Resource
             ];
 
             $attributes['update_available'] = Comparator::greaterThan($this->resource->last_version, $this->resource->possibleVersions->last()->version);
-        }
-
-        if ($this->resource->relationLoaded('versions')) {
-            $relationships['versions'] = [
-                'data' => ExtensionVersionResource::collection($this->resource->versions),
-            ];
         }
 
         if ($this->resource->relationLoaded('lastVersion')) {

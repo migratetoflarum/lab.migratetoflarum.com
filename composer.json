@@ -20,8 +20,8 @@
         "spatie/laravel-medialibrary": "^7.0.0",
         "symfony/css-selector": "^4.0",
         "symfony/dom-crawler": "^4.0",
-        "symfony/yaml": "^4.0",
-        "ext-json": "*"
+        "ext-json": "*",
+        "ext-zip": "*"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.1",

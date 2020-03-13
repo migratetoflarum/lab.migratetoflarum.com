@@ -60,16 +60,6 @@ class ExtensionVersion extends Model implements HasMedia
             ->withPivot('checksum');
     }
 
-    public function translationsProvided()
-    {
-        return $this->hasMany(ExtensionTranslation::class, 'version_id');
-    }
-
-    public function translationsReceived()
-    {
-        return $this->hasMany(ExtensionTranslation::class, 'namespace_extension_id', 'extension_id');
-    }
-
     public function registerMediaCollections()
     {
         $this

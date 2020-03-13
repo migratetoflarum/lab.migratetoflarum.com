@@ -22,7 +22,6 @@ export default {
                             m('li.nav-item', m('a.nav-link', {
                                 href: App.showcaseDomain || '/showcase',
                             }, 'Showcase')),
-                            m('li.nav-item', link('/extensions', {className: 'nav-link'}, 'Extension Analysis')),
                             m('li.nav-item', link('/opt-out', {className: 'nav-link'}, 'Opt Out')),
                             m('li.nav-item', m('a.nav-link', {
                                 href: App.discuss,
