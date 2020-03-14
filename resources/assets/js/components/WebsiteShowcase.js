@@ -1,6 +1,4 @@
 import m from 'mithril';
-import FlarumVersionString from "./FlarumVersionString";
-import icon from '../helpers/icon';
 
 function countFormatting(count) {
     if (typeof count === 'undefined' || count === null) {
@@ -103,7 +101,6 @@ export default {
                 ]) : null,
             ]),
             m('.card-footer', meta ? m('.row.text-center', [
-                meta.version ? m('.col', m(FlarumVersionString, {versions: [meta.version]})) : null,
                 discussionCount ? m('.col', {
                     title: discussionCount.label,
                 }, discussionCount.count + ' discussions') : null,

@@ -29,8 +29,15 @@ export default {
             titleVersions.push('Could not detect Flarum version');
         }
 
+        let label = labelVersions.join(' or ');
+
+        // If all titles start with "beta", use syntax beta 1/2/3 instead
+        if (labelVersions.length > 1 && labelVersions.every(t => t.indexOf('beta ') === 0)) {
+            label = 'beta ' + labelVersions.map(t => t.replace('beta ', '')).join('/');
+        }
+
         return m('span', {
             title: titleVersions.join(' or '),
-        }, labelVersions.join(' or '));
+        }, label);
     }
 }

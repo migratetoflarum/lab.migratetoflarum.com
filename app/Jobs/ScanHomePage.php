@@ -13,7 +13,8 @@ class ScanHomePage extends TaskJob
     {
         $canonical = $this->siblingTask(ScanResolveCanonical::class);
 
-        $homepage = new Crawler($this->request($canonical->getData('destinationUrl'))->getBody()->getContents());
+        $bodyContent = $this->request($canonical->getData('destinationUrl'))->getBody()->getContents();
+        $homepage = new Crawler($bodyContent);
 
         $this->log(self::LOG_PUBLIC, 'Reading boot asset url');
 
@@ -33,7 +34,7 @@ class ScanHomePage extends TaskJob
 
         $this->log(self::LOG_PUBLIC, 'Reading boot script');
 
-        $homepage->filter('body script')->each(function (Crawler $script) {
+        $homepage->filter('body script')->each(function (Crawler $script) use ($bodyContent) {
             $content = $script->text();
 
             if (!str_contains($content, 'app.boot')) {
@@ -41,7 +42,7 @@ class ScanHomePage extends TaskJob
             }
 
             $versionGuesser = new FlarumVersionGuesser();
-            $this->data['versions'] = $versionGuesser->guess($content);
+            $this->data['versions'] = $versionGuesser->guess($bodyContent, $content);
 
             $this->log(self::LOG_PUBLIC, 'Reading boot modules');
 

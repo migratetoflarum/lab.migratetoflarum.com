@@ -6,17 +6,30 @@ class FlarumVersionGuesser
 {
     /**
      * Takes the source code of the script tag containing app.boot() and attempts to guess the Flarum version
-     * @param string $html
+     * @param string $html Source of the whole page
+     * @param string $bootScript Source of the script tag that contains the boot() call
      * @return string[] Possible versions
      */
-    public function guess(string $html): array
+    public function guess(string $html, string $bootScript): array
     {
         $matches = [];
         // beta7 calls app.boot() with the payload
         // beta8 calls app.load() with the payload then app.boot() without arguments
-        if (preg_match('~app\.(boot|load)\(([^\n]+)\)~', $html, $matches) === 1) {
+        if (preg_match('~app\.(boot|load)\(([^\n]+)\)~', $bootScript, $matches) === 1) {
             if ($matches[1] === 'boot') {
                 return [FlarumVersion::BETA_7];
+            }
+
+            $hasHtmlDir = preg_match('~!doctype\s+html>\s*<html\s+dir="~i', $html) === 1;
+
+            // Beta 10 adds (back) the dir and lang attributes https://github.com/flarum/core/commit/e88a9394edccc992b9b5fa2970086d2c4df86b8a
+            // The meta canonical tag was also added in beta 10. But a second check is not needed
+            if ($hasHtmlDir) {
+                return [
+                    FlarumVersion::BETA_10,
+                    FlarumVersion::BETA_11,
+                    FlarumVersion::BETA_12,
+                ];
             }
 
             $hasPost = preg_match('~"type":\s*"posts"~', $matches[2]) === 1;

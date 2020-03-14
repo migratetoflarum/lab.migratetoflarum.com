@@ -20,9 +20,9 @@ class FlarumVersionGuesserTest extends TestCase
         $this->guesser = new FlarumVersionGuesser();
     }
 
-    protected function homepageScript(string $flarumVersion, bool $withTagsExtension, bool $canSeeDiscussions): string
+    protected function homepageScript(int $flarumVersion, bool $withTagsExtension, bool $canSeeDiscussions): string
     {
-        $isBeta7 = $flarumVersion === FlarumVersion::BETA_7;
+        $isBeta7 = $flarumVersion === 7;
 
         $documentName = $isBeta7 ? 'document' : 'apiDocument';
 
@@ -47,14 +47,14 @@ class FlarumVersionGuesserTest extends TestCase
             'avatarUrl',
         ];
 
-        $postAttributes = array_merge($flarumVersion !== FlarumVersion::BETA_9 ? [
+        $postAttributes = array_merge($flarumVersion < 9 ? [
             'id',
         ] : [], [
             'number',
             $postCreatedAtName,
             'contentType',
             'contentHtml',
-        ], $flarumVersion === $isBeta7 ? [
+        ], $isBeta7 ? [
             'isApproved',
         ] : []);
 
@@ -70,7 +70,7 @@ class FlarumVersionGuesserTest extends TestCase
                         'color' => '#888',
                         'backgroundUrl' => null,
                         'backgroundMode' => null,
-                    ], $flarumVersion === FlarumVersion::BETA_9 ? [
+                    ], $flarumVersion >= 9 ? [
                         'icon' => null,
                     ] : [], [
                         'iconUrl' => null,
@@ -279,7 +279,15 @@ class FlarumVersionGuesserTest extends TestCase
               ';
         }
 
-        return '
+        $htmlAttributes = '';
+
+        // Beta 10 adds (back) the dir and lang attributes https://github.com/flarum/core/commit/e88a9394edccc992b9b5fa2970086d2c4df86b8a
+        if ($flarumVersion >= 10) {
+            $htmlAttributes = ' dir="ltr" lang="en"';
+        }
+
+        return '<!doctype html>
+            <html' . $htmlAttributes . '>
             document.getElementById(\'flarum-loading\').style.display = \'none\';
 
             try {
@@ -299,93 +307,126 @@ class FlarumVersionGuesserTest extends TestCase
     {
         $html = '<p>Hello world this is just a random webpage and certainly not Flarum</p>';
 
-        $this->assertEquals([], $this->guesser->guess($html));
+        $this->assertEquals([], $this->guesser->guess($html, $html));
 
         $html = 'console.log("stuff");';
 
-        $this->assertEquals([], $this->guesser->guess($html));
+        $this->assertEquals([], $this->guesser->guess($html, $html));
     }
 
     function testBeta7Normal()
     {
-        $html = $this->homepageScript(FlarumVersion::BETA_7, true, true);
+        $html = $this->homepageScript(7, true, true);
 
         $this->assertEquals([
             FlarumVersion::BETA_7,
-        ], $this->guesser->guess($html));
+        ], $this->guesser->guess($html, $html));
     }
 
     function testBeta7NoDiscussions()
     {
-        $html = $this->homepageScript(FlarumVersion::BETA_7, true, false);
+        $html = $this->homepageScript(7, true, false);
 
         $this->assertEquals([
             FlarumVersion::BETA_7,
-        ], $this->guesser->guess($html));
+        ], $this->guesser->guess($html, $html));
     }
 
     function testBeta7Private()
     {
-        $html = $this->homepageScript(FlarumVersion::BETA_7, false, false);
+        $html = $this->homepageScript(7, false, false);
 
         $this->assertEquals([
             FlarumVersion::BETA_7,
-        ], $this->guesser->guess($html));
+        ], $this->guesser->guess($html, $html));
     }
 
     function testBeta8Normal()
     {
-        $html = $this->homepageScript(FlarumVersion::BETA_8, true, true);
+        $html = $this->homepageScript(8, true, true);
 
         $this->assertEquals([
             FlarumVersion::BETA_8,
-        ], $this->guesser->guess($html));
+        ], $this->guesser->guess($html, $html));
     }
 
     function testBeta8NoDiscussions()
     {
-        $html = $this->homepageScript(FlarumVersion::BETA_8, true, false);
+        $html = $this->homepageScript(8, true, false);
 
         $this->assertEquals([
             FlarumVersion::BETA_8,
-        ], $this->guesser->guess($html));
+        ], $this->guesser->guess($html, $html));
     }
 
     function testBeta8Private()
     {
-        $html = $this->homepageScript(FlarumVersion::BETA_8, false, false);
+        $html = $this->homepageScript(8, false, false);
 
         $this->assertEquals([
             FlarumVersion::BETA_8,
             FlarumVersion::BETA_9,
-        ], $this->guesser->guess($html));
+        ], $this->guesser->guess($html, $html));
     }
 
     function testBeta9Normal()
     {
-        $html = $this->homepageScript(FlarumVersion::BETA_9, true, true);
+        $html = $this->homepageScript(9, true, true);
 
         $this->assertEquals([
             FlarumVersion::BETA_9,
-        ], $this->guesser->guess($html));
+        ], $this->guesser->guess($html, $html));
     }
 
     function testBeta9NoDiscussions()
     {
-        $html = $this->homepageScript(FlarumVersion::BETA_9, true, false);
+        $html = $this->homepageScript(9, true, false);
 
         $this->assertEquals([
             FlarumVersion::BETA_9,
-        ], $this->guesser->guess($html));
+        ], $this->guesser->guess($html, $html));
     }
 
     function testBeta9Private()
     {
-        $html = $this->homepageScript(FlarumVersion::BETA_9, false, false);
+        $html = $this->homepageScript(9, false, false);
 
         $this->assertEquals([
             FlarumVersion::BETA_8,
             FlarumVersion::BETA_9,
-        ], $this->guesser->guess($html));
+        ], $this->guesser->guess($html, $html));
+    }
+
+    function testBeta10Normal()
+    {
+        $html = $this->homepageScript(10, true, true);
+
+        $this->assertEquals([
+            FlarumVersion::BETA_10,
+            FlarumVersion::BETA_11,
+            FlarumVersion::BETA_12,
+        ], $this->guesser->guess($html, $html));
+    }
+
+    function testBeta11Normal()
+    {
+        $html = $this->homepageScript(11, true, true);
+
+        $this->assertEquals([
+            FlarumVersion::BETA_10,
+            FlarumVersion::BETA_11,
+            FlarumVersion::BETA_12,
+        ], $this->guesser->guess($html, $html));
+    }
+
+    function testBeta12Normal()
+    {
+        $html = $this->homepageScript(12, true, true);
+
+        $this->assertEquals([
+            FlarumVersion::BETA_10,
+            FlarumVersion::BETA_11,
+            FlarumVersion::BETA_12,
+        ], $this->guesser->guess($html, $html));
     }
 }
