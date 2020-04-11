@@ -23,7 +23,8 @@ export default {
         return m('.card.mt-3', [
             m('.card-body', [
                 m('h2.card-title', [
-                    'Extensions',
+                    'Extensions ',
+                    m('span.badge.badge-light', extensions.length),
                     m('.btn.btn-sm.btn-light.float-right', {
                         onclick() {
                             vnode.state.showCoreExtensions = !vnode.state.showCoreExtensions;

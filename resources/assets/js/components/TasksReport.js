@@ -44,7 +44,7 @@ export default {
             m('.card-body', [
                 m('h2.card-title', [
                     'Background jobs ',
-                    m('span.badge.badge-secondary', tasks.length + '/' + tasksMeta.length),
+                    m('span.badge.badge-light', tasks.length + '/' + tasksMeta.length),
                 ]),
                 m('.list-group', tasksMeta.map(
                     taskMeta => m(TaskReport, {

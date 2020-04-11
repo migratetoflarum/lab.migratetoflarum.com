@@ -9,7 +9,7 @@ export default {
             m('.card-body', [
                 m('h2.card-title', [
                     'Requests made for the scan ',
-                    m('span.badge.badge-secondary', requests.length),
+                    m('span.badge.badge-light', requests.length),
                 ]),
                 m('.list-group', requests.map(
                     request => m(RequestReport, {
