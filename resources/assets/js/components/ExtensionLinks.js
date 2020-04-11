@@ -13,10 +13,10 @@ export default {
             }, [icon('download'), ' Packagist']),
             ' ',
             m('a.btn.btn-sm.btn-light', {
-                href: extension.attributes.customFlagrowLink ? extension.attributes.customFlagrowLink : 'https://flagrow.io/extensions/' + extension.attributes.package,
+                href: extension.attributes.customFlagrowLink ? extension.attributes.customFlagrowLink : 'https://extiverse.com/extension/' + extension.attributes.package,
                 target: '_blank',
                 rel: 'nofollow noopener',
-            }, [m('span.fab.icon-flagrow'), ' Flagrow.io']),
+            }, [m('span.fab.icon-extiverse'), ' Extiverse']),
         ];
 
         if (extension.attributes.repository) {
