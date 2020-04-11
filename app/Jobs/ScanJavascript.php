@@ -58,7 +58,7 @@ class ScanJavascript extends TaskJob
                     $javascriptExtensions[$stack] = [];
 
                     foreach ($javascriptParser->extensions() as $extension) {
-                        $javascriptExtensions[$stack][Arr::get($extension, 'id')] = md5(Arr::get($extension, 'code'));
+                        $javascriptExtensions[$stack][Arr::get($extension, 'id')] = Arr::get($extension, 'checksum');
                     }
                 }
             } catch (Exception $exception) {

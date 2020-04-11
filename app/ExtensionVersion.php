@@ -3,7 +3,6 @@
 namespace App;
 
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia\HasMedia;
 use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
@@ -14,15 +13,14 @@ use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
  * @property string $version
  * @property string $version_normalized
  * @property array $packagist
- * @property array $locale_errors
  * @property Carbon $packagist_time
  * @property Carbon $scanned_modules_at
- * @property Carbon $scanned_locales_at
+ * @property string $javascript_forum_checksum
+ * @property string $javascript_admin_checksum
  * @property Carbon $created_at
  * @property Carbon $updated_at
  *
  * @property Extension $extension
- * @property Collection|JavascriptModule[] $modules
  */
 class ExtensionVersion extends Model implements HasMedia
 {
@@ -31,10 +29,7 @@ class ExtensionVersion extends Model implements HasMedia
 
     protected $casts = [
         'packagist' => 'array',
-        'locale_errors' => 'array',
         'packagist_time' => 'timestamp',
-        'scanned_modules_at' => 'timestamp',
-        'scanned_locales_at' => 'timestamp',
     ];
 
     protected $fillable = [
@@ -44,20 +39,12 @@ class ExtensionVersion extends Model implements HasMedia
 
     protected $visible = [
         'version',
-        'locale_errors',
         'packagist_time',
     ];
 
     public function extension()
     {
         return $this->belongsTo(Extension::class);
-    }
-
-    public function modules()
-    {
-        return $this
-            ->belongsToMany(JavascriptModule::class, 'extension_version_module', 'version_id', 'module_id')
-            ->withPivot('checksum');
     }
 
     public function registerMediaCollections()

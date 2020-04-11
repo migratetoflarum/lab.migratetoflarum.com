@@ -5,6 +5,7 @@ namespace App\Resources;
 use App\Extension;
 use Composer\Semver\Comparator;
 use Illuminate\Http\Resources\Json\Resource;
+use Illuminate\Support\Arr;
 
 /**
  * @property Extension $resource
@@ -19,18 +20,12 @@ class ExtensionResource extends Resource
 
         $attributes['language_pack'] = !!$this->resource->flarum_locale_id;
 
-        if ($this->resource->possibleVersions) {
-            $relationships['possible_versions'] = [
-                'data' => ExtensionVersionResource::collection($this->resource->possibleVersions),
-            ];
+        if ($this->resource->pivot && !is_null($this->resource->pivot->possible_versions)) {
+            $possibleVersions = json_decode($this->resource->pivot->possible_versions);
 
-            $attributes['update_available'] = Comparator::greaterThan($this->resource->last_version, $this->resource->possibleVersions->last()->version);
-        }
-
-        if ($this->resource->relationLoaded('lastVersion')) {
-            $relationships['last_version'] = [
-                'data' => $this->resource->last_version ? new ExtensionVersionResource($this->resource->lastVersion) : null,
-            ];
+            $attributes['possible_versions'] = $possibleVersions;
+            // We know possible_versions are sorted from lowest to highest in the task
+            $attributes['update_available'] = Comparator::greaterThan($this->resource->last_version, Arr::last($possibleVersions));
         }
 
         return [

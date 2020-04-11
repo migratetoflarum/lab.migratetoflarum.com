@@ -3,7 +3,8 @@
 namespace App\Jobs;
 
 use App\Extension;
-use Illuminate\Database\Eloquent\Collection;
+use Composer\Semver\Semver;
+use Illuminate\Support\Arr;
 
 class ScanMapExtensions extends TaskJob
 {
@@ -11,33 +12,94 @@ class ScanMapExtensions extends TaskJob
     {
         $javascript = $this->siblingTask(ScanJavascript::class);
 
-        $extensionIds = [];
+        $stackedExtensions = [
+            'forum' => [],
+            'admin' => [],
+        ];
 
         foreach ($javascript->getData('javascriptExtensions', []) as $stack => $extensions) {
-            $extensionIds = array_merge($extensionIds, array_keys($extensions));
+            $stackedExtensions[$stack] = $this->extensionsAndPossibleVersionsForStack($stack, $extensions);
         }
 
-        /**
-         * @var $matchingExtensions Collection
-         */
-        $matchingExtensions = Extension::whereIn('flarumid', $extensionIds)->orderBy('package')->get();
+        $extensionsAndPossibleVersions = $this->mergePossibleVersions($stackedExtensions['forum'], $stackedExtensions['admin']);
 
-        $extensionsLikelyEnabled = $matchingExtensions->filter(function (Extension $extension) use ($matchingExtensions): bool {
-            // Keep any extension that isn't abandoned
-            if (!$extension->abandoned) {
-                return true;
+        $syncExtensions = [];
+
+        foreach ($extensionsAndPossibleVersions as $info) {
+            $extensionId = Arr::get($info, 'extension_id');
+            $possibleVersions = Semver::sort(Arr::get($info, 'possible_versions'));
+
+            $syncExtensions[$extensionId] = [
+                'possible_versions' => count($possibleVersions) ? json_encode($possibleVersions) : null,
+            ];
+        }
+
+        $this->task->scan->extensions()->sync($syncExtensions);
+    }
+
+    /**
+     * @param string $stack forum or admin
+     * @param array $extensions key-value array where key is the extension Flarum ID and value is the javascript checksum for this stack
+     * @return array
+     */
+    protected function extensionsAndPossibleVersionsForStack(string $stack, array $extensions): array
+    {
+        $return = [];
+
+        foreach ($extensions as $flarumId => $checksum) {
+            // Order by abandoned so that if there is both an abandoned and non-abandoned extension with the same ID, the non-abandoned one will be returned
+            // This happens in particular with Flarum core extensions whose packages were renamed while keeping the same ID
+            $extension = Extension::where('flarumid', $flarumId)->orderBy('abandoned')->first();
+
+            if (!$extension) {
+                continue;
             }
 
-            // If the extension is abandoned but another one matches the flarum id,
-            // remove this extension. Occurs when an extension was renamed and therefore there are multiple matches
-            // We assume the forum is already using the non-abandoned version
-            $duplicateNotAbandoned = $matchingExtensions->first(function (Extension $duplicate) use ($extension) {
-                return !$duplicate->abandoned && $duplicate->flarumid === $extension->flarumid;
+            $return[] = [
+                'extension_id' => $extension->id,
+                'possible_versions' => $extension->versions()->where('javascript_' . $stack . '_checksum', $checksum)->pluck('version')->all(),
+            ];
+        }
+
+        return $return;
+    }
+
+    protected function mergePossibleVersions(array $extensions1, array $extensions2): array
+    {
+        $extensionIds = array_unique(array_merge(Arr::pluck($extensions1, 'extension_id'), Arr::pluck($extensions2, 'extension_id')));
+
+        return array_map(function ($extensionId) use ($extensions1, $extensions2) {
+            $stackVersions = [];
+
+            $extensionIn1 = Arr::first($extensions1, function ($e) use ($extensionId) {
+                return Arr::get($e, 'extension_id') === $extensionId;
             });
 
-            return is_null($duplicateNotAbandoned);
-        })->values();
+            if ($extensionIn1) {
+                $stackVersions[] = Arr::get($extensionIn1, 'possible_versions');
+            }
 
-        $this->task->scan->extensions()->sync($extensionsLikelyEnabled);
+            $extensionIn2 = Arr::first($extensions2, function ($e) use ($extensionId) {
+                return Arr::get($e, 'extension_id') === $extensionId;
+            });
+
+            if ($extensionIn2) {
+                $stackVersions[] = Arr::get($extensionIn2, 'possible_versions');
+            }
+
+            // If only one stack had the extension present, we will use the possible versions of that stack as the truth
+            if (count($stackVersions) === 1) {
+                return [
+                    'extension_id' => $extensionId,
+                    'possible_versions' => $stackVersions[0],
+                ];
+            }
+
+            // If the extension is present in both stacks, then we will keep common possible versions between the two
+            return [
+                'extension_id' => $extensionId,
+                'possible_versions' => array_values(array_intersect($stackVersions[0], $stackVersions[1])),
+            ];
+        }, $extensionIds);
     }
 }

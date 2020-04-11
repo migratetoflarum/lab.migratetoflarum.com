@@ -17,15 +17,15 @@ export default {
                     extension,
                 })),
                 m('p.my-1', extension.attributes.description),
-                (extension.relationships && extension.relationships.possible_versions && extension.relationships.possible_versions.data.length ? m('p.my-1', {
-                    title: 'Possible versions: ' + extension.relationships.possible_versions.data.map(version => version.attributes.version).join(', '),
+                (Array.isArray(extension.attributes.possible_versions) ? m('p.my-1', {
+                    title: 'Possible versions: ' + extension.attributes.possible_versions.join(', '),
                 }, [
                     m('small', [
                         'Version ',
-                        extension.relationships.possible_versions.data[0].attributes.version,
-                        (extension.relationships.possible_versions.data.length > 1 ? [
+                        extension.attributes.possible_versions[0],
+                        (extension.attributes.possible_versions.length > 1 ? [
                             ' - ',
-                            extension.relationships.possible_versions.data[extension.relationships.possible_versions.data.length - 1].attributes.version,
+                            extension.attributes.possible_versions[extension.attributes.possible_versions.length - 1],
                         ] : null),
                     ]),
                     (extension.attributes.update_available ? [

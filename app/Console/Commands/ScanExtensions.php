@@ -3,9 +3,6 @@
 namespace App\Console\Commands;
 
 use App\ExtensionVersion;
-use App\JavascriptFileParser;
-use App\JavascriptModule;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
@@ -67,35 +64,21 @@ class ScanExtensions extends Command
         $zip = new \ZipArchive();
         $zip->open($zipPath);
 
-        $syncModules = [];
-
         for ($fileIndex = 0; $fileIndex < $zip->numFiles; $fileIndex++) {
             $file = $zip->statIndex($fileIndex);
             $filename = array_get($file, 'name');
 
-            if (!$skipModules && preg_match('~/(admin|forum)/dist/extension\.js$~', $filename, $matches) === 1) {
-                $stack = $matches[1];
+            if (!$skipModules && preg_match('~/js/dist/(admin|forum)\.js$~', $filename, $matches) === 1) {
+                $content = $zip->getFromIndex($fileIndex);
 
-                $parser = new JavascriptFileParser($zip->getFromIndex($fileIndex));
+                // Remove sourcemaps, like Flarum\Frontend\Compiler\JsCompiler::format does
+                $content = preg_replace('~//# sourceMappingURL.*$~m', '', $content);
 
-                foreach ($parser->modules() as $module) {
-                    $this->info($stack . '::' . array_get($module, 'module'));
-                    $moduleModel = JavascriptModule::firstOrCreate([
-                        'stack' => $stack,
-                        'module' => array_get($module, 'module'),
-                    ]);
+                // Remove whitespace at the start or end, we do the same before computing the checksum in the forum assets
+                $content = trim($content);
 
-                    $syncModules[$moduleModel->id] = [
-                        'checksum' => md5(array_get($module, 'code')),
-                    ];
-                }
+                $version->{'javascript_' . $matches[1] . '_checksum'} = md5($content);
             }
-        }
-
-        if (!$skipModules) {
-            $version->modules()->sync($syncModules);
-
-            $version->scanned_modules_at = Carbon::now();
         }
 
         if ($version->isDirty()) {
