@@ -56,6 +56,10 @@ const HSTSReport = {
     },
 };
 
+function shouldShowCSPReport(report) {
+    return report.type === 'ok' && report.headers && (report.headers['Content-Security-Policy'] || report.headers['Content-Security-Policy-Report-Only']);
+}
+
 const CSPReport = {
     view(vnode) {
         const cspEnforce = vnode.attrs.report.headers && vnode.attrs.report.headers['Content-Security-Policy'];
@@ -125,7 +129,7 @@ const UrlReport = {
                             m(HSTSReport, {
                                 report,
                             }),
-                            (report.type === 'ok' ? m(CSPReport, {
+                            (shouldShowCSPReport(report) ? m(CSPReport, {
                                 report,
                             }) : null),
                         ]),
