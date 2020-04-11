@@ -14,4 +14,5 @@ let mix = require('laravel-mix');
 mix.js('resources/assets/js/app.js', 'public/js')
     .js('resources/assets/js/showcase.js', 'public/js')
     .sass('resources/assets/sass/app.scss', 'public/css')
+    .copy('resources/assets/images/fontawesome-flask-solid.svg', 'public/images/fontawesome-flask-solid.svg')
     .version();
