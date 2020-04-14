@@ -119,7 +119,7 @@ abstract class TaskJob implements ShouldQueue
                 $maxSize = config('scanner.keep_max_response_body_size');
 
                 if ($request->response_body_size > $maxSize) {
-                    $content = substr($content, 0, $maxSize);
+                    $content = mb_substr($content, 0, $maxSize);
                     $request->response_body_truncated = true;
                 } else {
                     $request->response_body_truncated = false;
@@ -228,7 +228,7 @@ abstract class TaskJob implements ShouldQueue
         $this->task->failed_at = now();
 
         // Will also save the attributes from above
-        $this->log(self::LOG_PRIVATE, $exception->getTraceAsString());
+        $this->log(self::LOG_PRIVATE, $exception->getMessage() . "\n" . $exception->getTraceAsString());
 
         event(new TaskUpdated($this->task));
 
