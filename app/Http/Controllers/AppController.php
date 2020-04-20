@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Api\ScanController;
 use App\Resources\ScanResource;
 use App\Website;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Spatie\Csp\AddCspHeaders;
 
@@ -21,6 +22,11 @@ class AppController extends Controller
          * @var $recentWebsites Collection|Website[]
          */
         $recentWebsites = Website::publiclyVisible()
+            ->where(function (Builder $builder) {
+                $builder->where('last_rating', 'like', 'A%')
+                    ->orWhere('last_rating', 'like', 'B%')
+                    ->orWhere('last_rating', 'like', 'C%');
+            })
             ->orderBy('last_public_scanned_at', 'desc')
             ->take(config('scanner.show_recent_count'))
             ->get();
