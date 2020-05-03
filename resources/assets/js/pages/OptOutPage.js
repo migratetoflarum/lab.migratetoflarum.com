@@ -11,19 +11,19 @@ export default {
         vnode.state.websiteStatus = null;
 
         vnode.state.requestCheck = (checkNow = false) => {
-            const data = {
+            const body = {
                 _token: App.csrfToken,
                 url: vnode.state.url,
             };
 
             if (checkNow) {
-                data.check_now = 1;
+                body.check_now = 1;
             }
 
             m.request({
                 method: 'post',
                 url: '/api/opt-out-check',
-                data,
+                body,
             }).then(response => {
                 vnode.state.websiteStatus = response;
 
@@ -77,9 +77,9 @@ export default {
                                 className: vnode.state.errors.length ? 'is-invalid' : '',
                                 placeholder: 'https://yourflarum.tld',
                                 value: vnode.state.url,
-                                oninput: m.withAttr('value', value => {
-                                    vnode.state.url = value;
-                                }),
+                                oninput: event => {
+                                    vnode.state.url = event.target.value;
+                                },
                                 disabled: vnode.state.loading,
                             }),
                             m('.input-group-append', m('button.btn.btn-primary[type=submit]', {

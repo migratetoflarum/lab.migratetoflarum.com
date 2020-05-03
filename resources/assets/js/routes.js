@@ -49,5 +49,5 @@ for (let url in routes) {
     }
 }
 
-m.route.prefix('');
+m.route.prefix = '';
 m.route(root, '/', mithrilRoutes);

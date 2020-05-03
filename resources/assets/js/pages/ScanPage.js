@@ -335,7 +335,7 @@ export default {
                         m.request({
                             method: 'post',
                             url: '/api/scans',
-                            data: {
+                            body: {
                                 _token: App.csrfToken,
                                 website_id: website.id,
                                 hidden: scan.attributes.hidden,

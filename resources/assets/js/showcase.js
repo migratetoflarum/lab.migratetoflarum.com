@@ -11,7 +11,7 @@ App.init(root);
 
 let isFirstMatch = true;
 
-m.route.prefix(App.showcaseDomain ? '' : '/showcase');
+m.route.prefix = App.showcaseDomain ? '' : '/showcase';
 m.route(root, '/', {
     '/': {
         onmatch(args, requestedPath) {

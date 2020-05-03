@@ -11,9 +11,9 @@ export default {
             m.request({
                 method: 'get',
                 url: vnode.state.nextPage,
-                data: {
+                body: {
                     horizon_token: m.parseQueryString(location.search).horizon_token,
-                }
+                },
             }).then(response => {
                 vnode.state.nextPage = response.links.next;
                 vnode.state.totalResults = response.meta.total;

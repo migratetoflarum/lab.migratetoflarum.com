@@ -30,7 +30,7 @@ export default {
                         m.request({
                             method: 'post',
                             url: '/api/scans',
-                            data: {
+                            body: {
                                 _token: App.csrfToken,
                                 url: vnode.state.url,
                                 hidden: vnode.state.hidden,
@@ -62,9 +62,9 @@ export default {
                                 className: vnode.state.errors.length ? 'is-invalid' : '',
                                 placeholder: 'https://yourflarum.tld',
                                 value: vnode.state.url,
-                                oninput: m.withAttr('value', value => {
-                                    vnode.state.url = value;
-                                }),
+                                oninput: event => {
+                                    vnode.state.url = event.target.value;
+                                },
                                 disabled: vnode.state.loading,
                             }),
                             m('.input-group-append', m('button.btn.btn-primary[type=submit]', {

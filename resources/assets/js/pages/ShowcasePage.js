@@ -99,16 +99,16 @@ export default {
             m('.row', [
                 m('.col-md-6', m('.form-group', m('input[type=text].form-control', {
                     value: vnode.state.query.filter.q,
-                    onchange: m.withAttr('value', value => {
-                        vnode.state.changeSearch(value);
-                    }),
+                    onchange: event => {
+                        vnode.state.changeSearch(event.target.value);
+                    },
                     placeholder: 'Search for a forum name or url',
                 }))),
                 m('.col-md-6', m('.form-group', m('select.form-control', {
                     value: vnode.state.query.sort,
-                    onchange: m.withAttr('value', value => {
-                        vnode.state.changeSort(value);
-                    }),
+                    onchange: event => {
+                        vnode.state.changeSort(event.target.value);
+                    },
                 }, SORTING.map(sort => SORTING_ORDERS.map(order => m('option', {
                     value: order.prefix + sort.key,
                 }, sort.title + ' (' + order.title + ')')))))),
