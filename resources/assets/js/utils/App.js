@@ -7,6 +7,7 @@ export default {
     githubRepo: 'https://github.com/migratetoflarum/lab.migratetoflarum.com',
     githubIssues: 'https://github.com/migratetoflarum/lab.migratetoflarum.com/issues',
     discuss: 'https://discuss.flarum.org/d/10056-migratetoflarum-lab-the-health-scanner-for-flarum',
+    showcaseDiscuss: 'https://discuss.flarum.org/d/19566-builtwithflarum-com-the-ultimate-flarum-showcase',
     supportEmail: 'lab@migratetoflarum.com',
     sponsoringEmail: 'sponsoring@migratetoflarum.com',
     secretExtensionProbability: 0,

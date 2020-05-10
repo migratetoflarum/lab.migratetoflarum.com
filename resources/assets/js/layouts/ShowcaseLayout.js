@@ -29,7 +29,9 @@ export default {
                 ])),
             ]),
             m('.container.py-3', vnode.children),
-            m(Footer),
+            m(Footer, {
+                isShowcase: true,
+            }),
         ]);
     },
 }
