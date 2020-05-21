@@ -405,6 +405,7 @@ class FlarumVersionGuesserTest extends TestCase
             FlarumVersion::BETA_10,
             FlarumVersion::BETA_11,
             FlarumVersion::BETA_12,
+            FlarumVersion::BETA_13,
         ], $this->guesser->guess($html, $html));
     }
 
@@ -416,6 +417,7 @@ class FlarumVersionGuesserTest extends TestCase
             FlarumVersion::BETA_10,
             FlarumVersion::BETA_11,
             FlarumVersion::BETA_12,
+            FlarumVersion::BETA_13,
         ], $this->guesser->guess($html, $html));
     }
 
@@ -427,6 +429,19 @@ class FlarumVersionGuesserTest extends TestCase
             FlarumVersion::BETA_10,
             FlarumVersion::BETA_11,
             FlarumVersion::BETA_12,
+            FlarumVersion::BETA_13,
+        ], $this->guesser->guess($html, $html));
+    }
+
+    function testBeta13Normal()
+    {
+        $html = $this->homepageScript(13, true, true);
+
+        $this->assertEquals([
+            FlarumVersion::BETA_10,
+            FlarumVersion::BETA_11,
+            FlarumVersion::BETA_12,
+            FlarumVersion::BETA_13,
         ], $this->guesser->guess($html, $html));
     }
 }

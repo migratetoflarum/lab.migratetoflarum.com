@@ -12,6 +12,7 @@ class FlarumVersion
     const BETA_10 = "0.1.0-beta.10";
     const BETA_11 = "0.1.0-beta.11";
     const BETA_12 = "0.1.0-beta.12";
+    const BETA_13 = "0.1.0-beta.13";
 
     public static function isBeta7(array $versions): bool
     {
