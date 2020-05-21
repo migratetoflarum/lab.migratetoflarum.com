@@ -66,8 +66,8 @@ class ShowcaseUpdate implements ShouldQueue
         try {
             $userCount = $this->guessTotalItems("$apiUrl/users");
         } catch (ClientException $exception) {
-            // It's normal to get 401 Unauthorized if user listing wasn't enabled
-            if ($exception->getCode() === 401) {
+            // It's normal to get Unauthorized/Forbidden if user listing wasn't enabled
+            if ($exception->getCode() === 401 || $exception->getCode() === 403) {
                 $userCount = null;
             } else {
                 throw $exception;

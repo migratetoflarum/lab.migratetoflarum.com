@@ -148,7 +148,7 @@ trait NormalizeUrls
                         if ($other) {
                             $destination = $other;
 
-                            continue;
+                            continue 2;
                         }
 
                         // Exit loop
