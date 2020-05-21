@@ -12,6 +12,7 @@ import RequestsReport from '../components/RequestsReport';
 import getObjectKey from '../helpers/getObjectKey';
 import FlarumVersionString from '../components/FlarumVersionString';
 import TasksReport from '../components/TasksReport';
+import SizesReport from '../components/SizesReport';
 
 export default {
     oninit(vnode) {
@@ -438,6 +439,9 @@ export default {
                             ]),
                         ]),
                     ]),
+                    m(SizesReport, {
+                        javascriptSize: reportKey('ScanJavascript', 'javascriptSize'),
+                    }),
                 ]),
                 m('.col-md-6', [
                     m(ExtensionsReport, {

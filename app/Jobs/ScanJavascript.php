@@ -6,6 +6,7 @@ use App\Beta8JavascriptFileParser;
 use App\FlarumVersion;
 use Exception;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 
 class ScanJavascript extends TaskJob
 {
@@ -40,6 +41,7 @@ class ScanJavascript extends TaskJob
         }
 
         $javascriptExtensions = [];
+        $javascriptSize = [];
 
         foreach ([
                      'forum' => $forumJsHash,
@@ -52,14 +54,48 @@ class ScanJavascript extends TaskJob
 
                 $content = $this->request("$safeFlarumUrl/assets/$stack-$hash.js")->getBody()->getContents();
 
+                $javascriptSize[$stack] = [
+                    'total' => mb_strlen($content, '8bit'),
+                    'modules' => [],
+                ];
+
                 if (FlarumVersion::isBeta8OrAbove($homepage->getData('versions'))) {
                     $javascriptParser = new Beta8JavascriptFileParser($content);
 
                     $javascriptExtensions[$stack] = [];
+                    $sizeModules = [];
+                    $knownSize = 0;
 
                     foreach ($javascriptParser->extensions() as $extension) {
                         $javascriptExtensions[$stack][Arr::get($extension, 'id')] = Arr::get($extension, 'checksum');
+                        $sizeModules[] = Arr::only($extension, ['id', 'size', 'dev']);
+                        $knownSize += Arr::get($extension, 'size');
                     }
+
+                    $coreSize = $javascriptParser->coreSize();
+
+                    if ($coreSize) {
+                        foreach ($coreSize as $id => $size) {
+                            $sizeModules[] = [
+                                'id' => $id,
+                                'size' => $size,
+                            ];
+
+                            $knownSize += $size;
+                        }
+                    }
+
+                    $sizeModules[] = [
+                        'id' => 'other',
+                        'size' => $javascriptSize[$stack]['total'] - $knownSize,
+                    ];
+
+                    $javascriptSize[$stack]['modules'] = Collection::make($sizeModules)->sortByDesc('size')->values()->all();
+                } else {
+                    $javascriptSize[$stack]['modules'][] = [
+                        'id' => 'unknown',
+                        'size' => $javascriptSize[$stack]['total'],
+                    ];
                 }
             } catch (Exception $exception) {
                 $this->log(self::LOG_PUBLIC, 'Error while accessing ' . $stack . '. Skipping. ' . $exception->getMessage());
@@ -67,5 +103,6 @@ class ScanJavascript extends TaskJob
         }
 
         $this->data['javascriptExtensions'] = $javascriptExtensions;
+        $this->data['javascriptSize'] = $javascriptSize;
     }
 }

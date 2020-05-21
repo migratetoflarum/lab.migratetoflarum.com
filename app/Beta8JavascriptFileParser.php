@@ -30,7 +30,40 @@ class Beta8JavascriptFileParser
             return [
                 'id' => $match[2],
                 'checksum' => md5($content),
+                'size' => mb_strlen($match[0], '8bit'),
+                'dev' => str_contains($content, '/******/'),
             ];
         }, $matches);
+    }
+
+    public function coreSize(): ?array
+    {
+        // We detect the end of the core javascript by a its known content
+        // Beta 13 forum: (e,"compat",(function(){return he}))}]);
+        // Beta 13 admin: (e,"compat",(function(){return ct}))}]);
+        // Beta 12 forum: (e,"compat",(function(){return he}))}]);
+        // Beta 12 admin: (e,"compat",(function(){return ct}))}]);
+        // Beta 11 forum: (e,"compat",function(){return he})}]);
+        // Beta 11 admin: (e,"compat",function(){return ct})}]);
+        // Beta 10 forum: (e,"compat",function(){return he})}]);
+        // Beta 10 admin: (e,"compat",function(){return ct})}]);
+        // Beta 09 forum: (e,"compat",function(){return he})}]);
+        // Beta 09 admin: (e,"compat",function(){return ct})}]);
+        // Beta 08 forum: (e,"compat",function(){return he})}]);
+        // Beta 08 admin: (e,"compat",function(){return lt})}]);
+        if (preg_match('~^([\s\S]*\(e,"compat",\(?function\(\)\{return [a-z]{2}\}\)\)?\}\]\);)([\s\S]*?)var\s+module\s*=\s*\{\}~m', $this->content, $matches) !== 1) {
+            return null;
+        }
+
+        $modules = [
+            'core' => mb_strlen($matches[1], '8bit'),
+        ];
+
+        // On admin, there will be some space between core and the first module, but we won't consider it as textformatter
+        if (strlen($matches[2]) > 10) {
+            $modules['textformatter'] = mb_strlen($matches[2], '8bit');
+        }
+
+        return $modules;
     }
 }
