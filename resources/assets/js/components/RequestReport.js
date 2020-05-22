@@ -11,12 +11,12 @@ export default {
         let resultClass = 'secondary';
         let resultMessage = '??';
 
-        if (request.response_status_code) {
-            resultClass = 'success';
-            resultMessage = request.response_status_code + ' ' + request.response_reason_phrase + ', ' + request.duration + 'ms';
-        } else if (request.exception) {
+        if (request.exception) {
             resultClass = 'warning';
             resultMessage = 'Error';
+        } else if (request.response_status_code) {
+            resultClass = 'success';
+            resultMessage = request.response_status_code + ' ' + request.response_reason_phrase + ', ' + request.duration + 'ms';
         }
 
         return [

@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Events\RequestUpdated;
 use App\Events\TaskLog;
 use App\Events\TaskUpdated;
+use App\Exceptions\InvalidEncodingException;
 use App\Exceptions\TaskManualFailException;
 use App\Request;
 use App\ScannerClient;
@@ -125,6 +126,13 @@ abstract class TaskJob implements ShouldQueue
                     $request->response_body_truncated = false;
                 }
 
+                // We need to throw an error before saving to the database, otherwise a mess happens
+                // With both the original payload being impossible to write to DB, the error being too big for websocket
+                // And the error message itself containing an excerpt of the incorrectly encoded data
+                if (!mb_check_encoding($content)) {
+                    throw new InvalidEncodingException("$url contains incorrectly encoded data");
+                }
+
                 $request->response_body = $content;
             }
 
@@ -207,6 +215,9 @@ abstract class TaskJob implements ShouldQueue
             // This won't be seen as a job failure in the queue, allowing the next jobs to run
             $this->task->failed_at = now();
             $this->log(self::LOG_PUBLIC, $exception->getMessage());
+        } catch (InvalidEncodingException $exception) {
+            $this->task->failed_at = now();
+            $this->log(self::LOG_PUBLIC, 'Task aborted due to invalid encoding: ' . $exception->getMessage());
         }
 
         $this->saveTaskAndBroadcast();
