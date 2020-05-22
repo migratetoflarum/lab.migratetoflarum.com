@@ -11,7 +11,7 @@ export default {
             m.request({
                 method: 'get',
                 url: vnode.state.nextPage,
-                body: {
+                params: {
                     horizon_token: m.parseQueryString(location.search).horizon_token,
                 },
             }).then(response => {
