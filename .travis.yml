@@ -6,5 +6,8 @@ php:
 
 before_install:
   - cp .env.travis .env
+  # Travis doesn't have imagick, but we don't need it for the tests
+  # from https://github.com/composer/composer/issues/5900
+  - composer config platform.ext-imagick '0'
   - composer install --prefer-dist -n
   - php artisan key:generate
