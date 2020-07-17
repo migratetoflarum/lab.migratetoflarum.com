@@ -9,5 +9,7 @@ before_install:
   # Travis doesn't have imagick, but we don't need it for the tests
   # from https://github.com/composer/composer/issues/5900
   - composer config platform.ext-imagick '0'
-  - composer install --prefer-dist -n
+  # Composer will say the package name is invalid but that's not important
+  # This is just so that it updates the platform config in the lock file without updating any package
+  - composer update ext-imagick --prefer-dist --no-interaction
   - php artisan key:generate
