@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
@@ -55,9 +56,10 @@ class Extension extends Model
         'package',
     ];
 
-    public function versions()
+    public function versions(): HasMany
     {
-        return $this->hasMany(ExtensionVersion::class)->orderBy('version_normalized', 'desc');
+        return $this->hasMany(ExtensionVersion::class)
+            ->orderBy('version_normalized', 'desc');
     }
 
     public function lastVersion()

@@ -25,5 +25,8 @@ abstract class AbstractTaskEvent implements ShouldBroadcast
         if ($this->task->scan_id) {
             return new Channel('scans.' . $this->task->scan->uid);
         }
+
+        // This should not happen, but that we we make sure to return a channel name even if no scan is associated
+        return new Channel('scans.orphan');
     }
 }

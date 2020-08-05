@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Resources\WebsiteResource;
 use App\Website;
 use Illuminate\Contracts\Pagination\Paginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 
@@ -13,6 +14,9 @@ class WebsiteController extends Controller
 {
     public function index(Request $request)
     {
+        /**
+         * @var $query Builder
+         */
         $query = Website::publiclyVisible();
 
         switch ($request->get('sort')) {
@@ -48,7 +52,7 @@ class WebsiteController extends Controller
         $search = trim(Arr::get($filter, 'q'));
 
         if ($search) {
-            $query->where(function ($query) use ($search) {
+            $query->where(function (Builder $query) use ($search) {
                 $query->where('normalized_url', 'like', '%' . $search . '%')
                     ->orWhere('name', 'like', '%' . $search . '%')
                     ->orWhere('showcase_meta->description', 'like', '%' . $search . '%');

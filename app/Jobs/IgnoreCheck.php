@@ -48,7 +48,9 @@ class IgnoreCheck implements ShouldQueue
         /**
          * @var $website Website
          */
-        $website = Website::where('normalized_url', $this->check->normalized_url)->first();
+        $website = Website::query()
+            ->where('normalized_url', $this->check->normalized_url)
+            ->first();
 
         if ($website) {
             if ($website->ignore !== $this->check->ignore) {

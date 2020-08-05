@@ -62,7 +62,8 @@ abstract class TaskJob implements ShouldQueue
      * @param bool $sensitive
      * @return \Psr\Http\Message\ResponseInterface|null
      * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Exception
+     * @throws InvalidEncodingException
+     * @throws Exception
      */
     protected function request(string $url, string $method = 'GET', $sensitive = false)
     {
@@ -138,6 +139,10 @@ abstract class TaskJob implements ShouldQueue
 
             $response->getBody()->rewind(); // So the full response can be read again in the task
         } catch (Exception $exception) {
+            /**
+             * Necessary to make phpStorm realize InvalidEncodingException might be thrown
+             * @var $exception Exception|InvalidEncodingException
+             */
             $request->exception = [
                 'time' => round((microtime(true) - $requestTime) * 1000),
                 'class' => get_class($exception),
@@ -199,6 +204,7 @@ abstract class TaskJob implements ShouldQueue
 
     /**
      * @throws TaskManualFailException
+     * @throws InvalidEncodingException
      */
     abstract protected function handleTask();
 

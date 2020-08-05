@@ -23,7 +23,7 @@ class ScanController extends Controller
         /**
          * @var $scan Scan
          */
-        $scan = Scan::where('uid', $uid)->firstOrFail();
+        $scan = Scan::query()->where('uid', $uid)->firstOrFail();
         $scan->load('website');
 
         return new ScanResource($scan);
@@ -34,7 +34,9 @@ class ScanController extends Controller
         $destination = null;
 
         if ($request->has('website_id')) {
-            $website = Website::where('uid', $request->get('website_id'))->firstOrFail();
+            $website = Website::query()
+                ->where('uid', $request->get('website_id'))
+                ->firstOrFail();
 
             $wantsNewScan = true;
         } else {

@@ -138,5 +138,8 @@ class ShowcaseUpdate implements ShouldQueue
                     return self::PAGE_LIMIT * $page + count($items);
             }
         }
+
+        // We shouldn't reach this point but this fixes the missing return statement warning
+        return 0;
     }
 }

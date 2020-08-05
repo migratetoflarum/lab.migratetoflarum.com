@@ -2,7 +2,6 @@
 
 namespace App\Events;
 
-use App\Resources\ScanResource;
 use App\Scan;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;

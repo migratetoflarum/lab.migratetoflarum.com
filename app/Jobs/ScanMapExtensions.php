@@ -49,7 +49,10 @@ class ScanMapExtensions extends TaskJob
         foreach ($extensions as $flarumId => $checksum) {
             // Order by abandoned so that if there is both an abandoned and non-abandoned extension with the same ID, the non-abandoned one will be returned
             // This happens in particular with Flarum core extensions whose packages were renamed while keeping the same ID
-            $extension = Extension::where('flarumid', $flarumId)->orderBy('abandoned')->first();
+            $extension = Extension::query()
+                ->where('flarumid', $flarumId)
+                ->orderBy('abandoned')
+                ->first();
 
             if (!$extension) {
                 continue;
@@ -57,7 +60,10 @@ class ScanMapExtensions extends TaskJob
 
             $return[] = [
                 'extension_id' => $extension->id,
-                'possible_versions' => $extension->versions()->where('javascript_' . $stack . '_checksum', $checksum)->pluck('version')->all(),
+                'possible_versions' => $extension->versions()
+                    ->where('javascript_' . $stack . '_checksum', $checksum)
+                    ->pluck('version')
+                    ->all(),
             ];
         }
 

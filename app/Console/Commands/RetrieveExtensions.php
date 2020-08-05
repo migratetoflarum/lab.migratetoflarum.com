@@ -52,7 +52,7 @@ class RetrieveExtensions extends Command
                 /**
                  * @var $extension Extension
                  */
-                $extension = Extension::firstOrNew([
+                $extension = Extension::query()->firstOrNew([
                     'package' => $packageName,
                 ]);
 
@@ -79,7 +79,7 @@ class RetrieveExtensions extends Command
                     /**
                      * @var $extensionVersion ExtensionVersion
                      */
-                    $extensionVersion = ExtensionVersion::firstOrNew([
+                    $extensionVersion = ExtensionVersion::query()->firstOrNew([
                         'extension_id' => $extension->id,
                         'version' => $versionNumber,
                     ]);
@@ -139,11 +139,16 @@ class RetrieveExtensions extends Command
                     $localeId = null;
 
                     if ($localeCode = Arr::get($latestVersion, 'extra.flarum-locale.code')) {
-                        $localeId = Locale::firstOrCreate([
+                        /**
+                         * @var $locale Locale
+                         */
+                        $locale = Locale::query()->firstOrCreate([
                             'code' => $localeCode,
                         ], [
                             'localized_name' => Arr::get($latestVersion, 'extra.flarum-locale.title'),
-                        ])->id;
+                        ]);
+
+                        $localeId = $locale->id;
                     }
 
                     $extension->flarum_locale_id = $localeId;

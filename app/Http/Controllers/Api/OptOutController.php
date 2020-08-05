@@ -27,7 +27,7 @@ class OptOutController extends Controller
 
         $normalized = $this->getNormalizedUrl($destination);
 
-        $website = Website::where('normalized_url', $normalized)->first();
+        $website = Website::query()->where('normalized_url', $normalized)->first();
         $check = null;
 
         if (!$website || is_null($website->ignore) || $request->has('check_now')) {
@@ -37,7 +37,7 @@ class OptOutController extends Controller
             /**
              * @var $lastCheck OptOutCheck
              */
-            $lastCheck = OptOutCheck::where('domain', $domain)->latest()->first();
+            $lastCheck = OptOutCheck::query()->where('domain', $domain)->latest()->first();
 
             if ($lastCheck && !$lastCheck->checked_at) {
                 $check = $lastCheck;

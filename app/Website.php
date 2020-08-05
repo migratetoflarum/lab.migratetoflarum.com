@@ -67,7 +67,7 @@ class Website extends UidModel implements HasMedia
     {
         $query
             // TODO: can be replaced with simply ignore == 0 once most existing websites have been scanned again with an ignore check
-            ->where(function ($query) {
+            ->where(function (Builder $query) {
                 $query
                     ->whereNull('ignore')
                     ->orWhere('ignore', '=', 0);

@@ -17,11 +17,12 @@ class WebsitesPing extends Command
     public function handle()
     {
         if ($this->argument('website')) {
-            $websites = [Website::where('uid', $this->argument('website'))->firstOrFail()];
+            $websites = [Website::query()->where('uid', $this->argument('website'))->firstOrFail()];
         } else {
             $sinceDays = $this->option('since-days') === 'default' ? config('scanner.ping.interval') : $this->option('since-days');
 
-            $websites = Website::where('ignore', '=', 0)
+            $websites = Website::query()
+                ->where('ignore', '=', 0)
                 ->where('is_flarum', '=', 1)
                 ->where(function (Builder $query) use ($sinceDays) {
                     $query->whereNull('pinged_at')

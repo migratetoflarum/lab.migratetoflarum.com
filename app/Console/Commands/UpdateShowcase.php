@@ -14,7 +14,12 @@ class UpdateShowcase extends Command
 
     public function handle()
     {
-        $website = Website::where('uid', $this->argument('website'))->firstOrFail();
+        /**
+         * @var $website Website
+         */
+        $website = Website::query()
+            ->where('uid', $this->argument('website'))
+            ->firstOrFail();
 
         dispatch(new ShowcaseUpdate($website));
         dispatch(new ShowcaseScreenshot($website));
