@@ -4,14 +4,14 @@ namespace App\Resources;
 
 use App\Jobs\ScanHomePage;
 use App\Task;
-use Illuminate\Http\Resources\Json\Resource;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
 /**
  * @property Task $resource
  */
-class TaskResource extends Resource
+class TaskResource extends JsonResource
 {
     public function toArray($request)
     {

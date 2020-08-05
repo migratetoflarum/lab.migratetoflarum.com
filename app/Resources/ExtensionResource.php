@@ -4,13 +4,13 @@ namespace App\Resources;
 
 use App\Extension;
 use Composer\Semver\Comparator;
-use Illuminate\Http\Resources\Json\Resource;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Arr;
 
 /**
  * @property Extension $resource
  */
-class ExtensionResource extends Resource
+class ExtensionResource extends JsonResource
 {
     public function toArray($request)
     {

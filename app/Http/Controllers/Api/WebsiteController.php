@@ -7,6 +7,7 @@ use App\Resources\WebsiteResource;
 use App\Website;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
 class WebsiteController extends Controller
 {
@@ -44,7 +45,7 @@ class WebsiteController extends Controller
 
         $filter = $request->get('filter', []);
 
-        $search = trim(array_get($filter, 'q'));
+        $search = trim(Arr::get($filter, 'q'));
 
         if ($search) {
             $query->where(function ($query) use ($search) {

@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use App\FlarumVersion;
 use App\FlarumVersionGuesser;
+use Illuminate\Support\Arr;
 use Tests\TestCase;
 
 class FlarumVersionGuesserTest extends TestCase
@@ -13,7 +14,7 @@ class FlarumVersionGuesserTest extends TestCase
      */
     protected $guesser;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -244,7 +245,7 @@ class FlarumVersionGuesserTest extends TestCase
                     [
                         'type' => 'users',
                         'id' => '1',
-                        'attributes' => array_only([
+                        'attributes' => Arr::only([
                             'username' => 'Admin',
                             'displayName' => 'Admin',
                             'avatarUrl' => null,
@@ -252,7 +253,7 @@ class FlarumVersionGuesserTest extends TestCase
                     ], [
                         'type' => 'posts',
                         'id' => '1',
-                        'attributes' => array_only([
+                        'attributes' => Arr::only([
                             'id' => 1,
                             'number' => 1,
                             $postCreatedAtName => '2018-01-23T23:37:49+00:00',

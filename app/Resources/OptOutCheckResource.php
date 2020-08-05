@@ -3,12 +3,12 @@
 namespace App\Resources;
 
 use App\OptOutCheck;
-use Illuminate\Http\Resources\Json\Resource;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * @property OptOutCheck $resource
  */
-class OptOutCheckResource extends Resource
+class OptOutCheckResource extends JsonResource
 {
     public function toArray($request)
     {

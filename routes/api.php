@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+
 Route::resource('scans', Api\ScanController::class, ['only' => ['show', 'store']]);
 Route::resource('websites', Api\WebsiteController::class, ['only' => ['index']]);
 Route::resource('tasks', Api\TaskController::class, ['only' => ['index']]);

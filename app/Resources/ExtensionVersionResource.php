@@ -3,12 +3,12 @@
 namespace App\Resources;
 
 use App\ExtensionVersion;
-use Illuminate\Http\Resources\Json\Resource;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * @property ExtensionVersion $resource
  */
-class ExtensionVersionResource extends Resource
+class ExtensionVersionResource extends JsonResource
 {
     public function toArray($request)
     {

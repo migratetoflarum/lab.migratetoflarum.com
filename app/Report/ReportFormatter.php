@@ -3,6 +3,7 @@
 namespace App\Report;
 
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Support\Arr;
 
 /**
  * Used to format old reports
@@ -23,15 +24,15 @@ class ReportFormatter implements Arrayable
             return [];
         }
 
-        if (array_has($this->report, 'failed')) {
-            return array_only($this->report, [
+        if (Arr::has($this->report, 'failed')) {
+            return Arr::only($this->report, [
                 'failed',
                 'requests',
             ]);
         }
 
         // We know Discuss will always run dev-master
-        if (array_get($this->report, 'base_address') === 'discuss.flarum.org/' && array_has($this->report, 'homepage.versions')) {
+        if (Arr::get($this->report, 'base_address') === 'discuss.flarum.org/' && Arr::has($this->report, 'homepage.versions')) {
             $this->report['homepage']['versions'] = ['dev-master'];
         }
 

@@ -5,6 +5,7 @@ namespace App;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Arr;
 use Pdp\Rules;
 use Spatie\MediaLibrary\HasMedia\HasMedia;
 use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
@@ -85,7 +86,7 @@ class Website extends UidModel implements HasMedia
 
         $parsedUrl = parse_url("https://{$this->normalized_url}");
 
-        $domain = $rules->resolve(array_get($parsedUrl, 'host'));
+        $domain = $rules->resolve(Arr::get($parsedUrl, 'host'));
 
         return is_null($domain->getSubDomain());
     }

@@ -35,7 +35,7 @@ class ScanHomePage extends TaskJob
         $this->log(self::LOG_PUBLIC, 'Reading boot script');
 
         $homepage->filter('body script')->each(function (Crawler $script) use ($bodyContent) {
-            $content = $script->text();
+            $content = $script->text('', false);
 
             if (!str_contains($content, 'app.boot')) {
                 return;
@@ -69,7 +69,13 @@ class ScanHomePage extends TaskJob
             // beta7 calls app.boot() with the payload
             // beta8 calls app.load() with the payload then app.boot() without arguments
             if (preg_match('~app\.(boot|load)\(([^\n]+)\)~', $content, $matches) === 1) {
-                $bootArguments = json_decode($matches[2], true);
+                $bootArguments = null;
+
+                try {
+                    $bootArguments = \GuzzleHttp\json_decode($matches[2], true);
+                } catch (\InvalidArgumentException $exception) {
+                    $this->log(self::LOG_PRIVATE, $exception->getMessage());
+                }
 
                 if (is_array($bootArguments)) {
                     foreach (Arr::get($bootArguments, 'resources', []) as $resource) {
@@ -83,6 +89,8 @@ class ScanHomePage extends TaskJob
                             break;
                         }
                     }
+                } else {
+                    $this->log(self::LOG_PRIVATE, 'Found boot payload but is not an array or failed json parsing');
                 }
             }
         });

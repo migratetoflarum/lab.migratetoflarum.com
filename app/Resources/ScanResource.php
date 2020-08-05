@@ -4,12 +4,12 @@ namespace App\Resources;
 
 use App\Report\ReportFormatter;
 use App\Scan;
-use Illuminate\Http\Resources\Json\Resource;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * @property Scan $resource
  */
-class ScanResource extends Resource
+class ScanResource extends JsonResource
 {
     public function toArray($request)
     {

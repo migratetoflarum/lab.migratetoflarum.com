@@ -7,6 +7,7 @@ use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Arr;
 
 class ScanExtensions extends Command
 {
@@ -66,7 +67,7 @@ class ScanExtensions extends Command
 
         for ($fileIndex = 0; $fileIndex < $zip->numFiles; $fileIndex++) {
             $file = $zip->statIndex($fileIndex);
-            $filename = array_get($file, 'name');
+            $filename = Arr::get($file, 'name');
 
             if (!$skipModules && preg_match('~/js/dist/(admin|forum)\.js$~', $filename, $matches) === 1) {
                 $content = $zip->getFromIndex($fileIndex);

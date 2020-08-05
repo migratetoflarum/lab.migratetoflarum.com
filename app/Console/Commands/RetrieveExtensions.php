@@ -10,6 +10,8 @@ use Composer\Semver\Comparator;
 use Exception;
 use GuzzleHttp\Client;
 use Illuminate\Console\Command;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 class RetrieveExtensions extends Command
 {
@@ -37,15 +39,15 @@ class RetrieveExtensions extends Command
             $response = $this->client->get($url);
             $data = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
 
-            $packages = array_get($data, 'results', []);
+            $packages = Arr::get($data, 'results', []);
 
             foreach ($packages as $package) {
-                $packageName = array_get($package, 'name');
+                $packageName = Arr::get($package, 'name');
                 $this->info("Saving $packageName");
 
-                $details = array_get(\GuzzleHttp\json_decode($this->client->get("/packages/$packageName.json")->getBody()->getContents(), true), 'package', []);
+                $details = Arr::get(\GuzzleHttp\json_decode($this->client->get("/packages/$packageName.json")->getBody()->getContents(), true), 'package', []);
 
-                $versions = array_get($details, 'versions', []);
+                $versions = Arr::get($details, 'versions', []);
 
                 /**
                  * @var $extension Extension
@@ -70,7 +72,7 @@ class RetrieveExtensions extends Command
                 $lastVersion = null;
 
                 foreach ($versions as $version) {
-                    $versionNumber = array_get($version, 'version');
+                    $versionNumber = Arr::get($version, 'version');
 
                     $this->info("Saving version $versionNumber");
 
@@ -83,15 +85,15 @@ class RetrieveExtensions extends Command
                     ]);
 
                     $extensionVersion->packagist = $version;
-                    $extensionVersion->version_normalized = array_get($version, 'version_normalized');
-                    $extensionVersion->packagist_time = Carbon::parse(array_get($version, 'time'));
+                    $extensionVersion->version_normalized = Arr::get($version, 'version_normalized');
+                    $extensionVersion->packagist_time = Carbon::parse(Arr::get($version, 'time'));
                     $extensionVersion->save();
 
                     if (
-                        !starts_with($versionNumber, 'dev-') &&
-                        !ends_with($versionNumber, '-dev')
+                        !Str::startsWith($versionNumber, 'dev-') &&
+                        !Str::endsWith($versionNumber, '-dev')
                     ) {
-                        $distUrl = array_get($version, 'dist.url');
+                        $distUrl = Arr::get($version, 'dist.url');
 
                         if (
                             $distUrl &&
@@ -119,14 +121,14 @@ class RetrieveExtensions extends Command
                 }
 
                 if ($lastVersion) {
-                    $latestVersion = array_get($versions, $lastVersion);
+                    $latestVersion = Arr::get($versions, $lastVersion);
 
-                    $extension->title = array_get($latestVersion, 'extra.flarum-extension.title');
-                    $extension->icon = array_get($latestVersion, 'extra.flarum-extension.icon');
+                    $extension->title = Arr::get($latestVersion, 'extra.flarum-extension.title');
+                    $extension->icon = Arr::get($latestVersion, 'extra.flarum-extension.icon');
                     $extension->last_version = $lastVersion;
-                    $extension->last_version_time = Carbon::parse(array_get($latestVersion, 'time'));
+                    $extension->last_version_time = Carbon::parse(Arr::get($latestVersion, 'time'));
 
-                    $discussUrl = array_get($latestVersion, 'extra.flagrow.discuss');
+                    $discussUrl = Arr::get($latestVersion, 'extra.flagrow.discuss');
 
                     if (preg_match('~^https://discuss\.flarum\.org/d/[a-z0-9_-]+$~', $discussUrl) === 1) {
                         $extension->discuss_url = $discussUrl;
@@ -136,11 +138,11 @@ class RetrieveExtensions extends Command
 
                     $localeId = null;
 
-                    if ($localeCode = array_get($latestVersion, 'extra.flarum-locale.code')) {
+                    if ($localeCode = Arr::get($latestVersion, 'extra.flarum-locale.code')) {
                         $localeId = Locale::firstOrCreate([
                             'code' => $localeCode,
                         ], [
-                            'localized_name' => array_get($latestVersion, 'extra.flarum-locale.title'),
+                            'localized_name' => Arr::get($latestVersion, 'extra.flarum-locale.title'),
                         ])->id;
                     }
 
@@ -149,14 +151,14 @@ class RetrieveExtensions extends Command
                     $extension->lastVersion()->associate($extension->versions()->where('version', $lastVersion)->first());
                 }
 
-                $extension->description = array_get($details, 'description');
-                $extension->abandoned = array_get($details, 'abandoned');
-                $extension->repository = array_get($details, 'repository');
-                $extension->packagist_time = Carbon::parse(array_get($details, 'time'));
+                $extension->description = Arr::get($details, 'description');
+                $extension->abandoned = Arr::get($details, 'abandoned');
+                $extension->repository = Arr::get($details, 'repository');
+                $extension->packagist_time = Carbon::parse(Arr::get($details, 'time'));
                 $extension->save();
             }
 
-            $url = array_get($data, 'next');
+            $url = Arr::get($data, 'next');
         }
 
         $this->info('Done.');

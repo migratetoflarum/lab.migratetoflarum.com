@@ -6,6 +6,7 @@ use App\Events\ScanUpdated;
 use App\Exceptions\TaskManualFailException;
 use App\Task;
 use Carbon\Carbon;
+use Illuminate\Support\Arr;
 
 class ScanUpdateDatabase extends TaskJob
 {
@@ -74,7 +75,7 @@ class ScanUpdateDatabase extends TaskJob
 
         // If Flarum was detected and the website is public and the showcase meta is older than a day, update
         if ($scan->website->is_flarum && !$scan->website->ignore && !$scan->hidden) {
-            $lastShowcaseUpdate = array_get($scan->website->showcase_meta, 'date');
+            $lastShowcaseUpdate = Arr::get($scan->website->showcase_meta, 'date');
 
             if (!$lastShowcaseUpdate || Carbon::parse($lastShowcaseUpdate)->lt(now()->subDay())) {
                 ShowcaseUpdate::dispatch($scan->website);

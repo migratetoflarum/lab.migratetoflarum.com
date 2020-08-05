@@ -6,6 +6,8 @@ use App\ScannerClient;
 use GuzzleHttp\Exception\TransferException;
 use GuzzleHttp\Psr7\Uri;
 use Illuminate\Cache\Repository;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Psr\Http\Message\StreamInterface;
 use Symfony\Component\DomCrawler\Crawler;
@@ -30,7 +32,7 @@ trait NormalizeUrls
             throw $this->createUrlValidationException('Could not parse address');
         }
 
-        if (!array_has($address, 'host')) {
+        if (!Arr::has($address, 'host')) {
             throw $this->createUrlValidationException('No hostname found in address');
         }
 
@@ -67,7 +69,7 @@ trait NormalizeUrls
                 $href = $link->attr('href');
 
                 if (!$flarumUrl && str_contains($href, '/assets/forum-')) {
-                    $flarumUrl = array_first(explode('/assets/forum-', $href, 2)) . '/';
+                    $flarumUrl = Arr::first(explode('/assets/forum-', $href, 2)) . '/';
                 }
             });
 
@@ -93,7 +95,7 @@ trait NormalizeUrls
     {
         $address = $this->getParsedUrl($url);
 
-        $host = array_get($address, 'host');
+        $host = Arr::get($address, 'host');
 
         if (filter_var($host, FILTER_VALIDATE_IP) && !filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
             throw $this->createUrlValidationException('The ip address is not publicly reachable');
@@ -103,7 +105,7 @@ trait NormalizeUrls
             throw $this->createUrlValidationException('I\'m afraid I can\'t let you do that, Dave');
         }
 
-        $port = array_get($address, 'port');
+        $port = Arr::get($address, 'port');
 
         if ($port && $port !== 80 && $port !== 443) {
             throw $this->createUrlValidationException('We only scan servers answering http on port 80 and https on port 443');
@@ -155,7 +157,7 @@ trait NormalizeUrls
                         break 2;
                     case 301:
                     case 302:
-                        $destination = trim(array_first($response->getHeader('Location')));
+                        $destination = trim(Arr::first($response->getHeader('Location')));
 
                         $this->getValidationFactory()->make([
                             'url' => $destination,
@@ -168,7 +170,7 @@ trait NormalizeUrls
                         break;
                     default:
                         $status = $response->getStatusCode();
-                        $text = array_get(Response::$statusTexts, $status, 'Unknown status code');
+                        $text = Arr::get(Response::$statusTexts, $status, 'Unknown status code');
 
                         throw $this->createUrlValidationException("The url $destination returned the status code $status ($text)");
                 }
@@ -188,12 +190,12 @@ trait NormalizeUrls
     {
         $address = $this->getParsedUrl($url);
 
-        $baseAddress = array_get($address, 'host') . array_get($address, 'path', '/');
+        $baseAddress = Arr::get($address, 'host') . Arr::get($address, 'path', '/');
 
         $remove = 'www.';
 
         // remove www from base address
-        if (starts_with($baseAddress, $remove)) {
+        if (Str::startsWith($baseAddress, $remove)) {
             $baseAddress = substr($baseAddress, strlen($remove));
         }
 

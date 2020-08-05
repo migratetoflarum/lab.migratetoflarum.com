@@ -10,6 +10,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Support\Arr;
 
 class ShowcaseUpdate implements ShouldQueue
 {
@@ -77,9 +78,9 @@ class ShowcaseUpdate implements ShouldQueue
             $userCount = 50000;
         }
 
-        $description = trim(array_get($forum, 'data.attributes.description'));
+        $description = trim(Arr::get($forum, 'data.attributes.description'));
 
-        if ($forum && $title = trim(array_get($forum, 'data.attributes.title'))) {
+        if ($forum && $title = trim(Arr::get($forum, 'data.attributes.title'))) {
             $this->website->name = $title;
         }
         $this->website->showcase_meta = [
@@ -104,7 +105,7 @@ class ShowcaseUpdate implements ShouldQueue
             'http_errors' => true,
         ])->getBody()->getContents(), true);
 
-        $items = array_get($document, 'data');
+        $items = Arr::get($document, 'data');
         if (count($items) < self::PAGE_LIMIT) {
             return count($items);
         }
@@ -118,7 +119,7 @@ class ShowcaseUpdate implements ShouldQueue
                 'http_errors' => true,
             ])->getBody()->getContents(), true);
 
-            $items = array_get($document, 'data');
+            $items = Arr::get($document, 'data');
 
             switch (count($items)) {
                 case self::PAGE_LIMIT:

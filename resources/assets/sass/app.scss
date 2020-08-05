@@ -1,5 +1,5 @@
 // Use file instead of data: uri so it doesn't require to lower CSP strength
-$navbar-dark-toggler-icon-bg: url(../images/navbar-toggle.svg);
+$navbar-dark-toggler-icon-bg: url(../../../resources/assets/images/navbar-toggle.svg);
 
 @import '~bootstrap/scss/bootstrap';
 @import "~@fortawesome/fontawesome-free/scss/fontawesome";
@@ -125,6 +125,7 @@ $navbar-dark-toggler-icon-bg: url(../images/navbar-toggle.svg);
     background: #e4ded2;
 
     .container {
+        // TODO: this is broken in bootstrap 4.5.1 https://github.com/twbs/bootstrap/issues/31436
         @include make-container-max-widths((
             sm: 540px,
             md: 720px,

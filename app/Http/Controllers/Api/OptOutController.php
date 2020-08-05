@@ -9,6 +9,7 @@ use App\Resources\OptOutCheckResource;
 use App\Resources\WebsiteResource;
 use App\Website;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
 class OptOutController extends Controller
 {
@@ -31,7 +32,7 @@ class OptOutController extends Controller
 
         if (!$website || is_null($website->ignore) || $request->has('check_now')) {
             $parsed = $this->getParsedUrl($url);
-            $domain = array_get($parsed, 'host');
+            $domain = Arr::get($parsed, 'host');
 
             /**
              * @var $lastCheck OptOutCheck
