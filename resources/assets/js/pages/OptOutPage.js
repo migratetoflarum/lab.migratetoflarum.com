@@ -67,7 +67,7 @@ export default {
                 }, [
                     m('p', 'If you don\'t want your forum to show up in public scans or in the showcase, you can manually opt out.'),
                     m('p', 'You need to add (and keep) the following meta tag on the homepage of your forum. The easiest is to paste it in Admin > Appearance > Custom Header'),
-                    m('pre', '<meta name="migratetoflarum-lab-opt-out" value="yes">'),
+                    m('pre', '<meta name="migratetoflarum-lab-opt-out" content="yes">'),
                     m('p', 'This won\'t prevent other people from scanning your forum, but the results will always be private and the website will never be added to the showcase.'),
                     m('p', 'Want to opt back in ? Just remove the meta tag.'),
                     m('p', 'Enter your forum url below to check opt out status and ask for a re-check if needed:'),

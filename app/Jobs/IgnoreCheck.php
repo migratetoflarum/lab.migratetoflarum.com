@@ -35,6 +35,8 @@ class IgnoreCheck implements ShouldQueue
 
         $page = new Crawler($response->getBody()->getContents());
 
+        // We only check for the presence of the meta, even though instructions say to add content=yes
+        // Note: pre-august 2020 the instructions were saying to add value=yes
         $meta = $page->filter('meta[name=migratetoflarum-lab-opt-out]')->first();
 
         $this->check->ignore = $meta->count() > 0;
