@@ -350,8 +350,8 @@ export default {
                         }).catch(err => {
                             vnode.state.loading = false;
 
-                            if (err.errors && err.errors.website_id) {
-                                alert(err.errors.website_id.join());
+                            if (err.response && err.response.errors && err.response.errors.website_id) {
+                                alert(err.response.errors.website_id.join());
 
                                 return;
                             }

@@ -39,8 +39,8 @@ export default {
             }).catch(err => {
                 vnode.state.loading = false;
 
-                if (err.errors && err.errors.url) {
-                    vnode.state.errors = err.errors.url;
+                if (err.response && err.response.errors && err.response.errors.url) {
+                    vnode.state.errors = err.response.errors.url;
 
                     return;
                 }
