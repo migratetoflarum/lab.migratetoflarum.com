@@ -45,6 +45,13 @@ export default function (url) {
                 };
             // Peer certificate cannot be authenticated with known CA certificates.
             case 60:
+                if (message.indexOf('certificate has expired') !== -1) {
+                    return {
+                        description: 'HTTPS certificate is expired',
+                        suggest: 'Renew the certificate.',
+                    };
+                }
+
                 return {
                     description: 'Can\'t validate HTTPS certificate with known CA',
                     suggest: 'Your certificate isn\'t signed by any CA we know. Was it self-signed ?',
