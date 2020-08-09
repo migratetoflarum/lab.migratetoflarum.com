@@ -138,8 +138,6 @@ trait NormalizeUrls
                         'connect_timeout' => config('scanner.normalization_connect_timeout'),
                     ]);
                 } catch (TransferException $exception) {
-                    report($exception);
-
                     throw $this->createUrlValidationException("An error occurred while connecting to url $destination");
                 }
 

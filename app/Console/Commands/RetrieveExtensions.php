@@ -100,13 +100,13 @@ class RetrieveExtensions extends Command
                             !$extensionVersion->hasMedia('dist')
                         ) {
                             try {
-                                if (preg_match('~^https://api\.github\.com/repos/[^/]+/[^/]+/zipball/[0-9a-f]+$~', $distUrl) !== 1) {
-                                    throw new Exception("Invalid dist file url $distUrl");
+                                if (preg_match('~^https://api\.github\.com/repos/[^/]+/[^/]+/zipball/[0-9a-f]+$~', $distUrl) === 1) {
+                                    $extensionVersion
+                                        ->addMediaFromGitHubApiUrl($distUrl)
+                                        ->toMediaCollection('dist');
+                                } else {
+                                    $this->warn("Unhandled dist file url $distUrl");
                                 }
-
-                                $extensionVersion
-                                    ->addMediaFromGitHubApiUrl($distUrl)
-                                    ->toMediaCollection('dist');
                             } catch (Exception $exception) {
                                 $this->error($exception->getMessage());
 

@@ -239,7 +239,7 @@ abstract class TaskJob implements ShouldQueue
 
     }
 
-    public function failed(Exception $exception)
+    public function failed(\Throwable $exception)
     {
         // Not designed for jobs retries for now
         $this->task->failed_at = now();
