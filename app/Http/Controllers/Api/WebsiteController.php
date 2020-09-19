@@ -33,17 +33,19 @@ class WebsiteController extends Controller
                 $query->orderBy('name', 'desc');
                 break;
             case 'user_count':
-                $query->orderBy('showcase_meta->userCount');
+                // We can't use the "->" shorthand for JSON columns because Laravel
+                // wraps it with json_unquote which casts values to string and break sorting
+                $query->orderByRaw("json_extract(showcase_meta, '$.userCount')");
                 break;
             case '-user_count':
-                $query->orderBy('showcase_meta->userCount', 'desc');
+                $query->orderByRaw("json_extract(showcase_meta, '$.userCount') desc");
                 break;
             case 'discussion_count':
-                $query->orderBy('showcase_meta->discussionCount');
+                $query->orderByRaw("json_extract(showcase_meta, '$.discussionCount')");
                 break;
             case '-discussion_count':
             default:
-                $query->orderBy('showcase_meta->discussionCount', 'desc');
+                $query->orderByRaw("json_extract(showcase_meta, '$.discussionCount') desc");
                 break;
         }
 
