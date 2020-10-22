@@ -31,11 +31,6 @@ class ReportFormatter implements Arrayable
             ]);
         }
 
-        // We know Discuss will always run dev-master
-        if (Arr::get($this->report, 'base_address') === 'discuss.flarum.org/' && Arr::has($this->report, 'homepage.versions')) {
-            $this->report['homepage']['versions'] = ['dev-master'];
-        }
-
         return $this->report;
     }
 }

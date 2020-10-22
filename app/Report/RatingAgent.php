@@ -13,16 +13,18 @@ class RatingAgent
     protected $homepage;
     protected $alternate;
     protected $exposed;
+    protected $version;
 
     public $rating = '-';
     public $importantRules = [];
 
-    public function __construct(Task $canonical, Task $homepage, Task $alternate, Task $exposed)
+    public function __construct(Task $canonical, Task $homepage, Task $alternate, Task $exposed, Task $version)
     {
         $this->canonical = $canonical;
         $this->homepage = $homepage;
         $this->alternate = $alternate;
         $this->exposed = $exposed;
+        $this->version = $version;
     }
 
     public function rate()
@@ -32,9 +34,19 @@ class RatingAgent
                 'cap' => 'D',
                 'description' => 'Vulnerable Flarum version',
                 'check' => function (): bool {
-                    $versions = $this->homepage->getData('versions', []);
+                    $versions = $this->version->getData('versions', []);
 
-                    if (in_array(FlarumVersion::BETA_7, $versions) || in_array(FlarumVersion::BETA_8, $versions)) {
+                    // We mark as vulnerable if all the possible versions are part of the vulnerable list
+                    // If we're unsure, we won't mark vulnerable
+                    // If the list of guest versions is empty, we skip this test, this will happen for forums running a custom build
+                    if (count($versions) && count(array_diff($versions, [
+                            FlarumVersion::BETA_7,
+                            FlarumVersion::BETA_8,
+                            FlarumVersion::BETA_9,
+                            FlarumVersion::BETA_10,
+                            FlarumVersion::BETA_11,
+                            FlarumVersion::BETA_12,
+                        ])) === 0) {
                         return true;
                     }
 

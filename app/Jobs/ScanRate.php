@@ -12,7 +12,8 @@ class ScanRate extends TaskJob
             $this->siblingTask(ScanResolveCanonical::class),
             $this->siblingTask(ScanHomePage::class),
             $this->siblingTask(ScanAlternateUrlsAndHeaders::class),
-            $this->siblingTask(ScanExposedFiles::class)
+            $this->siblingTask(ScanExposedFiles::class),
+            $this->siblingTask(ScanGuessVersion::class)
         );
 
         $agent->rate();

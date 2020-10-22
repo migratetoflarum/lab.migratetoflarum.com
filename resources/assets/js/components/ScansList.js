@@ -4,16 +4,7 @@ import icon from '../helpers/icon';
 import link from '../helpers/link';
 import Rating from './Rating';
 import FlarumVersionString from './FlarumVersionString';
-
-function getVersions(scan) {
-    const task = scan.relationships.tasks && scan.relationships.tasks.data.find(t => t.attributes.job === 'ScanHomePage');
-
-    if (task && task.attributes.data.versions) {
-        return task.attributes.data.versions;
-    }
-
-    return [];
-}
+import getVersions from '../helpers/getVersions';
 
 export default {
     view(vnode) {

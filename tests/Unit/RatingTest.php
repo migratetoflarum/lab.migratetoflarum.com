@@ -2,8 +2,10 @@
 
 namespace Tests\Unit;
 
+use App\FlarumVersion;
 use App\Jobs\ScanAlternateUrlsAndHeaders;
 use App\Jobs\ScanExposedFiles;
+use App\Jobs\ScanGuessVersion;
 use App\Jobs\ScanHomePage;
 use App\Jobs\ScanResolveCanonical;
 use App\Report\RatingAgent;
@@ -78,6 +80,11 @@ class RatingTest extends TestCase
                     'errors' => [],
                 ],
             ],
+            ScanGuessVersion::class => [
+                'versions' => [
+                    FlarumVersion::BETA_14,
+                ],
+            ],
         ], $report);
     }
 
@@ -103,7 +110,8 @@ class RatingTest extends TestCase
             $this->createTaskFromArray(ScanResolveCanonical::class, $report),
             $this->createTaskFromArray(ScanHomePage::class, $report),
             $this->createTaskFromArray(ScanAlternateUrlsAndHeaders::class, $report),
-            $this->createTaskFromArray(ScanExposedFiles::class, $report)
+            $this->createTaskFromArray(ScanExposedFiles::class, $report),
+            $this->createTaskFromArray(ScanGuessVersion::class, $report)
         );
         $agent->rate();
 
@@ -144,7 +152,7 @@ class RatingTest extends TestCase
         ]), 'D');
 
         $this->assertReportRating($this->alterGoodReport([
-            ScanHomePage::class => [
+            ScanGuessVersion::class => [
                 'versions' => [
                     '0.1.0-beta.7',
                 ],
@@ -152,12 +160,30 @@ class RatingTest extends TestCase
         ]), 'D');
 
         $this->assertReportRating($this->alterGoodReport([
-            ScanHomePage::class => [
+            ScanGuessVersion::class => [
                 'versions' => [
                     '0.1.0-beta.8',
                 ],
             ],
         ]), 'D');
+
+        $this->assertReportRating($this->alterGoodReport([
+            ScanGuessVersion::class => [
+                'versions' => [
+                    '0.1.0-beta.12',
+                ],
+            ],
+        ]), 'D');
+
+        // When unsure, the D grade shouldn't be given
+        $this->assertReportRating($this->alterGoodReport([
+            ScanGuessVersion::class => [
+                'versions' => [
+                    '0.1.0-beta.12', // Vulnerable
+                    '0.1.0-beta.13', // Not vulnerable
+                ],
+            ],
+        ]), 'A');
     }
 
     public function testHttpErrors()

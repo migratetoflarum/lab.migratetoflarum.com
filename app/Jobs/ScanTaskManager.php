@@ -65,12 +65,18 @@ class ScanTaskManager
             $this->dispatch(ScanUpdateDatabase::class);
         }
 
-        if ($this->finished(ScanAlternateUrlsAndHeaders::class) && $this->finished(ScanExposedFiles::class) && $this->finished(ScanMapExtensions::class)) {
+        if (
+            $this->finished(ScanAlternateUrlsAndHeaders::class) &&
+            $this->finished(ScanExposedFiles::class) &&
+            $this->finished(ScanMapExtensions::class) &&
+            $this->finished(ScanGuessVersion::class)
+        ) {
             $this->dispatch(ScanRate::class);
         }
 
         if ($this->finished(ScanHomePage::class) && $this->finished(ScanJavascript::class)) {
             $this->dispatch(ScanMapExtensions::class);
+            $this->dispatch(ScanGuessVersion::class);
         }
 
         if ($this->finished(ScanHomePage::class)) {

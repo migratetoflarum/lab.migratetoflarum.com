@@ -42,6 +42,7 @@ class ScanJavascript extends TaskJob
 
         $javascriptExtensions = [];
         $javascriptSize = [];
+        $coreChecksums = [];
 
         foreach ([
                      'forum' => $forumJsHash,
@@ -72,16 +73,12 @@ class ScanJavascript extends TaskJob
                         $knownSize += Arr::get($extension, 'size');
                     }
 
-                    $coreSize = $javascriptParser->coreSize();
+                    foreach ($javascriptParser->coreSize() as $coreElement) {
+                        $sizeModules[] = Arr::only($coreElement, ['id', 'size']);
+                        $knownSize += Arr::get($coreElement, 'size');
 
-                    if ($coreSize) {
-                        foreach ($coreSize as $id => $size) {
-                            $sizeModules[] = [
-                                'id' => $id,
-                                'size' => $size,
-                            ];
-
-                            $knownSize += $size;
+                        if (Arr::get($coreElement, 'id') === 'core') {
+                            $coreChecksums[$stack] = Arr::get($coreElement, 'checksum');
                         }
                     }
 
@@ -104,5 +101,6 @@ class ScanJavascript extends TaskJob
 
         $this->data['javascriptExtensions'] = $javascriptExtensions;
         $this->data['javascriptSize'] = $javascriptSize;
+        $this->data['coreChecksums'] = $coreChecksums;
     }
 }

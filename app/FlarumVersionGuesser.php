@@ -30,6 +30,7 @@ class FlarumVersionGuesser
                     FlarumVersion::BETA_11,
                     FlarumVersion::BETA_12,
                     FlarumVersion::BETA_13,
+                    FlarumVersion::BETA_14,
                 ];
             }
 

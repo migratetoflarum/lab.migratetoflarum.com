@@ -9,6 +9,7 @@ export default {
         const {
             task,
             taskMeta,
+            showLiveLoading,
         } = vnode.attrs;
 
         let iconNode = icon('hourglass');
@@ -30,6 +31,9 @@ export default {
                     statusText = 'In progress';
                 }
             }
+        } else if (!showLiveLoading) {
+            iconNode = icon('forward');
+            statusText = 'Skipped';
         }
 
         return [
@@ -64,7 +68,7 @@ export default {
                 ]),
                 m('h5', 'Log'),
                 m('pre', task.attributes.public_log),
-            ]) : m('p', 'No job launched for this task.')) : null),
+            ]) : m('.list-group-item', m('p', 'No job launched for this task.'))) : null),
         ];
     },
 }

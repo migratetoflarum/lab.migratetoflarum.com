@@ -27,6 +27,10 @@ const tasksMeta = [
         title: 'Detecting installed extensions',
     },
     {
+        job: 'ScanGuessVersion',
+        title: 'Determine possible Flarum versions',
+    },
+    {
         job: 'ScanRate',
         title: 'Computing rating',
     },
@@ -38,7 +42,10 @@ const tasksMeta = [
 
 export default {
     view(vnode) {
-        const {tasks} = vnode.attrs;
+        const {
+            tasks,
+            showLiveLoading,
+        } = vnode.attrs;
 
         return m('.card.mt-3', [
             m('.card-body', [
@@ -50,6 +57,7 @@ export default {
                     taskMeta => m(TaskReport, {
                         taskMeta,
                         task: tasks.find(t => t.attributes.job === taskMeta.job),
+                        showLiveLoading,
                     })
                 )),
             ]),

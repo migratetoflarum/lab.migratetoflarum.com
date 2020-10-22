@@ -13,6 +13,7 @@ import getObjectKey from '../helpers/getObjectKey';
 import FlarumVersionString from '../components/FlarumVersionString';
 import TasksReport from '../components/TasksReport';
 import SizesReport from '../components/SizesReport';
+import getVersions from '../helpers/getVersions';
 
 export default {
     oninit(vnode) {
@@ -148,6 +149,7 @@ export default {
             return m('div', [
                 m(TasksReport, {
                     tasks: vnode.state.tasks,
+                    showLiveLoading: true,
                 }),
                 m(RequestsReport, {
                     requests: vnode.state.requests,
@@ -401,7 +403,7 @@ export default {
                             m('p', [
                                 'Flarum version: ',
                                 m(FlarumVersionString, {
-                                    versions: reportKey('ScanHomePage', 'versions'),
+                                    versions: getVersions(scan),
                                 }),
                             ]),
                         ]),

@@ -2,6 +2,8 @@
 
 namespace App;
 
+use Illuminate\Support\Str;
+
 class Beta8JavascriptFileParser
 {
     protected $content;
@@ -15,7 +17,8 @@ class Beta8JavascriptFileParser
     {
         // A module import part is always added before and after each extension import
         // in https://github.com/flarum/core/blob/master/src/Extend/Frontend.php
-        if (preg_match_all('~var\s+module={};\s*(module\.exports[\s\S]+?;)\s*flarum\.extensions\[[\'"]([^\'"]+)[\'"]\]\s*=\s*module\.exports;~m', $this->content, $matches, PREG_SET_ORDER) <= 0) {
+        // Since beta 14, there are a lot less semicolumns because of https://github.com/flarum/core/pull/2280
+        if (preg_match_all('~var\s+module={};?\s*(module\.exports[\s\S]+?;)\s*flarum\.extensions\[[\'"]([^\'"]+)[\'"]\]\s*=\s*module\.exports;?~m', $this->content, $matches, PREG_SET_ORDER) <= 0) {
             return [];
         }
 
@@ -23,7 +26,7 @@ class Beta8JavascriptFileParser
             $content = $match[1];
             // If the code ends with two ;; following each other, remove one
             // That second ; is added by the Flarum JsCompiler and is not part of the extension source code
-            // The origin of that ; is being investigated in https://github.com/flarum/core/issues/2120
+            // Linked issue https://github.com/flarum/core/issues/2120
             $content = preg_replace('~;\s*;$~', ';', $content);
             $content = trim($content);
 
@@ -36,9 +39,11 @@ class Beta8JavascriptFileParser
         }, $matches);
     }
 
-    public function coreSize(): ?array
+    public function coreSize(): array
     {
-        // We detect the end of the core javascript by a its known content
+        // We detect the end of the core javascript by its known content
+        // Beta 14 forum: window.app=Fe,Ue.app=Fe}]);
+        // Beta 14 admin: window.app=dt,lt.app=dt}]);
         // Beta 13 forum: (e,"compat",(function(){return he}))}]);
         // Beta 13 admin: (e,"compat",(function(){return ct}))}]);
         // Beta 12 forum: (e,"compat",(function(){return he}))}]);
@@ -51,17 +56,61 @@ class Beta8JavascriptFileParser
         // Beta 09 admin: (e,"compat",function(){return ct})}]);
         // Beta 08 forum: (e,"compat",function(){return he})}]);
         // Beta 08 admin: (e,"compat",function(){return lt})}]);
-        if (preg_match('~^([\s\S]*\(e,"compat",\(?function\(\)\{return [a-z]{2}\}\)\)?\}\]\);)([\s\S]*?)var\s+module\s*=\s*\{\}~m', $this->content, $matches) !== 1) {
-            return null;
+        // We also know everything between core and the first module will be TextFormatter
+        // We truncate the input with substr because otherwise it's possible to reach pcre.backtrack_limit
+        // We know Flarum's largest core JS is around 360kB and we're going to be generous and allow 240kB of TextFormatter, which is unlikely
+        $preg = preg_match('~^([\s\S]*(?:\(e,"compat",\(?function\(\)\{return [a-z]{2}\}\)\)?|window\.app=[A-Za-z]{2},[A-Za-z]{2}\.app=[A-Za-z]{2})\}\]\);)([\s\S]*?)var\s+module\s*=\s*\{\}~m', mb_substr($this->content, 0, 600000, '8bit'), $matches);
+
+        if ($preg === false) {
+            throw new \Exception(preg_last_error_msg());
         }
 
+        if ($preg !== 1) {
+            return [];
+        }
+
+        // One common change made by proxies/CDNs is to collapse the copyright comments for Sizzle/jQuery/etc
+        // We will expend them back to their original format to make the checksum test work
+        $coreCode = preg_replace_callback('~/\*![\s\S]+?\*/(?=([\s\S]|$))~', function ($commentMatches) {
+            $comment = $commentMatches[0];
+
+            // If this is a collapsed comment (no space between newline and `*`)
+            // Add initial newline, and a space in front of each line from the second line
+            if (Str::contains($comment, "\n*")) {
+                $comment = "\n" . implode("\n ", explode("\n", $comment));
+
+                // In the original dist file, some comments must be followed by a newline
+                // We check for a list of exceptions before adding the missing newline
+                if (!in_array($commentMatches[1], [
+                    "\n", // Two comments are followed by a newline
+                    '!', // Two comments are followed by `!` and don't go to a newline
+                    '/', // Start of another comment. There's one space that will be added by the block below. Without this there would be two newlines
+                    'i', // Start of a `if` (line 52 on beta 14)
+                ])) {
+                    $comment .= "\n";
+                }
+            } else if (Str::startsWith($comment, '/*!https')) {
+                // punycode one-line comment also has a spaces at each end of the comment that are removed by optimizers
+                $comment = preg_replace('~/\*!(\s?)(.+?)(\s?)\*/~', '/*! \\2 */', $comment);
+            }
+
+            return $comment;
+        }, $matches[1]);
+
         $modules = [
-            'core' => mb_strlen($matches[1], '8bit'),
+            [
+                'id' => 'core',
+                'checksum' => md5($coreCode),
+                'size' => mb_strlen($matches[1], '8bit'),
+            ],
         ];
 
-        // On admin, there will be some space between core and the first module, but we won't consider it as textformatter
+        // On admin, there will be some space between core and the first module, but we won't consider it as TextFormatter
         if (strlen($matches[2]) > 10) {
-            $modules['textformatter'] = mb_strlen($matches[2], '8bit');
+            $modules[] = [
+                'id' => 'textformatter',
+                'size' => mb_strlen($matches[2], '8bit'),
+            ];
         }
 
         return $modules;
