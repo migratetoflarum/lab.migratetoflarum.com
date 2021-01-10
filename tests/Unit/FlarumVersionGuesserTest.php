@@ -408,6 +408,8 @@ class FlarumVersionGuesserTest extends TestCase
             FlarumVersion::BETA_12,
             FlarumVersion::BETA_13,
             FlarumVersion::BETA_14,
+            FlarumVersion::BETA_14_1,
+            FlarumVersion::BETA_15,
         ], $this->guesser->guess($html, $html));
     }
 
@@ -421,6 +423,8 @@ class FlarumVersionGuesserTest extends TestCase
             FlarumVersion::BETA_12,
             FlarumVersion::BETA_13,
             FlarumVersion::BETA_14,
+            FlarumVersion::BETA_14_1,
+            FlarumVersion::BETA_15,
         ], $this->guesser->guess($html, $html));
     }
 
@@ -434,6 +438,8 @@ class FlarumVersionGuesserTest extends TestCase
             FlarumVersion::BETA_12,
             FlarumVersion::BETA_13,
             FlarumVersion::BETA_14,
+            FlarumVersion::BETA_14_1,
+            FlarumVersion::BETA_15,
         ], $this->guesser->guess($html, $html));
     }
 
@@ -447,6 +453,8 @@ class FlarumVersionGuesserTest extends TestCase
             FlarumVersion::BETA_12,
             FlarumVersion::BETA_13,
             FlarumVersion::BETA_14,
+            FlarumVersion::BETA_14_1,
+            FlarumVersion::BETA_15,
         ], $this->guesser->guess($html, $html));
     }
 }

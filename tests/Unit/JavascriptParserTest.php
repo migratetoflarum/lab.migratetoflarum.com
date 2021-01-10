@@ -7,6 +7,36 @@ use Tests\TestCase;
 
 class JavascriptParserTest extends TestCase
 {
+    public function testBeta15ForumParser()
+    {
+        $parser = new Beta8JavascriptFileParser(file_get_contents(__DIR__ . '/javascript-parser/beta15-typical-forum.js'));
+
+        $this->assertEquals([
+            [
+                'id' => 'core',
+                'checksum' => '7a12f38e148ce80b9697ef91b9a84409',
+                'size' => 354712,
+            ],
+            [
+                'id' => 'textformatter',
+                'size' => 66686,
+            ],
+        ], $parser->coreSize());
+    }
+
+    public function testBeta15AdminParser()
+    {
+        $parser = new Beta8JavascriptFileParser(file_get_contents(__DIR__ . '/javascript-parser/beta15-typical-admin.js'));
+
+        $this->assertEquals([
+            [
+                'id' => 'core',
+                'checksum' => '62a602eba5dc4196f7e0dd29b512471e',
+                'size' => 275387,
+            ],
+        ], $parser->coreSize());
+    }
+
     public function testBeta14ForumParser()
     {
         $parser = new Beta8JavascriptFileParser(file_get_contents(__DIR__ . '/javascript-parser/beta14-typical-forum.js'));

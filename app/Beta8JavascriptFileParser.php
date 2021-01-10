@@ -42,6 +42,10 @@ class Beta8JavascriptFileParser
     public function coreSize(): array
     {
         // We detect the end of the core javascript by its known content
+        // Beta 15 forum: window.app=Fe,He.app=Fe;var qe=Object(Ue.a)(He,"forum")}]);
+        // Beta 15 admin: window.app=Tt,xt.app=Tt;var Nt=Object(Ot.a)(xt,"admin")}]);
+        // Beta 14.1 forum: window.app=Fe,Ue.app=Fe}]);
+        // Beta 14.1 admin: window.app=dt,lt.app=dt}]);
         // Beta 14 forum: window.app=Fe,Ue.app=Fe}]);
         // Beta 14 admin: window.app=dt,lt.app=dt}]);
         // Beta 13 forum: (e,"compat",(function(){return he}))}]);
@@ -59,7 +63,7 @@ class Beta8JavascriptFileParser
         // We also know everything between core and the first module will be TextFormatter
         // We truncate the input with substr because otherwise it's possible to reach pcre.backtrack_limit
         // We know Flarum's largest core JS is around 360kB and we're going to be generous and allow 240kB of TextFormatter, which is unlikely
-        $preg = preg_match('~^([\s\S]*(?:\(e,"compat",\(?function\(\)\{return [a-z]{2}\}\)\)?|window\.app=[A-Za-z]{2},[A-Za-z]{2}\.app=[A-Za-z]{2})\}\]\);)([\s\S]*?)var\s+module\s*=\s*\{\}~m', mb_substr($this->content, 0, 600000, '8bit'), $matches);
+        $preg = preg_match('~^([\s\S]*(?:\(e,"compat",\(?function\(\)\{return [a-z]{2}\}\)\)?|window\.app=[A-Za-z]{2},[A-Za-z]{2}\.app=[A-Za-z]{2})(?:;var [A-Za-z]{2}=Object\([A-Za-z]{2}\.a\)\([A-Za-z]{2},"(?:forum|admin)"\))?\}\]\);)([\s\S]*?)var\s+module\s*=\s*\{\}~m', mb_substr($this->content, 0, 600000, '8bit'), $matches);
 
         if ($preg === false) {
             throw new \Exception(preg_last_error_msg());
