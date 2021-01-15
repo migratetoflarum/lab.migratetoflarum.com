@@ -9,6 +9,7 @@
     "license": "MIT",
     "require": {
         "php": "^7.2.5",
+        "ext-fileinfo": "*",
         "ext-json": "*",
         "ext-zip": "*",
         "composer/semver": "^3.0",

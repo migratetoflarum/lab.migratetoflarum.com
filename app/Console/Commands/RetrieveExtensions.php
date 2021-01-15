@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Composer\Semver\Comparator;
 use Exception;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -108,9 +109,20 @@ class RetrieveExtensions extends Command
                                     $this->warn("Unhandled dist file url $distUrl");
                                 }
                             } catch (Exception $exception) {
-                                $this->error($exception->getMessage());
+                                // it's not uncommon to hit 404 errors when packages have been deleted from
+                                // GitHub but not Packagist
+                                if (
+                                    $exception instanceof ClientException &&
+                                    $exception->hasResponse() &&
+                                    $exception->getResponse()->getStatusCode() === 404
+                                ) {
+                                    $this->warn("Not Found error downloading dist file url $distUrl");
+                                } else {
+                                    $this->error($exception->getMessage());
 
-                                report($exception);
+                                    // Report other errors to Sentry, but don't interrupt crawling more packages
+                                    report($exception);
+                                }
                             }
                         }
 
