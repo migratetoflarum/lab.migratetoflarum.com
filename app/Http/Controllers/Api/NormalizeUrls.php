@@ -6,6 +6,7 @@ use App\ScannerClient;
 use GuzzleHttp\Exception\TransferException;
 use GuzzleHttp\Psr7\Uri;
 use Illuminate\Cache\Repository;
+use Illuminate\Contracts\Validation\Factory;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -47,7 +48,7 @@ trait NormalizeUrls
      * @param StreamInterface $body Body reference from Guzzle
      * @return null|string The new Flarum root url to try or null if the current one looks good
      */
-    protected function shouldTryOtherRootUrl(string $url, StreamInterface $body):? string
+    protected function shouldTryOtherRootUrl(string $url, StreamInterface $body): ?string
     {
         $finalPath = (new Uri($url))->getPath();
         $expectedFlarumUrlPath = $finalPath;
@@ -157,7 +158,12 @@ trait NormalizeUrls
                     case 302:
                         $destination = trim(Arr::first($response->getHeader('Location')));
 
-                        $this->getValidationFactory()->make([
+                        /**
+                         * @var $factory Factory
+                         */
+                        $factory = app(Factory::class);
+
+                        $factory->make([
                             'url' => $destination,
                         ], [
                             'url' => 'required|url',
