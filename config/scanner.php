@@ -12,6 +12,7 @@ return [
 
     'client' => [
         'user_agent' => env('SCANNER_USER_AGENT', 'MigrateToFlarum Lab'),
+        'accept_encoding' => env('SCANNER_ACCEPT_ENCODING', 'gzip'),
         'connect_timeout' => env('SCANNER_CONNECT_TIMEOUT', 30), // seconds
         'timeout' => env('SCANNER_TIMEOUT', 30), // seconds
     ],

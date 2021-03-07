@@ -1,5 +1,18 @@
 import m from 'mithril';
 import icon from '../helpers/icon';
+import formatBytes from '../helpers/formatBytes';
+
+function bodySizeInfo(request) {
+    if (!request.response_body_size) {
+        return 'Empty body';
+    }
+
+    if (request.response_body_compressed_size) {
+        return formatBytes(request.response_body_compressed_size) + ' compressed, ' + formatBytes(request.response_body_size) + ' uncompressed';
+    }
+
+    return formatBytes(request.response_body_size) + ' (not compressed)';
+}
 
 export default {
     oninit(vnode) {
@@ -17,6 +30,12 @@ export default {
         } else if (request.response_status_code) {
             resultClass = 'success';
             resultMessage = request.response_status_code + ' ' + request.response_reason_phrase + ', ' + request.duration + 'ms';
+
+            if (request.response_body_compressed_size) {
+                resultMessage += ', ' + formatBytes(request.response_body_compressed_size);
+            } else if (request.response_body_size) {
+                resultMessage += ', ' + formatBytes(request.response_body_size);
+            }
         }
 
         return [
@@ -63,6 +82,8 @@ export default {
                         m('dd.col-sm-9', [
                             request.duration + 'ms',
                         ]),
+                        m('dt.col-sm-3', 'Body size'),
+                        m('dd.col-sm-9', bodySizeInfo(request)),
                         (request.response_headers ? [
                             m('dt.col-sm-12', 'Headers'),
                             Object.keys(request.response_headers).map(headerName => [

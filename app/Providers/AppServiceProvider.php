@@ -33,6 +33,7 @@ class AppServiceProvider extends ServiceProvider
                 'http_errors' => false,
                 'headers' => [
                     'User-Agent' => config('scanner.client.user_agent'),
+                    'Accept-Encoding' => config('scanner.client.accept_encoding'),
                 ],
                 'connect_timeout' => config('scanner.client.connect_timeout'),
                 'timeout' => config('scanner.client.timeout'),

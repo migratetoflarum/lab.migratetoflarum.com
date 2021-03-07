@@ -11,6 +11,7 @@ use App\Request;
 use App\ScannerClient;
 use App\Task;
 use Exception;
+use GuzzleHttp\Psr7\InflateStream;
 use GuzzleHttp\Psr7\Response;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
@@ -106,7 +107,9 @@ abstract class TaskJob implements ShouldQueue
         $response = null;
 
         try {
-            $response = $client->request($method, $url);
+            $response = $client->request($method, $url, [
+                'decode_content' => false,
+            ]);
 
             $request->response_headers = $response->getHeaders();
             $request->response_status_code = $response->getStatusCode();
@@ -114,7 +117,27 @@ abstract class TaskJob implements ShouldQueue
 
             $content = $response->getBody()->getContents();
 
-            $request->response_body_size = strlen($content);
+            $response->getBody()->rewind(); // So the full response can be read again in the task
+
+            $encoding = strtolower($response->getHeaderLine('Content-Encoding'));
+
+            // We manually decode, otherwise there is no way of knowing the raw body size
+            if ($encoding === 'gzip' && $content) {
+                $request->response_body_compressed_size = mb_strlen($content, '8bit');
+
+                $content = gzdecode($content);
+
+                if ($content === false) {
+                    throw new \Exception('Could not uncompress encoded response');
+                }
+
+                // Do what Guzzle would have done without decode_content=false so that the body can be read from tasks
+                $response = $response->withBody(new InflateStream($response->getBody()))
+                    // Include compressed size so tasks can get access to it
+                    ->withAddedHeader('X-Body-Compressed-Size', $request->response_body_compressed_size);
+            }
+
+            $request->response_body_size = mb_strlen($content, '8bit');
 
             // Only store content if the request was non-sensitive
             if (!$sensitive) {
@@ -136,8 +159,6 @@ abstract class TaskJob implements ShouldQueue
 
                 $request->response_body = $content;
             }
-
-            $response->getBody()->rewind(); // So the full response can be read again in the task
         } catch (Exception $exception) {
             /**
              * Necessary to make phpStorm realize InvalidEncodingException might be thrown

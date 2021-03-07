@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $response_body
  * @property int $response_body_size
  * @property bool $response_body_truncated
+ * @property int $response_body_compressed_size
  *
  * @property Scan $scan
  */

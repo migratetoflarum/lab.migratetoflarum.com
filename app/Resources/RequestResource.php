@@ -26,6 +26,8 @@ class RequestResource extends JsonResource
                 'response_status_code' => $this->resource->response_status_code,
                 'response_reason_phrase' => $this->resource->response_reason_phrase,
                 'response_body' => $this->resource->response_body,
+                'response_body_size' => $this->resource->response_body_size,
+                'response_body_compressed_size' => $this->resource->response_body_compressed_size,
             ],
         ];
     }

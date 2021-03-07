@@ -53,12 +53,26 @@ class ScanJavascript extends TaskJob
                     continue;
                 }
 
-                $content = $this->request("$safeFlarumUrl/assets/$stack-$hash.js")->getBody()->getContents();
+                $response = $this->request("$safeFlarumUrl/assets/$stack-$hash.js");
+
+                $content = $response->getBody()->getContents();
 
                 $javascriptSize[$stack] = [
                     'total' => mb_strlen($content, '8bit'),
+                    'expectedGzipSize' => mb_strlen(gzencode($content), '8bit'),
                     'modules' => [],
                 ];
+
+                if ($response->getHeaderLine('Content-Encoding')) {
+                    $javascriptSize[$stack]['compressed'] = true;
+
+                    // The length of the body has been saved by request()
+                    $size = $response->getHeaderLine('X-Body-Compressed-Size');
+
+                    if ($size) {
+                        $javascriptSize[$stack]['actualCompressedSize'] = intval($size);
+                    }
+                }
 
                 if (FlarumVersion::isBeta8OrAbove($homepage->getData('versions'))) {
                     $javascriptParser = new Beta8JavascriptFileParser($content);
