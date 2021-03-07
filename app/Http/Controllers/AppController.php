@@ -41,32 +41,8 @@ class AppController extends Controller
             'extensions',
         ]);
 
-        $bestWebsitesSerialized = cache()->remember('best-websites-preload', config('scanner.best_scans_cache'), function () {
-            /**
-             * @var $bestWebsites Collection|Website[]
-             */
-            $bestWebsites = Website::publiclyVisible()
-                ->where('last_rating', 'like', 'A%')
-                ->orderBy('last_public_scanned_at', 'desc')
-                ->take(config('scanner.show_best_count'))
-                ->get();
-
-            $bestWebsites->load('lastPubliclyVisibleScan');
-
-            $bestScans = new Collection($bestWebsites->pluck('lastPubliclyVisibleScan'));
-            $bestScans->load([
-                'website',
-                'tasks',
-                'requests',
-                'extensions',
-            ]);
-
-            return ScanResource::collection($bestScans)->jsonSerialize();
-        });
-
         $preload = array_merge(
             ScanResource::collection($recentScans)->jsonSerialize(),
-            $bestWebsitesSerialized,
             $preload
         );
 

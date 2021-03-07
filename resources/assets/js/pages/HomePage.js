@@ -1,7 +1,6 @@
 import m from 'mithril';
 import icon from '../helpers/icon';
 import sortByAttribute from '../helpers/sortByAttribute';
-import sortByRating from '../helpers/sortByRating';
 import App from '../utils/App';
 import Store from '../utils/Store';
 import ScansList from '../components/ScansList';
@@ -15,7 +14,6 @@ export default {
     },
     view(vnode) {
         const recentScans = Store.all('scans').sort(sortByAttribute('scanned_at', 'desc')).slice(0, 5);
-        const bestScans = Store.all('scans').sort(sortByRating()).slice(0, 5);
 
         return m('.page-home', [
             m('h2.text-center', 'Check the configuration of your Flarum'),
@@ -89,13 +87,7 @@ export default {
                     }), ' Do not show the results on the homepage')),
                 ]),
             ]),
-            m('.row', [
-                m('.col-md-6', [
-                    m('h5', 'Best ratings'),
-                    m(ScansList, {
-                        scans: bestScans,
-                    }),
-                ]),
+            m('.row.justify-content-center', [
                 m('.col-md-6', [
                     m('h5', 'Recent scans'),
                     m(ScansList, {
