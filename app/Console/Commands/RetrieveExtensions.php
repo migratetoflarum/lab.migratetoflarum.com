@@ -140,7 +140,7 @@ class RetrieveExtensions extends Command
                     $extension->last_version = $lastVersion;
                     $extension->last_version_time = Carbon::parse(Arr::get($latestVersion, 'time'));
 
-                    $discussUrl = Arr::get($latestVersion, 'extra.flagrow.discuss');
+                    $discussUrl = Arr::get($latestVersion, 'support.forum') ?? Arr::get($latestVersion, 'extra.flagrow.discuss');
 
                     if (preg_match('~^https://discuss\.flarum\.org/d/[a-z0-9_-]+$~', $discussUrl) === 1) {
                         $extension->discuss_url = $discussUrl;
