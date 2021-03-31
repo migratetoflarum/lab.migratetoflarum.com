@@ -5,7 +5,8 @@ import icon from '../helpers/icon';
 const colorRegex = /^(#[0-9a-f]{3,6})|(rgba?\([0-9]{1,3},[0-9]{1,3},[0-9]{1,3}(,[0-9]{1,3})?\))$/i;
 
 // Matches fontawesome names after fa-
-const iconNameRegex = /^(fa[srb]? fa-)?[a-z0-9-]+$/;
+// Allows one more fa- identifier after main identifier for modifiers like fa-flip-vertical
+const iconNameRegex = /^(fa[srb]? fa-)?[a-z0-9-]+( fa-[a-z0-9-]+)?$/;
 
 export default {
     view(vnode) {
