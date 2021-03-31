@@ -144,15 +144,9 @@ export default function (scan, extensions) {
             repository: repoLink,
             customPackagistLink: repoLink,
             customFlagrowLink: repoLink,
-        },
-        relationships: {
-            possible_versions: {
-                data: [{
-                    attributes: {
-                        version: random.version,
-                    },
-                }],
-            },
+            possible_versions: [
+                random.version,
+            ],
         },
     });
 }
