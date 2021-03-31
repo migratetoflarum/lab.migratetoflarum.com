@@ -143,7 +143,7 @@ export default function (scan, extensions) {
             icon: extension.icon,
             repository: repoLink,
             customPackagistLink: repoLink,
-            customFlagrowLink: repoLink,
+            customExtiverseLink: repoLink,
             possible_versions: [
                 random.version,
             ],

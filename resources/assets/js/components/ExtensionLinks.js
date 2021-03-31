@@ -13,7 +13,7 @@ export default {
             }, [icon('download'), ' Packagist']),
             ' ',
             m('a.btn.btn-sm.btn-light', {
-                href: extension.attributes.customFlagrowLink ? extension.attributes.customFlagrowLink : 'https://extiverse.com/extension/' + extension.attributes.package,
+                href: extension.attributes.customExtiverseLink || ('https://extiverse.com/extension/' + extension.attributes.package),
                 target: '_blank',
                 rel: 'nofollow noopener',
             }, [m('span.fab.icon-extiverse'), ' Extiverse']),
