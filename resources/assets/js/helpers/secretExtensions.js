@@ -133,7 +133,14 @@ export default function (scan, extensions) {
 
     const repoLink = 'https://flarum.dev/repo/migratetoflarum/flarum-ext-' + extension.package;
 
-    const insertAtIndex = Math.floor(random.placement * (extensions.length + (extensions.length > 0 ? 1 : 0)));
+    let insertAtIndex = 0;
+
+    if (extensions.length > 0) {
+        // Limit to placement in the first 3
+        const maximumIndexForInsert = Math.min(3, extensions.length);
+
+        insertAtIndex = Math.floor(random.placement * maximumIndexForInsert);
+    }
 
     extensions.splice(insertAtIndex, 0, {
         attributes: {
