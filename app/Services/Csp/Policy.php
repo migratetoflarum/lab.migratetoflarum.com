@@ -12,7 +12,8 @@ class Policy extends Basic
         parent::configure();
 
         $this
-            ->addDirective(Directive::IMG, 'https://flagrow.io')
+            ->addDirective(Directive::IMG, 'https://flarum-badge-api.davwheat.dev')
+            ->addDirective(Directive::IMG, 'https://extiverse.com')
             ->addDirective(Directive::IMG, 'https://analytics.kilowhat.net')
             ->addDirective(Directive::SCRIPT, 'https://analytics.kilowhat.net')
             ->addDirective(Directive::SCRIPT, 'https://*.pusher.com')

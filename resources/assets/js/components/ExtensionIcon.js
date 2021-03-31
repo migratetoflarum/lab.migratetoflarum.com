@@ -28,21 +28,7 @@ export default {
             }
 
             if (iconData.image) {
-                const iconExt = iconData.image.match(/\.(png|jpg|jpeg|svg)$/);
-
-                let fileName = 'icon';
-
-                // We need to extract the filename because flagrow.io keeps the original name
-                // For example Masquerade has an image path of "resources/logo.svg" and its filename at flagrow.io is "logo"
-                const fileNameMatch = iconData.image.match(/([a-z]+)\./i);
-
-                if (fileNameMatch) {
-                    fileName = fileNameMatch[1];
-                }
-
-                if (iconExt) {
-                    iconStyle.backgroundImage = 'url(https://flagrow.io/storage/icons/' + extension.attributes.package.replace('/', '$') + '-' + fileName + '.' + iconExt[1] + ')';
-                }
+                iconStyle.backgroundImage = 'url(https://flarum-badge-api.davwheat.dev/v1/ext-icon/' + extension.attributes.package + ')';
             }
         }
 
