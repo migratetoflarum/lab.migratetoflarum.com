@@ -4,3 +4,5 @@
 *.js linguist-vendored
 CHANGELOG.md export-ignore
 tests/Unit/javascript-parser/*.js -diff
+public/vendor/horizon/*.js -diff
+public/vendor/horizon/*.css -diff
