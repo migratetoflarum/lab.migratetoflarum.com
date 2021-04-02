@@ -27,7 +27,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton(ScannerClient::class, function () {
+        $this->app->bind(ScannerClient::class, function () {
             return new ScannerClient([
                 'allow_redirects' => false,
                 'http_errors' => false,
@@ -40,7 +40,7 @@ class AppServiceProvider extends ServiceProvider
             ]);
         });
 
-        $this->app->singleton(Rules::class, function () {
+        $this->app->bind(Rules::class, function () {
             $rules = Storage::get('public_suffix_list_converted');
 
             return new Rules(unserialize($rules));
