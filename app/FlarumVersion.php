@@ -17,6 +17,7 @@ class FlarumVersion
     const BETA_14_1 = "0.1.0-beta.14.1";
     const BETA_15 = "0.1.0-beta.15";
     const BETA_16 = "0.1.0-beta.16";
+    const V1_0_0 = "1.0.0";
 
     // MD5 hash of the javascript of Flarum core, excluding the sourcemap declaration
     // Obtained through the GetCoreJavascriptHash command
@@ -31,6 +32,7 @@ class FlarumVersion
         '70ff3ba6388c6eb2d207806a3bae3c28' => self::BETA_14_1,
         '7a12f38e148ce80b9697ef91b9a84409' => self::BETA_15,
         '13fdce9de3e8eea11c2f9caf6c3b5725' => self::BETA_16,
+        '9bfa334d419f1506dcaf3024ec9dec39' => self::V1_0_0,
     ];
 
     public $adminJavascriptHashes = [
@@ -44,6 +46,7 @@ class FlarumVersion
         'a36756c1c89a4eb2ab9aee33d1f7d72c' => self::BETA_14_1,
         '62a602eba5dc4196f7e0dd29b512471e' => self::BETA_15,
         '4fb89c7fabd9eb27d2d6ce948dc34e5a' => self::BETA_16,
+        '32493f26cf9fa701003391bd654a13e8' => self::V1_0_0,
     ];
 
     public static function isBeta7(array $versions): bool
@@ -56,6 +59,11 @@ class FlarumVersion
         return Arr::first($versions, function ($version) {
                 return $version !== self::BETA_7;
             }) !== null;
+    }
+
+    public static function isV1OrAbove(array $versions): bool
+    {
+        return in_array(self::V1_0_0, $versions);
     }
 
     public static function versionsFromJavascriptHash(string $frontend, string $hash): array

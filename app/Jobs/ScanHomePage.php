@@ -24,6 +24,11 @@ class ScanHomePage extends TaskJob
             if (str_contains($href, '/assets/forum-')) {
                 $this->data['assetsBaseUrl'] = Arr::first(explode('/assets/forum-', $href, 2));
             }
+
+            // New Flarum V1 format
+            if (str_contains($href, '/assets/forum.css')) {
+                $this->data['assetsBaseUrl'] = Arr::first(explode('/assets/forum.css', $href, 2));
+            }
         });
 
         if (!isset($this->data['assetsBaseUrl'])) {
@@ -97,20 +102,6 @@ class ScanHomePage extends TaskJob
 
         if (!Arr::exists($this->data, 'debug')) {
             throw new TaskManualFailException('Could not read boot payload');
-        }
-
-        $this->log(self::LOG_PUBLIC, 'Reading boot asset hash');
-
-        $homepage->filter('body script[src]')->each(function (Crawler $link) {
-            $src = $link->attr('src');
-
-            if (preg_match('~assets/forum\-([0-9a-f]{8})\.js$~', $src, $matches) === 1) {
-                $this->data['assetsForumJSHash'] = $matches[1];
-            }
-        });
-
-        if (!$this->data['assetsForumJSHash']) {
-            throw new TaskManualFailException('Could not identify JS assets hash');
         }
     }
 }

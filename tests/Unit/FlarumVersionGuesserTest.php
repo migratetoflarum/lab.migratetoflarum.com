@@ -461,4 +461,29 @@ class FlarumVersionGuesserTest extends TestCase
             FlarumVersion::BETA_16,
         ], $this->guesser->guess($html, $html));
     }
+
+    function testBeta16Typical()
+    {
+        $html = file_get_contents(__DIR__ . '/version-guesser/beta16-typical.html');
+
+        $this->assertEquals([
+            FlarumVersion::BETA_10,
+            FlarumVersion::BETA_11,
+            FlarumVersion::BETA_12,
+            FlarumVersion::BETA_13,
+            FlarumVersion::BETA_14,
+            FlarumVersion::BETA_14_1,
+            FlarumVersion::BETA_15,
+            FlarumVersion::BETA_16,
+        ], $this->guesser->guess($html, $html));
+    }
+
+    function testV100Typical()
+    {
+        $html = file_get_contents(__DIR__ . '/version-guesser/1.0.0-typical.html');
+
+        $this->assertEquals([
+            FlarumVersion::V1_0_0,
+        ], $this->guesser->guess($html, $html));
+    }
 }

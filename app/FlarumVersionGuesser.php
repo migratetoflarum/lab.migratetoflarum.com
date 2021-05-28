@@ -12,6 +12,13 @@ class FlarumVersionGuesser
      */
     public function guess(string $html, string $bootScript): array
     {
+        // Hashes changed in Flarum 1.0 https://github.com/flarum/core/pull/2805
+        if (preg_match('~/assets/forum\.js\?v=[0-9a-f]{8}"></script>~', $html) === 1) {
+            return [
+                FlarumVersion::V1_0_0,
+            ];
+        }
+
         $matches = [];
         // beta7 calls app.boot() with the payload
         // beta8 calls app.load() with the payload then app.boot() without arguments

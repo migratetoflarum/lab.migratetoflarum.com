@@ -42,6 +42,8 @@ class Beta8JavascriptFileParser
     public function coreSize(): array
     {
         // We detect the end of the core javascript by its known content
+        // 1.0.0 forum: $e=n(73);De.app=je;var Ie=Object($e.a)(De,"forum")}]);
+        // 1.0.0 admin: kt=n(73);Ct.app=_t;var jt=Object(kt.a)(Ct,"admin")}]);
         // Beta 15 forum: window.app=Fe,He.app=Fe;var qe=Object(Ue.a)(He,"forum")}]);
         // Beta 15 admin: window.app=Tt,xt.app=Tt;var Nt=Object(Ot.a)(xt,"admin")}]);
         // Beta 14.1 forum: window.app=Fe,Ue.app=Fe}]);
@@ -63,7 +65,7 @@ class Beta8JavascriptFileParser
         // We also know everything between core and the first module will be TextFormatter
         // We truncate the input with substr because otherwise it's possible to reach pcre.backtrack_limit
         // We know Flarum's largest core JS is around 360kB and we're going to be generous and allow 240kB of TextFormatter, which is unlikely
-        $preg = preg_match('~^([\s\S]*(?:\(e,"compat",\(?function\(\)\{return [a-z]{2}\}\)\)?|window\.app=[A-Za-z]{2},[A-Za-z]{2}\.app=[A-Za-z]{2})(?:;var [A-Za-z]{2}=Object\([A-Za-z]{2}\.a\)\([A-Za-z]{2},"(?:forum|admin)"\))?\}\]\);)([\s\S]*?)var\s+module\s*=\s*\{\}~m', mb_substr($this->content, 0, 600000, '8bit'), $matches);
+        $preg = preg_match('~^([\s\S]*(?:\(e,"compat",\(?function\(\)\{return [a-z]{2}\}\)\)?|(?:window\.app=[A-Za-z]{2},|[$A-Za-z]{2}=n\(73\);)[A-Za-z]{2}\.app=[_A-Za-z]{2})(?:;var [A-Za-z]{2}=Object\([$A-Za-z]{2}\.a\)\([A-Za-z]{2},"(?:forum|admin)"\))?\}\]\);)([\s\S]*?)var\s+module\s*=\s*\{\}~m', mb_substr($this->content, 0, 600000, '8bit'), $matches);
 
         if ($preg === false) {
             throw new \Exception(preg_last_error_msg());
@@ -75,7 +77,8 @@ class Beta8JavascriptFileParser
 
         // One common change made by proxies/CDNs is to collapse the copyright comments for Sizzle/jQuery/etc
         // We will expend them back to their original format to make the checksum test work
-        $coreCode = preg_replace_callback('~/\*![\s\S]+?\*/(?=([\s\S]|$))~', function ($commentMatches) {
+        // We also verify the first char before the comment to verify it has indeed been collapsed with the previous line
+        $coreCode = preg_replace_callback('~(?<![\r\n])/\*![\s\S]+?\*/(?=([\s\S]|$))~', function ($commentMatches) {
             $comment = $commentMatches[0];
 
             // If this is a collapsed comment (no space between newline and `*`)

@@ -33,10 +33,21 @@ class ScanController extends Controller
     {
         $destination = null;
 
+        /**
+         * @var $website Website
+         */
         if ($request->has('website_id')) {
             $website = Website::query()
                 ->where('uid', $request->get('website_id'))
                 ->firstOrFail();
+
+            if (!$website->canonical_url) {
+                throw ValidationException::withMessages([
+                    'website_id' => [
+                        'This website was never successfully scanned. You need to try again from the homepage.',
+                    ],
+                ]);
+            }
 
             $wantsNewScan = true;
         } else {
@@ -51,9 +62,6 @@ class ScanController extends Controller
 
             $normalized = $this->getNormalizedUrl($destination);
 
-            /**
-             * @var $website Website
-             */
             $website = Website::query()->firstOrCreate([
                 'normalized_url' => $normalized,
             ], [

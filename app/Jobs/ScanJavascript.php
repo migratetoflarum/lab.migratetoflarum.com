@@ -26,10 +26,6 @@ class ScanJavascript extends TaskJob
             $manifestAdminJsHash = Arr::get($revManifest, 'admin.js');
 
             if (preg_match('~^[0-9a-f]{8}$~', $manifestForumJsHash) === 1) {
-                if ($forumJsHash && $forumJsHash !== $manifestForumJsHash) {
-                    $this->log(self::LOG_PUBLIC, 'forum.js hash from homepage (' . $forumJsHash . ') is different from rev-manifest (' . $manifestForumJsHash . ')');
-                }
-
                 $forumJsHash = $manifestForumJsHash;
             }
 
@@ -53,7 +49,13 @@ class ScanJavascript extends TaskJob
                     continue;
                 }
 
-                $response = $this->request("$safeFlarumUrl/assets/$stack-$hash.js");
+                if (FlarumVersion::isV1OrAbove($homepage->getData('versions'))) {
+                    $assetUrl = "$safeFlarumUrl/assets/$stack.js?v=$hash";
+                } else {
+                    $assetUrl = "$safeFlarumUrl/assets/$stack-$hash.js";
+                }
+
+                $response = $this->request($assetUrl);
 
                 $content = $response->getBody()->getContents();
 

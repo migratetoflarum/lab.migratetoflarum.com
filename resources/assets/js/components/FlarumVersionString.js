@@ -13,11 +13,16 @@ export default {
                 titleVersions.push('(development version)');
             }
 
-            const matches = /^0\.1\.0-beta\.([0-9]+(\.[0-9]+)?)$/.exec(version);
+            if (/^[0-9]+\.[0-9]+\.[0-9]+$/.test(version)) {
+                labelVersions.push(version);
+                titleVersions.push(version);
+            } else {
+                const matches = /^0\.1\.0-beta\.([0-9]+(\.[0-9]+)?)$/.exec(version);
 
-            if (matches) {
-                labelVersions.push('beta ' + matches[1]);
-                titleVersions.push('0.1.0-beta.' + matches[1] + '.*');
+                if (matches) {
+                    labelVersions.push('beta ' + matches[1]);
+                    titleVersions.push('0.1.0-beta.' + matches[1] + '.*');
+                }
             }
         });
 
