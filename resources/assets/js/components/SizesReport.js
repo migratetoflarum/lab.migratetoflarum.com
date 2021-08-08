@@ -6,6 +6,10 @@ import icon from '../helpers/icon';
 import Warning from './Warning';
 
 function compressionReport(frontend) {
+    if (!frontend) {
+        return null;
+    }
+
     if (frontend.compressed) {
         let sizeText = '';
 
