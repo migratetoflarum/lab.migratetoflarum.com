@@ -17,6 +17,7 @@ class Policy extends Basic
             ->addDirective(Directive::IMG, 'https://analytics.kilowhat.net')
             ->addDirective(Directive::SCRIPT, 'https://analytics.kilowhat.net')
             ->addDirective(Directive::SCRIPT, 'https://*.pusher.com')
+            ->addDirective(Directive::CONNECT, 'https://analytics.kilowhat.net')
             ->addDirective(Directive::CONNECT, 'https://*.pusher.com')
             ->addDirective(Directive::CONNECT, 'wss://*.pusher.com');
     }

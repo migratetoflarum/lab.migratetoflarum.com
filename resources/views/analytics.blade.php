@@ -8,13 +8,13 @@
         _paq.push(['enableLinkTracking']);
         (function () {
             var u = {!! json_encode(\Illuminate\Support\Arr::get($matomo, 'url')) !!};
-            _paq.push(['setTrackerUrl', u + 'piwik.php']);
+            _paq.push(['setTrackerUrl', u + 'matomo.php']);
             _paq.push(['setSiteId', {!! json_encode(\Illuminate\Support\Arr::get($matomo, 'site_id')) !!}]);
             var d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
             g.type = 'text/javascript';
             g.async = true;
             g.defer = true;
-            g.src = u + 'piwik.js';
+            g.src = u + 'matomo.js';
             s.parentNode.insertBefore(g, s);
         })();
     </script>
