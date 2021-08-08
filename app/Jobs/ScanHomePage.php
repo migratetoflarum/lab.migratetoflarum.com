@@ -73,7 +73,8 @@ class ScanHomePage extends TaskJob
             $matches = [];
             // beta7 calls app.boot() with the payload
             // beta8 calls app.load() with the payload then app.boot() without arguments
-            if (preg_match('~app\.(boot|load)\(([^\n]+)\)~', $content, $matches) === 1) {
+            // The json object ends at the end of the line with a closing ); or it might be inlined with the next line if optimized by proxy
+            if (preg_match('~app\.(boot|load)\(([^\n]+)\);?\s*(?:$|flarum\.core\.app\.bootExtensions\(flarum\.extensions\))~', $content, $matches) === 1) {
                 $bootArguments = null;
 
                 try {
@@ -84,8 +85,11 @@ class ScanHomePage extends TaskJob
 
                 if (is_array($bootArguments)) {
                     foreach (Arr::get($bootArguments, 'resources', []) as $resource) {
-                        if (Arr::get($resource, 'type') === 'forums') {
+                        $type = Arr::get($resource, 'type');
 
+                        $this->log(self::LOG_PRIVATE, "Parsing JSON:API object of type $type");
+
+                        if ($type === 'forums') {
                             $this->data['bootBaseUrl'] = Arr::get($resource, 'attributes.baseUrl');
                             $this->data['bootBasePath'] = Arr::get($resource, 'attributes.basePath');
                             $this->data['debug'] = Arr::get($resource, 'attributes.debug');
@@ -95,8 +99,10 @@ class ScanHomePage extends TaskJob
                         }
                     }
                 } else {
-                    $this->log(self::LOG_PRIVATE, 'Found boot payload but is not an array or failed json parsing');
+                    $this->log(self::LOG_PUBLIC, 'Found boot payload but format is invalid');
                 }
+            } else {
+                $this->log(self::LOG_PUBLIC, 'Could not find app.boot() call');
             }
         });
 
