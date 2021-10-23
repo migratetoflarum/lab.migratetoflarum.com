@@ -12,10 +12,22 @@ class FlarumVersionGuesser
      */
     public function guess(string $html, string $bootScript): array
     {
+        // Preload was introduced in 1.1 https://github.com/flarum/core/pull/3057
+        if (preg_match('~rel="preload" href="[^"]+/fa-solid-900\.woff2" as="font"~', $html) === 1) {
+            return [
+                FlarumVersion::V1_1_0,
+                FlarumVersion::V1_1_1,
+            ];
+        }
+
         // Hashes changed in Flarum 1.0 https://github.com/flarum/core/pull/2805
         if (preg_match('~/assets/forum\.js\?v=[0-9a-f]{8}"></script>~', $html) === 1) {
             return [
                 FlarumVersion::V1_0_0,
+                FlarumVersion::V1_0_1,
+                FlarumVersion::V1_0_2,
+                FlarumVersion::V1_0_3,
+                FlarumVersion::V1_0_4,
             ];
         }
 

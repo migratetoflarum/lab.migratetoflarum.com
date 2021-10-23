@@ -13,8 +13,13 @@ export default {
                 titleVersions.push('(development version)');
             }
 
-            if (/^[0-9]+\.[0-9]+\.[0-9]+$/.test(version)) {
-                labelVersions.push(version);
+            const stableMatches = /^([0-9]+\.[0-9]+)\.[0-9]+$/.exec(version);
+
+            if (stableMatches) {
+                // Only add major.minor (without patch) to the main label
+                if (labelVersions.indexOf(stableMatches[1]) === -1) {
+                    labelVersions.push(stableMatches[1]);
+                }
                 titleVersions.push(version);
             } else {
                 const matches = /^0\.1\.0-beta\.([0-9]+(\.[0-9]+)?)$/.exec(version);
