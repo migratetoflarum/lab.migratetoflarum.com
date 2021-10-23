@@ -54,12 +54,20 @@ class ScanAlternateUrlsAndHeaders extends TaskJob
                 try {
                     $response = $this->request($url);
 
+                    $headers = [];
+
+                    foreach ([
+                                 'Content-Security-Policy',
+                                 'Content-Security-Policy-Report-Only',
+                                 'Strict-Transport-Security',
+                             ] as $headerName) {
+                        // Use a loop, so we can use getHeader to retrieve the header in a case-insensitive manner
+                        // while still naming the key with the "official" case
+                        $headers[$headerName] = $response->getHeader($headerName);
+                    }
+
                     $urlReport['status'] = $response->getStatusCode();
-                    $urlReport['headers'] = Arr::only($response->getHeaders(), [
-                        'Content-Security-Policy',
-                        'Content-Security-Policy-Report-Only',
-                        'Strict-Transport-Security',
-                    ]);
+                    $urlReport['headers'] = $headers;
 
                     switch ($response->getStatusCode()) {
                         case 301:
