@@ -63,7 +63,11 @@ class ScanAlternateUrlsAndHeaders extends TaskJob
                              ] as $headerName) {
                         // Use a loop, so we can use getHeader to retrieve the header in a case-insensitive manner
                         // while still naming the key with the "official" case
-                        $headers[$headerName] = $response->getHeader($headerName);
+                        $values = $response->getHeader($headerName);
+
+                        if (count($values)) {
+                            $headers[$headerName] = $values;
+                        }
                     }
 
                     $urlReport['status'] = $response->getStatusCode();
