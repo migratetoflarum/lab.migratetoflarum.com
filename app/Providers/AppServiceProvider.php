@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\GeoIPDatabase;
 use App\ScannerClient;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Horizon\Horizon;
@@ -45,5 +46,7 @@ class AppServiceProvider extends ServiceProvider
 
             return new Rules(unserialize($rules));
         });
+
+        $this->app->singleton(GeoIPDatabase::class);
     }
 }

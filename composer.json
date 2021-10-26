@@ -9,6 +9,7 @@
     "license": "MIT",
     "require": {
         "php": "^7.2.5",
+        "ext-curl": "*",
         "ext-fileinfo": "*",
         "ext-json": "*",
         "ext-zip": "*",
@@ -21,6 +22,7 @@
         "laravel/framework": "^7.0",
         "laravel/horizon": "^4.3",
         "laravel/tinker": "^2.0",
+        "maxmind-db/reader": "^1.11",
         "predis/predis": "^1.1",
         "pusher/pusher-php-server": "^4.1",
         "sentry/sentry-laravel": "1.8.0",

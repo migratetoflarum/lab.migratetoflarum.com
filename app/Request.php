@@ -22,6 +22,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $response_body_size
  * @property bool $response_body_truncated
  * @property int $response_body_compressed_size
+ * @property array $certificate
+ * @property string $ip
  *
  * @property Scan $scan
  */
@@ -38,6 +40,7 @@ class Request extends UidModel
         'response_status_code' => 'int',
         'response_body_size' => 'int',
         'response_body_truncated' => 'bool',
+        'certificate' => 'array',
     ];
 
     public function scan(): BelongsTo

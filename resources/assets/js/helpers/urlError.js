@@ -1,3 +1,5 @@
+import m from 'mithril';
+
 export default function (url) {
     const message = url.exception_message || '';
     const curl = message.match(/cURL error ([0-9]+):/);
@@ -53,8 +55,12 @@ export default function (url) {
                 }
 
                 return {
-                    description: 'Can\'t validate HTTPS certificate with known CA',
-                    suggest: 'Your certificate isn\'t signed by any CA we know. Was it self-signed ?',
+                    description: 'Can\'t validate HTTPS certificate',
+                    suggest: [
+                        'Your certificate isn\'t signed by any recognised Certificate Authority. It might be self-signed.',
+                        m('br'),
+                        'If there are no errors for your main URL, make sure the certificate covers both www and no-www subdomain.',
+                    ],
                 };
         }
     }

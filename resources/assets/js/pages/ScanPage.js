@@ -4,7 +4,6 @@ import icon from '../helpers/icon';
 import App from '../utils/App';
 import LoadingScreen from '../components/LoadingScreen';
 import OtherTools from '../components/OtherTools';
-import moment from 'moment';
 import DomainReport from '../components/DomainReport';
 import ExtensionsReport from '../components/ExtensionsReport';
 import Rating from '../components/Rating';
@@ -14,6 +13,7 @@ import FlarumVersionString from '../components/FlarumVersionString';
 import TasksReport from '../components/TasksReport';
 import SizesReport from '../components/SizesReport';
 import getVersions from '../helpers/getVersions';
+import dateAndAgo from '../helpers/dateAndAgo';
 
 export default {
     oninit(vnode) {
@@ -398,7 +398,7 @@ export default {
                                 ]),
                             ]),
                             m('h3.card-title', 'Details'),
-                            m('p', 'Scan performed on ' + moment(scan.attributes.scanned_at).format('YYYY-MM-DD HH:mm:ss')),
+                            m('p', 'Scan performed on ' + dateAndAgo(scan.attributes.scanned_at)),
                             m('p', 'Visibility: ' + (website.attributes.ignore ? 'This website has opted out and won\'t be visible on the homepage' : (scan.attributes.hidden ? 'this scan won\'t show up on the homepage' : 'this scan might show up on the homepage'))),
                             m('p', [
                                 'Flarum version: ',

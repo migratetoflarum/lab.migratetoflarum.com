@@ -47,6 +47,23 @@ location / {
 ProxyPass / http://127.0.0.1:8000/showcase/
 ```
 
+## External services
+
+The lab does not call any external API, but it uses some external services through offline databases.
+
+### Public Suffix List
+
+The list is automatically synced from https://github.com/publicsuffix/list using the `update-public-suffix-list` scheduled command.
+
+### IP geolocation
+
+IP geolocation uses DB-IP Free dataset.
+
+To use, download the latest file, extract and place at the following locations:
+
+- https://db-ip.com/db/download/ip-to-asn-lite to `storage/app/dbip-asn-lite.mmdb`
+- https://db-ip.com/db/download/ip-to-country-lite to `storage/app/dbip-country-lite.mmdb`
+
 ## A MigrateToFlarum service
 
 This is a free service by MigrateToFlarum, an online forum migration tool (launching soon).

@@ -10,6 +10,7 @@ use App\Exceptions\TaskManualFailException;
 use App\Request;
 use App\ScannerClient;
 use App\Task;
+use Carbon\Carbon;
 use Exception;
 use GuzzleHttp\Psr7\InflateStream;
 use GuzzleHttp\Psr7\Response;
@@ -18,6 +19,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Support\Str;
 
 abstract class TaskJob implements ShouldQueue
 {
@@ -106,9 +108,17 @@ abstract class TaskJob implements ShouldQueue
 
         $response = null;
 
+        $debug = fopen('php://memory', 'rw+');
+
         try {
             $response = $client->request($method, $url, [
                 'decode_content' => false,
+                // The curl option is not officially listed in the documentation but it seems to be used by Guzzle itself for some situations
+                'curl' => [
+                    CURLOPT_CERTINFO => true,
+                ],
+                // Debug enables CURL verbose output required by CERTINFO option and also gives us a way to read the output
+                'debug' => $debug,
             ]);
 
             $request->response_headers = $response->getHeaders();
@@ -172,6 +182,80 @@ abstract class TaskJob implements ShouldQueue
 
             throw $exception;
         } finally {
+            rewind($debug);
+
+            $meta = [];
+            $readingCertificate = false;
+
+            while ($line = fgets($debug)) {
+                if ($readingCertificate) {
+                    if (!Str::startsWith($line, '*  ')) {
+                        $readingCertificate = false;
+                        continue;
+                    }
+
+                    $parts = explode(':', $line, 2);
+
+                    if (count($parts) !== 2) {
+                        continue;
+                    }
+
+                    // Remove starting space and ending newline
+                    $secondPart = trim($parts[1]);
+
+                    switch (substr($parts[0], 3)) {
+                        case 'subject':
+                            $meta['subject'] = $secondPart;
+                            break;
+                        case 'start date':
+                            try {
+                                $meta['startDate'] = Carbon::parse($secondPart)->toIso8601String();
+                            } catch (\Exception $exception) {
+                                // We don't want this to break the scan, but still want to report the error
+                                report($exception);
+                            }
+                            break;
+                        case 'expire date':
+                            try {
+                                $meta['expireDate'] = Carbon::parse($secondPart)->toIso8601String();
+                            } catch (\Exception $exception) {
+                                // We don't want this to break the scan, but still want to report the error
+                                report($exception);
+                            }
+                            break;
+                        case 'subjectAltName':
+                            $meta['subjectAltName'] = $secondPart;
+                            break;
+                        case 'issuer':
+                            $meta['issuer'] = $secondPart;
+                            break;
+                    }
+
+                    continue;
+                }
+
+                if ($line === "* Server certificate:\n") {
+                    $readingCertificate = true;
+                    continue;
+                }
+
+                if (Str::startsWith($line, '* SSL connection using')) {
+                    // Remove start of line until space, and ending newline
+                    $meta['sslVersion'] = substr($line, 23, -1);
+                    continue;
+                }
+
+                if (preg_match('~^\* Connected to .+ \(([^(]+)\) port [0-9]+ \(#[0-9]+\)\s*$~', $line, $matches) === 1) {
+                    $request->ip = $matches[1];
+                }
+            }
+
+            fclose($debug);
+
+            if (count($meta)) {
+                $request->certificate = $meta;
+            }
+
             $request->duration = round((microtime(true) - $requestTime) * 1000);
             $request->save();
 

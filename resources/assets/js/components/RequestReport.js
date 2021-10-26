@@ -1,6 +1,8 @@
 import m from 'mithril';
+import {countryCodeEmoji} from 'country-code-emoji';
 import icon from '../helpers/icon';
 import formatBytes from '../helpers/formatBytes';
+import dateAndAgo from '../helpers/dateAndAgo';
 
 function bodySizeInfo(request) {
     if (!request.response_body_size) {
@@ -12,6 +14,26 @@ function bodySizeInfo(request) {
     }
 
     return formatBytes(request.response_body_size) + ' (not compressed)';
+}
+
+function certificateInfo(request) {
+    return [
+        m('dt.col-sm-3', 'Certificate'),
+        m('dd.col-sm-9', m('dl.row', [
+            request.certificate.issuer ? [
+                m('dt.col-sm-2', 'Issuer'),
+                m('dd.col-sm-10', request.certificate.issuer),
+            ] : null,
+            request.certificate.subject ? [
+                m('dt.col-sm-2', 'Subject'),
+                m('dd.col-sm-10', request.certificate.subject),
+            ] : null,
+            request.certificate.expireDate ? [
+                m('dt.col-sm-2', 'Expires'),
+                m('dd.col-sm-10', dateAndAgo(request.certificate.expireDate)),
+            ] : null,
+        ])),
+    ];
 }
 
 export default {
@@ -38,6 +60,8 @@ export default {
             }
         }
 
+        const ipEmoji = request.ipCountry && countryCodeEmoji(request.ipCountry);
+
         return [
             m('a.list-group-item.list-group-item-action', {
                 href: '#',
@@ -62,11 +86,26 @@ export default {
                     m('dt.col-sm-3', 'Date'),
                     m('dd.col-sm-9', request.fetched_at),
                     m('dt.col-sm-3', 'URL'),
-                    m('dd.col-sm-9', m('a', {
-                        href: request.url,
-                        target: '_blank',
-                        rel: 'nofollow noopener',
-                    }, request.url)),
+                    m('dd.col-sm-9', [
+                        m('a', {
+                            href: request.url,
+                            target: '_blank',
+                            rel: 'nofollow noopener',
+                        }, request.url),
+                        request.ip ? m('span.ip-info', [
+                            ' (',
+                            (request.ipCountry ? (ipEmoji || request.ipCountry) + ' ' : ''),
+                            request.ip,
+                            (request.ipOrg ? ' / ' + request.ipOrg : ''),
+                            request.ipCountry || request.ipOrg ? [
+                                ' ',
+                                m('a', {
+                                    href: 'https://db-ip.com/',
+                                }, 'IP Geolocation by DB-IP'),
+                            ] : null,
+                            ')',
+                        ]) : null,
+                    ]),
                     (request.request_headers ? [
                         m('dt.col-sm-12', 'Headers'),
                         Object.keys(request.request_headers).map(headerName => [
@@ -76,6 +115,9 @@ export default {
                     ] : null),
                 ]),
                 m('h5', 'Response'),
+                (request.exception ? [
+                    m('.alert.alert-warning', request.exception.message),
+                ] : null),
                 (request.response_status_code ? [
                     m('dl.row', [
                         m('dt.col-sm-3', 'Time'),
@@ -84,6 +126,7 @@ export default {
                         ]),
                         m('dt.col-sm-3', 'Body size'),
                         m('dd.col-sm-9', bodySizeInfo(request)),
+                        (request.certificate ? certificateInfo(request) : null),
                         (request.response_headers ? [
                             m('dt.col-sm-12', 'Headers'),
                             Object.keys(request.response_headers).map(headerName => [
@@ -93,10 +136,10 @@ export default {
                         ] : null),
                     ]),
                     (request.method === 'HEAD' ? m('div', m('em', 'Only headers were fetched to save time')) : m('pre', request.response_body)),
-                ] : null),
-                (request.exception ? [
-                    m('.alert.alert-warning', request.exception.message),
-                ] : null),
+                ] : (request.certificate ? m('dl.row', [
+                    // Display certificate info even on errors without status code because the certificate might have been retrieved
+                    certificateInfo(request),
+                ]) : null)),
             ]) : null),
         ];
     },
