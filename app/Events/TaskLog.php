@@ -6,8 +6,8 @@ use App\Task;
 
 class TaskLog extends AbstractTaskEvent
 {
-    protected $time;
-    protected $message;
+    protected string $time;
+    protected string $message;
 
     public function __construct(Task $task, string $time, string $message)
     {

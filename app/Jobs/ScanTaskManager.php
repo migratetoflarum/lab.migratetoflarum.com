@@ -8,10 +8,7 @@ use Illuminate\Database\Eloquent\Collection;
 
 class ScanTaskManager
 {
-    /**
-     * @var Scan $scan
-     */
-    protected $scan;
+    protected Scan $scan;
     /**
      * @var Collection|Task[]
      */
@@ -19,7 +16,7 @@ class ScanTaskManager
     /**
      * @var string[]
      */
-    public $dispatched = [];
+    public array $dispatched = [];
 
     public function __construct(Scan $scan)
     {

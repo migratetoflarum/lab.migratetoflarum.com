@@ -7,6 +7,10 @@ use Spatie\Csp\Policies\Basic;
 
 class Policy extends Basic
 {
+    /**
+     * @throws \Spatie\Csp\Exceptions\InvalidValueSet
+     * @throws \Spatie\Csp\Exceptions\InvalidDirective
+     */
     public function configure()
     {
         parent::configure();

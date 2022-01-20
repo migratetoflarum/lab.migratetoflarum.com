@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Pdp\Rules;
-use Spatie\MediaLibrary\HasMedia\HasMedia;
-use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
 /**
  * @property int $id
@@ -31,7 +31,7 @@ use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
  */
 class Website extends UidModel implements HasMedia
 {
-    use HasMediaTrait;
+    use InteractsWithMedia;
 
     const COLLECTION_SCREENSHOT = 'screenshot';
 

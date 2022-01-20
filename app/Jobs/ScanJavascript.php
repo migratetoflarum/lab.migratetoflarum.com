@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Beta8JavascriptFileParser;
 use App\FlarumVersion;
 use Exception;
+use GuzzleHttp\Utils;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
@@ -20,7 +21,7 @@ class ScanJavascript extends TaskJob
         $adminJsHash = null;
 
         try {
-            $revManifest = \GuzzleHttp\json_decode($this->request("$safeFlarumUrl/assets/rev-manifest.json")->getBody()->getContents(), true);
+            $revManifest = Utils::jsonDecode($this->request("$safeFlarumUrl/assets/rev-manifest.json")->getBody()->getContents(), true);
 
             $manifestForumJsHash = Arr::get($revManifest, 'forum.js');
             $manifestAdminJsHash = Arr::get($revManifest, 'admin.js');

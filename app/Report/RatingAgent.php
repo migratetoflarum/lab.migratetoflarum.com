@@ -9,14 +9,14 @@ use Illuminate\Support\Str;
 
 class RatingAgent
 {
-    protected $canonical;
-    protected $homepage;
-    protected $alternate;
-    protected $exposed;
-    protected $version;
+    protected Task $canonical;
+    protected Task $homepage;
+    protected Task $alternate;
+    protected Task $exposed;
+    protected Task $version;
 
-    public $rating = '-';
-    public $importantRules = [];
+    public string $rating = '-';
+    public array $importantRules = [];
 
     public function __construct(Task $canonical, Task $homepage, Task $alternate, Task $exposed, Task $version)
     {

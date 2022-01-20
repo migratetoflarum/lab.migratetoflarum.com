@@ -13,7 +13,7 @@ class ScanUpdated implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $scan;
+    public Scan $scan;
 
     public function __construct(Scan $scan)
     {

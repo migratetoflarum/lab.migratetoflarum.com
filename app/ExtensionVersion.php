@@ -4,8 +4,8 @@ namespace App;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\MediaLibrary\HasMedia\HasMedia;
-use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
 /**
  * @property int $id
@@ -25,7 +25,7 @@ use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
 class ExtensionVersion extends Model implements HasMedia
 {
     use AddMediaFromGitHubApiUrl;
-    use HasMediaTrait;
+    use InteractsWithMedia;
 
     protected $casts = [
         'packagist' => 'array',
@@ -47,7 +47,7 @@ class ExtensionVersion extends Model implements HasMedia
         return $this->belongsTo(Extension::class);
     }
 
-    public function registerMediaCollections()
+    public function registerMediaCollections(): void
     {
         $this
             ->addMediaCollection('dist')

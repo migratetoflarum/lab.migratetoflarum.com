@@ -8,8 +8,8 @@ use MaxMind\Db\Reader;
 
 class GeoIPDatabase
 {
-    protected $reader = [];
-    protected $cache;
+    protected array $reader = [];
+    protected Repository $cache;
 
     public function __construct(Repository $cache)
     {

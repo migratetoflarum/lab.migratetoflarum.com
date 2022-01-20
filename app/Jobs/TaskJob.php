@@ -25,12 +25,9 @@ abstract class TaskJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    /**
-     * @var Task $task
-     */
-    protected $task;
+    protected Task $task;
 
-    protected $data = [];
+    protected array $data = [];
 
     const LOG_PUBLIC = 'public';
     const LOG_PRIVATE = 'private';

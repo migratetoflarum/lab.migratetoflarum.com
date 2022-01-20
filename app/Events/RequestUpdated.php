@@ -15,7 +15,7 @@ class RequestUpdated implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $request;
+    public Request $request;
 
     public function __construct(Request $request)
     {

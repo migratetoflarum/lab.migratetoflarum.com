@@ -11,7 +11,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class ScanResource extends JsonResource
 {
-    public function toArray($request)
+    public function toArray($request): array
     {
         $report = new ReportFormatter($this->resource->report);
 

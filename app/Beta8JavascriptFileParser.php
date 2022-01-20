@@ -6,7 +6,7 @@ use Illuminate\Support\Str;
 
 class Beta8JavascriptFileParser
 {
-    protected $content;
+    protected string $content;
 
     public function __construct(string $content)
     {

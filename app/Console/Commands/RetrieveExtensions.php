@@ -19,7 +19,7 @@ class RetrieveExtensions extends Command
     protected $signature = 'extensions:retrieve';
     protected $description = 'Retrieve extensions via Packagist';
 
-    protected $client;
+    protected Client $client;
 
     public function __construct()
     {

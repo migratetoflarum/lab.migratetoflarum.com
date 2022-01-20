@@ -12,7 +12,7 @@ use Illuminate\Support\Arr;
  */
 class ExtensionResource extends JsonResource
 {
-    public function toArray($request)
+    public function toArray($request): array
     {
         $relationships = [];
 

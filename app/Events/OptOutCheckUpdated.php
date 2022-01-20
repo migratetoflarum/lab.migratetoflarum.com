@@ -15,7 +15,7 @@ class OptOutCheckUpdated implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $check;
+    public OptOutCheck $check;
 
     public function __construct(OptOutCheck $check)
     {

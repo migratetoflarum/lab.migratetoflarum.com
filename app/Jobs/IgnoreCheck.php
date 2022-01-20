@@ -17,7 +17,7 @@ class IgnoreCheck implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $check;
+    protected OptOutCheck $check;
 
     public function __construct(OptOutCheck $check)
     {

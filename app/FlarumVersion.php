@@ -28,7 +28,7 @@ class FlarumVersion
 
     // MD5 hash of the javascript of Flarum core, excluding the sourcemap declaration
     // Obtained through the GetCoreJavascriptHash command
-    public $forumJavascriptHashes = [
+    public array $forumJavascriptHashes = [
         '189296cfbba1fc2ed589ba2f15725905' => self::BETA_8,
         'c4852231b8e6286ce37761a1cfab1297' => self::BETA_9,
         '3616121e8824e77d8676060d103765fb' => self::BETA_10,
@@ -45,7 +45,7 @@ class FlarumVersion
         'c3d9c002b7b0b12c3c967723ac41ec77' => [self::V1_1_0, self::V1_1_1],
     ];
 
-    public $adminJavascriptHashes = [
+    public array $adminJavascriptHashes = [
         '3ac891548d3b255cbe65a97fc4eba017' => self::BETA_8,
         'a558ecde363e01b1cdd6a76a684eba48' => self::BETA_9,
         'de40f6fa13b1c5158bb617fa70b818dc' => self::BETA_10,

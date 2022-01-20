@@ -16,7 +16,7 @@ class WebsitePing implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $website;
+    protected Website $website;
 
     public function __construct(Website $website)
     {

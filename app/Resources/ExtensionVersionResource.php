@@ -10,7 +10,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class ExtensionVersionResource extends JsonResource
 {
-    public function toArray($request)
+    public function toArray($request): array
     {
         return [
             'type' => 'extension-versions',

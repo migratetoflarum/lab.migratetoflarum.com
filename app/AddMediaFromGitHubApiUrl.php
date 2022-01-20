@@ -3,7 +3,7 @@
 namespace App;
 
 use GuzzleHttp\Client;
-use Spatie\MediaLibrary\FileAdder\FileAdderFactory;
+use Spatie\MediaLibrary\MediaCollections\FileAdderFactory;
 
 trait AddMediaFromGitHubApiUrl
 {

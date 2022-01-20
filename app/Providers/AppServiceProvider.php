@@ -5,7 +5,6 @@ namespace App\Providers;
 use App\GeoIPDatabase;
 use App\ScannerClient;
 use Illuminate\Support\ServiceProvider;
-use Laravel\Horizon\Horizon;
 use Pdp\Rules;
 use Storage;
 

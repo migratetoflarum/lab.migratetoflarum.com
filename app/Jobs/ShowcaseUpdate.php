@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\ScannerClient;
 use App\Website;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Utils;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -18,7 +19,7 @@ class ShowcaseUpdate implements ShouldQueue
 
     const PAGE_LIMIT = 50;
 
-    protected $website;
+    protected Website $website;
 
     public function __construct(Website $website)
     {
@@ -44,7 +45,7 @@ class ShowcaseUpdate implements ShouldQueue
         $apiUrl = rtrim($this->website->canonical_url, '/') . '/api';
 
         try {
-            $forum = \GuzzleHttp\json_decode($client->get($apiUrl, [
+            $forum = Utils::jsonDecode($client->get($apiUrl, [
                 'http_errors' => true,
             ])->getBody()->getContents(), true);
         } catch (ClientException $exception) {
@@ -101,7 +102,7 @@ class ShowcaseUpdate implements ShouldQueue
 
         // We first try offset 0, because many forums will have few posts
         // And also offset 0 is never properly reached with the loop below
-        $document = \GuzzleHttp\json_decode($client->get($url . '?page[limit]=' . self::PAGE_LIMIT, [
+        $document = Utils::jsonDecode($client->get($url . '?page[limit]=' . self::PAGE_LIMIT, [
             'http_errors' => true,
         ])->getBody()->getContents(), true);
 
@@ -115,7 +116,7 @@ class ShowcaseUpdate implements ShouldQueue
 
         // Try to find a page that's not completely full in as few queries as possible
         for ($i = $page / 2; $i >= 0.5; $i = $i / 2) {
-            $document = \GuzzleHttp\json_decode($client->get($url . '?page[limit]=' . self::PAGE_LIMIT . '&page[offset]=' . (self::PAGE_LIMIT * $page), [
+            $document = Utils::jsonDecode($client->get($url . '?page[limit]=' . self::PAGE_LIMIT . '&page[offset]=' . (self::PAGE_LIMIT * $page), [
                 'http_errors' => true,
             ])->getBody()->getContents(), true);
 
