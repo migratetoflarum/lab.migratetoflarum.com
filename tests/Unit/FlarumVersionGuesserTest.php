@@ -9,10 +9,7 @@ use Tests\TestCase;
 
 class FlarumVersionGuesserTest extends TestCase
 {
-    /**
-     * @var $guesser FlarumVersionGuesser
-     */
-    protected $guesser;
+    protected FlarumVersionGuesser $guesser;
 
     protected function setUp(): void
     {
@@ -498,6 +495,18 @@ class FlarumVersionGuesserTest extends TestCase
         $this->assertEquals([
             FlarumVersion::V1_1_0,
             FlarumVersion::V1_1_1,
+            FlarumVersion::V1_2_0,
+        ], $this->guesser->guess($html, $html));
+    }
+
+    function testV120Typical()
+    {
+        $html = file_get_contents(__DIR__ . '/version-guesser/1.2.0-typical.html');
+
+        $this->assertEquals([
+            FlarumVersion::V1_1_0,
+            FlarumVersion::V1_1_1,
+            FlarumVersion::V1_2_0,
         ], $this->guesser->guess($html, $html));
     }
 }

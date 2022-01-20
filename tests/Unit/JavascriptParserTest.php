@@ -7,6 +7,54 @@ use Tests\TestCase;
 
 class JavascriptParserTest extends TestCase
 {
+    public function testV1_2ForumParser()
+    {
+        $parser = new Beta8JavascriptFileParser(file_get_contents(__DIR__ . '/javascript-parser/1.2.0-typical-forum.js'));
+
+        $this->assertEquals([
+            [
+                'id' => 'flarum-tags',
+                'checksum' => '1f4b16168c3f5e4dd941af671ce63987',
+                'size' => 29389,
+                'dev' => false,
+            ],
+        ], $parser->extensions());
+
+        $this->assertEquals([
+            [
+                'id' => 'core',
+                'checksum' => '7ce80a4947d0a9d3ed59f1c983d6306c',
+                'size' => 391876,
+            ],
+            [
+                'id' => 'textformatter',
+                'size' => 46873,
+            ],
+        ], $parser->coreSize());
+    }
+
+    public function testV1_2AdminParser()
+    {
+        $parser = new Beta8JavascriptFileParser(file_get_contents(__DIR__ . '/javascript-parser/1.2.0-typical-admin.js'));
+
+        $this->assertEquals([
+            [
+                'id' => 'flarum-tags',
+                'checksum' => '746938ef3c28ade09d31da6bb658a39c',
+                'size' => 52017,
+                'dev' => false,
+            ],
+        ], $parser->extensions());
+
+        $this->assertEquals([
+            [
+                'id' => 'core',
+                'checksum' => 'd2f45e06f2914e9347c95a440e31ac6c',
+                'size' => 324971,
+            ],
+        ], $parser->coreSize());
+    }
+
     public function testV1ForumParser()
     {
         $parser = new Beta8JavascriptFileParser(file_get_contents(__DIR__ . '/javascript-parser/1.0.0-typical-forum.js'));

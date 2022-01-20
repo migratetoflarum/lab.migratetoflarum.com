@@ -17,6 +17,7 @@ class FlarumVersionGuesser
             return [
                 FlarumVersion::V1_1_0,
                 FlarumVersion::V1_1_1,
+                FlarumVersion::V1_2_0,
             ];
         }
 
