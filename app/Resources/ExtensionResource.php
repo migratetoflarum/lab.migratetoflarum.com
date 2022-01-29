@@ -25,7 +25,8 @@ class ExtensionResource extends JsonResource
 
             $attributes['possible_versions'] = $possibleVersions;
             // We know possible_versions are sorted from lowest to highest in the task
-            $attributes['update_available'] = Comparator::greaterThan($this->resource->last_version, Arr::last($possibleVersions));
+            // We need to trim the "v" in front of version because it creates issue if one of the versions has it and another doesn't
+            $attributes['update_available'] = Comparator::greaterThan(trim($this->resource->last_version, 'v'), trim(Arr::last($possibleVersions), 'v'));
         }
 
         return [
