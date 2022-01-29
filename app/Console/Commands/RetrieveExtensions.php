@@ -10,13 +10,14 @@ use Composer\Semver\Comparator;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Utils;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
 class RetrieveExtensions extends Command
 {
-    protected $signature = 'extensions:retrieve';
+    protected $signature = 'extensions:retrieve {q?}';
     protected $description = 'Retrieve extensions via Packagist';
 
     protected Client $client;
@@ -34,11 +35,15 @@ class RetrieveExtensions extends Command
     {
         $url = '/search.json?type=flarum-extension';
 
+        if ($this->hasArgument('q')) {
+            $url .= '&q=' . urlencode($this->argument('q'));
+        }
+
         while ($url) {
             $this->info("Reading $url");
 
             $response = $this->client->get($url);
-            $data = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+            $data = Utils::jsonDecode($response->getBody()->getContents(), true);
 
             $packages = Arr::get($data, 'results', []);
 
@@ -46,7 +51,7 @@ class RetrieveExtensions extends Command
                 $packageName = Arr::get($package, 'name');
                 $this->info("Saving $packageName");
 
-                $details = Arr::get(\GuzzleHttp\json_decode($this->client->get("/packages/$packageName.json")->getBody()->getContents(), true), 'package', []);
+                $details = Arr::get(Utils::jsonDecode($this->client->get("/packages/$packageName.json")->getBody()->getContents(), true), 'package', []);
 
                 $versions = Arr::get($details, 'versions', []);
 
