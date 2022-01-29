@@ -4,6 +4,7 @@ import HomePage from './pages/HomePage';
 import ScanPage from './pages/ScanPage';
 import App from './utils/App';
 import OptOutPage from './pages/OptOutPage';
+import StatsPage from './pages/StatsPage';
 import TasksPage from './pages/TasksPage';
 
 let root = document.getElementById('app');
@@ -14,6 +15,7 @@ const routes = {
     '/': HomePage,
     '/scans/:key': ScanPage,
     '/opt-out': OptOutPage,
+    '/stats': StatsPage,
     '/tasks': TasksPage,
 };
 

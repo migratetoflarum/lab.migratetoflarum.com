@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Api\ScanController;
 use App\Resources\ScanResource;
+use App\Stats;
 use App\Website;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
 use Spatie\Csp\AddCspHeaders;
 
 class AppController extends Controller
@@ -46,7 +48,11 @@ class AppController extends Controller
             $preload
         );
 
-        return view('app')->withPreload($preload);
+        $stats = Cache::get('stats', function () {
+            return (new Stats())();
+        });
+
+        return view('app')->withPreload($preload)->withStats($stats);
     }
 
     public function home()

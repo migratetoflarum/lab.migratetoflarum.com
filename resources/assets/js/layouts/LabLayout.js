@@ -23,6 +23,7 @@ export default {
                                 href: App.showcaseDomain || '/showcase',
                             }, 'Showcase')),
                             m('li.nav-item', link('/opt-out', {className: 'nav-link'}, 'Opt Out')),
+                            m('li.nav-item', link('/stats', {className: 'nav-link'}, 'Stats')),
                             m('li.nav-item', m('a.nav-link', {
                                 href: App.discuss,
                                 target: '_blank',

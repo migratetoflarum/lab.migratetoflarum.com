@@ -26,6 +26,8 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('horizon:snapshot')->everyFiveMinutes();
 
+        $schedule->command('stats:cache')->dailyAt('2:00');
+
         $schedule->command('websites:ping')->dailyAt('4:00');
 
         $schedule->command('extensions:retrieve')->dailyAt('5:00');

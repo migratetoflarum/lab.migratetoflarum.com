@@ -16,6 +16,7 @@ $data = [
     'base-domain' => url(''),
     'showcase-domain' => config('scanner.showcase_domain'),
     'preload' => isset($preload) ? \GuzzleHttp\json_encode($preload) : '[]',
+    'stats' => \GuzzleHttp\json_encode($stats),
     'sponsoring' => \GuzzleHttp\json_encode(config('sponsoring')),
 ];
 if ($probability = config('scanner.secret_extensions_probability')) {

@@ -13,6 +13,7 @@ export default {
     secretExtensionProbability: 0,
     baseDomain: null,
     showcaseDomain: null,
+    stats: null,
     init(root) {
         this.csrfToken = root.dataset.csrf;
 
@@ -30,6 +31,10 @@ export default {
 
         if (root.dataset.hasOwnProperty('showcaseDomain')) {
             this.showcaseDomain = root.dataset.showcaseDomain || null;
+        }
+
+        if (root.dataset.hasOwnProperty('stats')) {
+            this.stats = JSON.parse(root.dataset.stats);
         }
 
         if (root.dataset.hasOwnProperty('preload')) {
