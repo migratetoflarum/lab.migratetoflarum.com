@@ -32,31 +32,36 @@ class WebsitePing implements ShouldQueue
 
         $isFlarum = false;
 
-        try {
-            $response = $client->get($this->website->canonical_url);
+        // It's very unlikely to run this method for a website without a canonical URL
+        // But it can happen if all requests fail in ScanAlternateUrlsAndHeaders while the scan still succeeds
+        // If we don't handle this we encounter an InvalidArgumentException when trying to call Guzzle with null
+        if ($this->website->canonical_url) {
+            try {
+                $response = $client->get($this->website->canonical_url);
 
-            if ($response->getStatusCode() === 200) {
-                $page = new Crawler($response->getBody()->getContents());
+                if ($response->getStatusCode() === 200) {
+                    $page = new Crawler($response->getBody()->getContents());
 
-                $meta = $page->filter('meta[name=migratetoflarum-lab-opt-out]')->first();
+                    $meta = $page->filter('meta[name=migratetoflarum-lab-opt-out]')->first();
 
-                // If the website wasn't ignored but we notice it should be, add ignore flag
-                // Let the opt out check take care of removing websites from the opt out
-                if (!$this->website->ignore && $meta->count() > 0) {
-                    $this->website->ignore = true;
-                }
-
-                $page->filter('head link[rel="stylesheet"]')->each(function (Crawler $link) use (&$isFlarum) {
-                    $href = $link->attr('href');
-
-                    if (str_contains($href, '/assets/forum-')) {
-                        $isFlarum = true;
+                    // If the website wasn't ignored but we notice it should be, add ignore flag
+                    // Let the opt out check take care of removing websites from the opt out
+                    if (!$this->website->ignore && $meta->count() > 0) {
+                        $this->website->ignore = true;
                     }
-                });
+
+                    $page->filter('head link[rel="stylesheet"]')->each(function (Crawler $link) use (&$isFlarum) {
+                        $href = $link->attr('href');
+
+                        if (str_contains($href, '/assets/forum-')) {
+                            $isFlarum = true;
+                        }
+                    });
+                }
+            } catch (RequestException $exception) {
+                // Ignore connect exceptions, they will be considered as non-flarum
+                // We also need to catch RequestException for certificate issues and such
             }
-        } catch (RequestException $exception) {
-            // Ignore connect exceptions, they will be considered as non-flarum
-            // We also need to catch RequestException for certificate issues and such
         }
 
         $this->website->updateIsFlarumStatus($isFlarum);
