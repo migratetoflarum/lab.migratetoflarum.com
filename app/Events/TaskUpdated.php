@@ -10,7 +10,10 @@ class TaskUpdated extends AbstractTaskEvent
     public function broadcastWith(): array
     {
         return Arr::except((new TaskResource($this->task))->jsonSerialize(), [
-            'attributes.public_log', // Could be too big for Pusher
+            // This broadcast is only to update the state of a task
+            // We'll skip all data that could make the payload too large for Pusher
+            'attributes.data',
+            'attributes.public_log',
             'attributes.private_log',
         ]);
     }
