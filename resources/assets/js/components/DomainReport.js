@@ -140,6 +140,24 @@ const UrlReport = {
     },
 };
 
+function cleanCurlErrorMessage(address, message) {
+    if (typeof message !== 'string') {
+        return message;
+    }
+
+    // Some cURL error messages include the URL which prevent us from using exact string comparison to tell if it's the same problem
+    // So we'll remove those URLs before comparing the strings
+    return message.replace('http://' + address, '').replace('https://' + address, '');
+}
+
+function isSameError(address, report1, report2) {
+    if (report1.type !== 'error' || report2.type !== 'error') {
+        return false;
+    }
+
+    return cleanCurlErrorMessage(report1.exception_message) === cleanCurlErrorMessage(report2.exception_message);
+}
+
 export default {
     oninit(vnode) {
         vnode.state.showUnimportantDomain = false;
@@ -151,7 +169,7 @@ export default {
             return null;
         }
 
-        const sameError = vnode.attrs.httpReport.type === 'error' && vnode.attrs.httpsReport.type === 'error' && vnode.attrs.httpReport.exception_message === vnode.attrs.httpsReport.exception_message;
+        const sameError = isSameError(vnode.attrs.address, vnode.attrs.httpReport, vnode.attrs.httpsReport);
 
         let error;
 
