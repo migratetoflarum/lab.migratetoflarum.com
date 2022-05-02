@@ -14,6 +14,7 @@ use GuzzleHttp\Utils;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
 
 class RetrieveExtensions extends Command
 {
@@ -122,6 +123,10 @@ class RetrieveExtensions extends Command
                                     $exception->getResponse()->getStatusCode() === 404
                                 ) {
                                     $this->warn("Not Found error downloading dist file url $distUrl");
+                                } else if ($exception instanceof FileIsTooBig) {
+                                    $this->warn("Dist file url $distUrl is too big: " . $exception->getMessage());
+
+                                    logger()->warning("Dist file url $distUrl is too big: " . $exception->getMessage());
                                 } else {
                                     $this->error($exception->getMessage());
 
