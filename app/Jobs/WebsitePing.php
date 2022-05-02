@@ -4,7 +4,7 @@ namespace App\Jobs;
 
 use App\ScannerClient;
 use App\Website;
-use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\TransferException;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -58,7 +58,7 @@ class WebsitePing implements ShouldQueue
                         }
                     });
                 }
-            } catch (RequestException $exception) {
+            } catch (TransferException $exception) {
                 // Ignore connect exceptions, they will be considered as non-flarum
                 // We also need to catch RequestException for certificate issues and such
             }
