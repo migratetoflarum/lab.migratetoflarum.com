@@ -20,7 +20,7 @@ class GetCoreJavascriptHash extends Command
     {
         $client = new Client();
 
-        $response = $client->get("https://raw.githubusercontent.com/flarum/core/$tag/js/dist/$frontend.js");
+        $response = $client->get("https://raw.githubusercontent.com/flarum/flarum-core/$tag/js/dist/$frontend.js");
 
         return md5(trim(str_replace("//# sourceMappingURL=$frontend.js.map", '', $response->getBody()->getContents())));
     }
