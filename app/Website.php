@@ -88,7 +88,7 @@ class Website extends UidModel implements HasMedia
 
         $domain = $rules->resolve(Arr::get($parsedUrl, 'host'));
 
-        return is_null($domain->getSubDomain());
+        return $domain->subDomain()->count() === 0;
     }
 
     public function updateIsFlarumStatus(bool $isFlarumNow)

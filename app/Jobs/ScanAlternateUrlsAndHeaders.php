@@ -20,7 +20,7 @@ class ScanAlternateUrlsAndHeaders extends TaskJob
 
         $domain = $rules->resolve(Arr::get($parsedUrl, 'host'));
 
-        return is_null($domain->getSubDomain());
+        return $domain->subDomain()->count() === 0;
     }
 
     protected function handleTask()

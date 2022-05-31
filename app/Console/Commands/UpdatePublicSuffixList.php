@@ -4,8 +4,7 @@ namespace App\Console\Commands;
 
 use GuzzleHttp\Client;
 use Illuminate\Console\Command;
-use Pdp\Converter;
-use Storage;
+use Illuminate\Support\Facades\Storage;
 
 class UpdatePublicSuffixList extends Command
 {
@@ -17,9 +16,8 @@ class UpdatePublicSuffixList extends Command
         $client = new Client();
         $response = $client->get('https://raw.githubusercontent.com/publicsuffix/list/master/public_suffix_list.dat');
         $content = $response->getBody()->getContents();
-        $rules = (new Converter())->convert($content);
 
-        Storage::put('public_suffix_list_converted', serialize($rules));
+        Storage::put('public_suffix_list', $content);
 
         $this->info('Public Suffix List cache updated.');
     }

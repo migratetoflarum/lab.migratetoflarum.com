@@ -23,14 +23,10 @@ trait CreatesApplication
 
         // Use a simple list of rules as the full list can't be pulled from the cache in the test application
         $app->singleton(Rules::class, function () {
-            return new Rules([
-                Rules::ICANN_DOMAINS => [
-                    'com' => [],
-                    'uk' => [
-                        'co' => [],
-                    ],
-                ],
-            ]);
+            return Rules::fromString(<<<TEXT
+com
+co.uk
+TEXT);
         });
 
         return $app;

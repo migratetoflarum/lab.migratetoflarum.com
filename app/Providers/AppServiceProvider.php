@@ -4,9 +4,9 @@ namespace App\Providers;
 
 use App\GeoIPDatabase;
 use App\ScannerClient;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
 use Pdp\Rules;
-use Storage;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -40,10 +40,14 @@ class AppServiceProvider extends ServiceProvider
             ]);
         });
 
-        $this->app->bind(Rules::class, function () {
-            $rules = Storage::get('public_suffix_list_converted');
+        $this->app->singleton(Rules::class, function () {
+            $content = Storage::get('public_suffix_list');
 
-            return new Rules(unserialize($rules));
+            if (empty($content)) {
+                throw new \Exception('Public Suffix List cache not available');
+            }
+
+            return Rules::fromString($content);
         });
 
         $this->app->singleton(GeoIPDatabase::class);

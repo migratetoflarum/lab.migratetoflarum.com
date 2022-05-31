@@ -8,37 +8,36 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^7.4|^8.0",
+        "php": "^8.0.2",
         "ext-curl": "*",
         "ext-fileinfo": "*",
         "ext-json": "*",
         "ext-zip": "*",
         "ext-zlib": "*",
-        "composer/semver": "^3.0",
-        "fideloper/proxy": "^4.2",
+        "composer/semver": "^3.3",
         "fruitcake/laravel-cors": "^2.0",
-        "guzzlehttp/guzzle": "^7.0.1",
-        "jeremykendall/php-domain-parser": "^5.7",
-        "laravel/framework": "^8.0",
+        "guzzlehttp/guzzle": "^7.4.3",
+        "jeremykendall/php-domain-parser": "^6.1",
+        "laravel/framework": "^9.0",
         "laravel/horizon": "^5.0",
-        "laravel/tinker": "^2.5",
+        "laravel/tinker": "^2.7",
         "maxmind-db/reader": "^1.11",
         "predis/predis": "^1.1",
-        "pusher/pusher-php-server": "^4.1",
+        "pusher/pusher-php-server": "^7.0",
         "sentry/sentry-laravel": "^2.11",
         "spatie/browsershot": "^3.37",
         "spatie/laravel-csp": "^2.6",
-        "spatie/laravel-medialibrary": "^9.0",
+        "spatie/laravel-medialibrary": "^10.0",
         "symfony/css-selector": "^5.1",
         "symfony/dom-crawler": "^5.1"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.3",
-        "facade/ignition": "^2.5",
-        "fzaninotto/faker": "^1.9.1",
+        "fakerphp/faker": "^1.9.1",
         "mockery/mockery": "^1.4.4",
-        "nunomaduro/collision": "^5.0",
-        "phpunit/phpunit": "^9.0"
+        "nunomaduro/collision": "^6.1",
+        "phpunit/phpunit": "^9.5.10",
+        "spatie/laravel-ignition": "^1.0"
     },
     "autoload": {
         "psr-4": {
@@ -77,7 +76,7 @@
         "preferred-install": "dist",
         "sort-packages": true,
         "platform": {
-            "php": "7.4"
+            "php": "8.0.2"
         }
     },
     "minimum-stability": "dev",
