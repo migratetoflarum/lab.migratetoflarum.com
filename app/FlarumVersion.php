@@ -28,6 +28,7 @@ class FlarumVersion
     const V1_2_0 = "1.2.0";
     const V1_2_1 = "1.2.1";
     const V1_3_0 = "1.3.0";
+    const V1_3_1 = "1.3.1";
 
     // MD5 hash of the javascript of Flarum core, excluding the sourcemap declaration
     // Obtained through the GetCoreJavascriptHash command
@@ -49,6 +50,7 @@ class FlarumVersion
         '7ce80a4947d0a9d3ed59f1c983d6306c' => self::V1_2_0,
         '0cfd2788d28051b38e4b01683f6d025f' => self::V1_2_1,
         'a51d05b5a8f67394a0670595ed7339b8' => self::V1_3_0,
+        'd65fc5308fa72d5ed57999ee5a5ace52' => self::V1_3_1,
     ];
 
     public array $adminJavascriptHashes = [
@@ -69,6 +71,7 @@ class FlarumVersion
         'd2f45e06f2914e9347c95a440e31ac6c' => self::V1_2_0,
         'd57482968b44be46067c3502097394c1' => self::V1_2_1,
         '10e94240d3c29d41e9a35b439f6ad812' => self::V1_3_0,
+        'aff9d42a56b8b419901f3f21a39fab18' => self::V1_3_1,
     ];
 
     public static function isBeta7(array $versions): bool

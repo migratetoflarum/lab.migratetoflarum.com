@@ -20,6 +20,7 @@ class FlarumVersionGuesser
                 FlarumVersion::V1_2_0,
                 FlarumVersion::V1_2_1,
                 FlarumVersion::V1_3_0,
+                FlarumVersion::V1_3_1,
             ];
         }
 
