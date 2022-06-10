@@ -46,6 +46,11 @@ export default {
             label = 'beta ' + labelVersions.map(t => t.replace('beta ', '')).join('/');
         }
 
+        // If there are more than 2 stable versions possible, use label 1.x
+        if (labelVersions.length > 2 && labelVersions.every(t => t.indexOf('beta') === -1)) {
+            label = '1.x';
+        }
+
         return m('span', {
             title: titleVersions.join(' or '),
         }, label);
