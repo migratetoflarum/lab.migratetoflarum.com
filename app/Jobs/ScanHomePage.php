@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Exceptions\TaskManualFailException;
 use App\FlarumVersionGuesser;
+use GuzzleHttp\Utils;
 use Illuminate\Support\Arr;
 use Symfony\Component\DomCrawler\Crawler;
 
@@ -39,15 +40,31 @@ class ScanHomePage extends TaskJob
 
         $this->log(self::LOG_PUBLIC, 'Reading boot script');
 
-        $homepage->filter('body script')->each(function (Crawler $script) use ($bodyContent) {
+        $bootPayload = '';
+        $versions = null;
+
+        $homepage->filter('body script')->each(function (Crawler $script) use ($bodyContent, &$bootPayload, &$versions) {
             $content = $script->text('', false);
+
+            // Starting with Flarum 1.4, the boot payload is in its own tag
+            if ($script->attr('id') === 'flarum-json-payload') {
+                $this->log(self::LOG_PUBLIC, 'Reading separate boot payload');
+
+                if (trim($content)) {
+                    $bootPayload = $content;
+                }
+
+                return;
+            }
 
             if (!str_contains($content, 'app.boot')) {
                 return;
             }
 
+            // For backward compatibility, the version guesser must run in the script tag
+            // But since Flarum 1.4 there is no longer any app.boot() code so a separate call to the guesser is done below
             $versionGuesser = new FlarumVersionGuesser();
-            $this->data['versions'] = $versionGuesser->guess($bodyContent, $content);
+            $versions = $versionGuesser->guess($bodyContent, $content);
 
             $this->log(self::LOG_PUBLIC, 'Reading boot modules');
 
@@ -68,46 +85,65 @@ class ScanHomePage extends TaskJob
                 }
             }
 
-            $this->log(self::LOG_PUBLIC, 'Reading boot payload');
+            if (!$bootPayload) {
+                $this->log(self::LOG_PUBLIC, 'Reading inlined boot payload');
 
-            $matches = [];
-            // beta7 calls app.boot() with the payload
-            // beta8 calls app.load() with the payload then app.boot() without arguments
-            // The json object ends at the end of the line with a closing ); or it might be inlined with the next line if optimized by proxy
-            if (preg_match('~app\.(boot|load)\(([^\n]+)\);?\s*(?:$|flarum\.core\.app\.bootExtensions\(flarum\.extensions\))~', $content, $matches) === 1) {
-                $bootArguments = null;
-
-                try {
-                    $bootArguments = \GuzzleHttp\json_decode($matches[2], true);
-                } catch (\InvalidArgumentException $exception) {
-                    $this->log(self::LOG_PRIVATE, $exception->getMessage());
-                }
-
-                if (is_array($bootArguments)) {
-                    foreach (Arr::get($bootArguments, 'resources', []) as $resource) {
-                        $type = Arr::get($resource, 'type');
-
-                        $this->log(self::LOG_PRIVATE, "Parsing JSON:API object of type $type");
-
-                        if ($type === 'forums') {
-                            $this->data['bootBaseUrl'] = Arr::get($resource, 'attributes.baseUrl');
-                            $this->data['bootBasePath'] = Arr::get($resource, 'attributes.basePath');
-                            $this->data['debug'] = Arr::get($resource, 'attributes.debug');
-                            $this->data['bootTitle'] = Arr::get($resource, 'attributes.title');
-
-                            break;
-                        }
-                    }
+                $matches = [];
+                // beta7 calls app.boot() with the payload
+                // beta8 calls app.load() with the payload then app.boot() without arguments
+                // The json object ends at the end of the line with a closing ); or it might be inlined with the next line if optimized by proxy
+                if (preg_match('~app\.(boot|load)\(([^\n]+)\);?\s*(?:$|flarum\.core\.app\.bootExtensions\(flarum\.extensions\))~', $content, $matches) === 1) {
+                    $bootPayload = $matches[2];
                 } else {
-                    $this->log(self::LOG_PUBLIC, 'Found boot payload but format is invalid');
+                    $this->log(self::LOG_PUBLIC, 'Could not find app.boot() call');
                 }
-            } else {
-                $this->log(self::LOG_PUBLIC, 'Could not find app.boot() call');
             }
         });
 
+        if ($bootPayload) {
+            $this->readBootPlayload($bootPayload);
+        }
+
+        // Version guesser for Flarum 1.4+ since there is no longer any boot payload to pass
+        if (!$versions) {
+            $versionGuesser = new FlarumVersionGuesser();
+            $versions = $versionGuesser->guess($bodyContent, '');
+        }
+
+        $this->data['versions'] = $versions;
+
         if (!Arr::exists($this->data, 'debug')) {
             throw new TaskManualFailException('Could not read boot payload');
+        }
+    }
+
+    protected function readBootPlayload(string $payload)
+    {
+        $bootArguments = null;
+
+        try {
+            $bootArguments = Utils::jsonDecode($payload, true);
+        } catch (\InvalidArgumentException $exception) {
+            $this->log(self::LOG_PRIVATE, $exception->getMessage());
+        }
+
+        if (is_array($bootArguments)) {
+            foreach (Arr::get($bootArguments, 'resources', []) as $resource) {
+                $type = Arr::get($resource, 'type');
+
+                $this->log(self::LOG_PRIVATE, "Parsing JSON:API object of type $type");
+
+                if ($type === 'forums') {
+                    $this->data['bootBaseUrl'] = Arr::get($resource, 'attributes.baseUrl');
+                    $this->data['bootBasePath'] = Arr::get($resource, 'attributes.basePath');
+                    $this->data['debug'] = Arr::get($resource, 'attributes.debug');
+                    $this->data['bootTitle'] = Arr::get($resource, 'attributes.title');
+
+                    break;
+                }
+            }
+        } else {
+            $this->log(self::LOG_PUBLIC, 'Found boot payload but format is invalid');
         }
     }
 }

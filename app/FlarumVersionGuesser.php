@@ -12,6 +12,13 @@ class FlarumVersionGuesser
      */
     public function guess(string $html, string $bootScript): array
     {
+        // Separate JSON payload tag was introduced in 1.4 https://github.com/flarum/framework/pull/3461
+        if (preg_match('~<script\s+id="flarum-json-payload"\s+type="application/json"~', $html) === 1) {
+            return [
+                FlarumVersion::V1_4_0,
+            ];
+        }
+
         // Preload was introduced in 1.1 https://github.com/flarum/core/pull/3057
         if (preg_match('~rel="preload" href="[^"]+/fa-solid-900\.woff2" as="font"~', $html) === 1) {
             return [

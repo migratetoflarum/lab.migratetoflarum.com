@@ -529,4 +529,13 @@ class FlarumVersionGuesserTest extends TestCase
             FlarumVersion::V1_3_1,
         ], $this->guesser->guess($html, $html));
     }
+
+    function testV140Typical()
+    {
+        $html = file_get_contents(__DIR__ . '/version-guesser/1.4.0-typical.html');
+
+        $this->assertEquals([
+            FlarumVersion::V1_4_0,
+        ], $this->guesser->guess($html, $html));
+    }
 }
