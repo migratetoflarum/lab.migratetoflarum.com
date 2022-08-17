@@ -145,29 +145,29 @@ class RetrieveExtensions extends Command
                 if ($lastVersion) {
                     $latestVersion = Arr::get($versions, $lastVersion);
 
-                    $extension->title = Arr::get($latestVersion, 'extra.flarum-extension.title');
-                    $extension->icon = Arr::get($latestVersion, 'extra.flarum-extension.icon');
+                    $extension->title = Str::limit(Arr::get($latestVersion, 'extra.flarum-extension.title'), 252);
+                    $extension->icon = Arr::get($latestVersion, 'extra.flarum-extension.icon'); // It's an array
                     $extension->last_version = $lastVersion;
                     $extension->last_version_time = Carbon::parse(Arr::get($latestVersion, 'time'));
 
                     $discussUrl = Arr::get($latestVersion, 'support.forum') ?? Arr::get($latestVersion, 'extra.flagrow.discuss');
 
                     if (preg_match('~^https://discuss\.flarum\.org/d/[a-z0-9_-]+$~', $discussUrl) === 1) {
-                        $extension->discuss_url = $discussUrl;
+                        $extension->discuss_url = Str::limit($discussUrl, 255, '');
                     } else {
                         $extension->discuss_url = null;
                     }
 
                     $localeId = null;
 
-                    if ($localeCode = Arr::get($latestVersion, 'extra.flarum-locale.code')) {
+                    if ($localeCode = Str::limit(Arr::get($latestVersion, 'extra.flarum-locale.code'), 255, '')) {
                         /**
                          * @var $locale Locale
                          */
                         $locale = Locale::query()->firstOrCreate([
                             'code' => $localeCode,
                         ], [
-                            'localized_name' => Arr::get($latestVersion, 'extra.flarum-locale.title'),
+                            'localized_name' => Str::limit(Arr::get($latestVersion, 'extra.flarum-locale.title'), 255, ''),
                         ]);
 
                         $localeId = $locale->id;
@@ -178,9 +178,9 @@ class RetrieveExtensions extends Command
                     $extension->lastVersion()->associate($extension->versions()->where('version', $lastVersion)->first());
                 }
 
-                $extension->description = Arr::get($details, 'description');
-                $extension->abandoned = Arr::get($details, 'abandoned');
-                $extension->repository = Arr::get($details, 'repository');
+                $extension->description = Str::limit(Arr::get($details, 'description'), 252);
+                $extension->abandoned = Str::limit(Arr::get($details, 'abandoned'), 255, '');
+                $extension->repository = Str::limit(Arr::get($details, 'repository'), 255, '');
                 $extension->packagist_time = Carbon::parse(Arr::get($details, 'time'));
                 $extension->save();
             }
