@@ -40,11 +40,15 @@ export default {
                             break;
                     }
 
+                    const percent = module.size / total * 100;
+
                     return m('tr', [
-                        m('td', m('.progress.module-size-progress', m('.progress-bar', {
+                        m('td', m('.progress.module-size-progress', {
+                            title: percent < 0.1 ? '<0.1%' : (Math.round(percent * 10) / 10) + '%',
+                        }, m('.progress-bar', {
                             className: name === 'other' ? 'bg-dark' : CLASSES[index % CLASSES.length],
                             style: {
-                                width: Math.max(module.size / total * 100, 6) + '%', // Minimum % wide
+                                width: Math.max(percent, 6) + '%', // Minimum % wide
                             },
                         }))),
                         m('td', formatBytes(module.size)),
