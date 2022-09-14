@@ -16,6 +16,7 @@ class FlarumVersionGuesser
         if (preg_match('~<script\s+id="flarum-json-payload"\s+type="application/json"~', $html) === 1) {
             return [
                 FlarumVersion::V1_4_0,
+                FlarumVersion::V1_5_0,
             ];
         }
 
