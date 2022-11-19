@@ -224,17 +224,34 @@ export default {
             return getObjectKey(task.attributes.data, key, defaultValue);
         }
 
-        const versions = reportKey('ScanHomePage', 'versions', []);
+        // We could probably switch to ScanGuessVersion but if it ain't broken...
+        const legacyVersions = reportKey('ScanHomePage', 'versions', []);
 
-        if (versions.some(v => v === '0.1.0-beta.7' || v === '0.1.0-beta.8')) {
+        if (legacyVersions.some(v => v === '0.1.0-beta.7' || v === '0.1.0-beta.8')) {
             suggestions.push({
                 danger: true,
                 title: 'Security vulnerability',
                 suggest: [
                     'The forum is running a vulnerable Flarum version. ',
-                    versions.some(v => v === '0.1.0-beta.7') ? 'Beta 7 was affected by a user details exposure. ' : '',
+                    legacyVersions.some(v => v === '0.1.0-beta.7') ? 'Beta 7 was affected by a user details exposure. ' : '',
                     'Beta 8 and earlier were affected by a CSRF bypass issue. ',
                     'Update to beta 9 to fix those issues',
+                ],
+            });
+        }
+
+        const versions = reportKey('ScanGuessVersion', 'versions', []);
+
+        if (versions.length && versions.every(v => ['1.5.0', '1.6.0', '1.6.1'].indexOf(v) !== -1)) {
+            suggestions.push({
+                danger: true,
+                title: 'Security vulnerability',
+                suggest: [
+                    'The forum is running a vulnerable Flarum version. ',
+                    'Flarum versions 1.5.0 to 1.6.1 are affected by an XSS vulnerability. ',
+                    'Update to 1.6.2 to fix this issue. ',
+                    m('a', {href: 'https://discuss.flarum.org/d/31999'}, 'Read release notes on flarum.org'),
+                    '.',
                 ],
             });
         }

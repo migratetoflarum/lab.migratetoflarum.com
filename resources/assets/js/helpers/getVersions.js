@@ -9,13 +9,14 @@ export default function (scan) {
 
     const versionTask = scan.relationships.tasks.data.find(t => t.attributes.job === 'ScanGuessVersion');
 
-    if (versionTask) {
+    // Check if data is loaded because the Pusher status update doesn't contain it during the progress bar
+    if (versionTask && versionTask.attributes.data) {
         return versionTask.attributes.data.versions;
     }
 
     const homeTask = scan.relationships.tasks.data.find(t => t.attributes.job === 'ScanHomePage');
 
-    if (homeTask) {
+    if (homeTask && homeTask.attributes.data) {
         return homeTask.attributes.data.versions || [];
     }
 

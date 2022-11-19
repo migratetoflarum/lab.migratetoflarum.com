@@ -50,6 +50,15 @@ class RatingAgent
                         return true;
                     }
 
+                    // https://github.com/flarum/framework/security/advisories/GHSA-7x4w-j98p-854x
+                    if (count($versions) && count(array_diff($versions, [
+                            FlarumVersion::V1_5_0,
+                            FlarumVersion::V1_6_0,
+                            FlarumVersion::V1_6_1,
+                        ])) === 0) {
+                        return true;
+                    }
+
                     return false;
                 },
             ],
