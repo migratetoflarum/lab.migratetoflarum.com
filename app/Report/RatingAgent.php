@@ -40,21 +40,53 @@ class RatingAgent
                     // If we're unsure, we won't mark vulnerable
                     // If the list of guest versions is empty, we skip this test, this will happen for forums running a custom build
                     if (count($versions) && count(array_diff($versions, [
+                            // I remember there was a major fix in beta 13 but can't find details
+                            // https://github.com/flarum/framework/security/advisories/GHSA-22m9-m3ww-53h3 Mentions REST
                             FlarumVersion::BETA_7,
                             FlarumVersion::BETA_8,
+
+                            // I remember there was a major fix in beta 13 but can't find details
+                            // https://github.com/flarum/framework/security/advisories/GHSA-3wjh-93gr-chh6 Missing CSRF
+                            // https://github.com/flarum/framework/security/advisories/GHSA-22m9-m3ww-53h3 Mentions REST
                             FlarumVersion::BETA_9,
                             FlarumVersion::BETA_10,
                             FlarumVersion::BETA_11,
                             FlarumVersion::BETA_12,
-                        ])) === 0) {
-                        return true;
-                    }
 
-                    // https://github.com/flarum/framework/security/advisories/GHSA-7x4w-j98p-854x
-                    if (count($versions) && count(array_diff($versions, [
+                            // https://github.com/flarum/framework/security/advisories/GHSA-22m9-m3ww-53h3 Mentions REST
+                            FlarumVersion::BETA_13,
+                            FlarumVersion::BETA_14,
+                            FlarumVersion::BETA_14_1,
+                            FlarumVersion::BETA_15,
+                            FlarumVersion::BETA_16,
+
+                            // https://github.com/flarum/framework/security/advisories/GHSA-5qjq-69w6-fg57 XSS translator
+                            // https://github.com/flarum/framework/security/advisories/GHSA-22m9-m3ww-53h3 Mentions REST
+                            FlarumVersion::V1_0_0,
+                            FlarumVersion::V1_0_1,
+
+                            // https://github.com/flarum/framework/security/advisories/GHSA-22m9-m3ww-53h3 Mentions REST
+                            FlarumVersion::V1_0_2,
+                            FlarumVersion::V1_0_3,
+                            FlarumVersion::V1_0_4,
+                            FlarumVersion::V1_1_0,
+                            FlarumVersion::V1_1_1,
+                            FlarumVersion::V1_2_0,
+                            FlarumVersion::V1_2_1,
+                            FlarumVersion::V1_3_0,
+                            FlarumVersion::V1_3_1,
+                            FlarumVersion::V1_4_0,
+
+                            // https://github.com/flarum/framework/security/advisories/GHSA-7x4w-j98p-854x XSS discussion title
+                            // https://github.com/flarum/framework/security/advisories/GHSA-22m9-m3ww-53h3 Mentions REST
                             FlarumVersion::V1_5_0,
                             FlarumVersion::V1_6_0,
                             FlarumVersion::V1_6_1,
+
+                            // https://github.com/flarum/framework/security/advisories/GHSA-22m9-m3ww-53h3 Mentions REST
+                            // https://github.com/flarum/framework/security/advisories/GHSA-8gcg-vwmw-rxj4 Notifications leak
+                            // https://github.com/flarum/framework/security/advisories/GHSA-hph3-hv3c-7725 First post deleted
+                            FlarumVersion::V1_6_2,
                         ])) === 0) {
                         return true;
                     }
