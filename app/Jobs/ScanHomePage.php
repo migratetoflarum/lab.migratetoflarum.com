@@ -44,6 +44,14 @@ class ScanHomePage extends TaskJob
         $versions = null;
 
         $homepage->filter('body script')->each(function (Crawler $script) use ($bodyContent, &$bootPayload, &$versions) {
+            // Cloudflare's Rocket Loader complicates the parsing of known tags
+            // We'll add a warning about so the user is aware why the scan might be incomplete
+            if (str_contains($script->attr('src'), 'cloudflare-static/rocket-loader')) {
+                $this->data['cloudflareRocketLoader'] = true;
+
+                return;
+            }
+
             $content = $script->text('', false);
 
             // Starting with Flarum 1.4, the boot payload is in its own tag

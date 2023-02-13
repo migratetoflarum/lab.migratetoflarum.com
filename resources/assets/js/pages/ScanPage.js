@@ -224,6 +224,20 @@ export default {
             return getObjectKey(task.attributes.data, key, defaultValue);
         }
 
+        if (reportKey('ScanHomePage', 'cloudflareRocketLoader')) {
+            suggestions.push({
+                title: 'Rocket Loader',
+                suggest: [
+                    'This website appears to be enhanced with ',
+                    m('a', {
+                        href: 'https://developers.cloudflare.com/fundamentals/speed/rocket-loader/',
+                    }, 'Cloudflare Rocket Loader'),
+                    '. Unfortunately not all features of the Lab work with Rocket Loader at the moment. ',
+                    'You might see incomplete results.',
+                ],
+            });
+        }
+
         // We could probably switch to ScanGuessVersion but if it ain't broken...
         const legacyVersions = reportKey('ScanHomePage', 'versions', []);
 

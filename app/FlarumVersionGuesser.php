@@ -13,7 +13,8 @@ class FlarumVersionGuesser
     public function guess(string $html, string $bootScript): array
     {
         // Separate JSON payload tag was introduced in 1.4 https://github.com/flarum/framework/pull/3461
-        if (preg_match('~<script\s+id="flarum-json-payload"\s+type="application/json"~', $html) === 1) {
+        // Cloudflare Rocket Loader removes the quotes around the ID
+        if (preg_match('~<script\s+id=("flarum-json-payload"|flarum-json-payload)\s+type="application/json"~', $html) === 1) {
             return [
                 FlarumVersion::V1_4_0,
                 FlarumVersion::V1_5_0,
@@ -37,7 +38,8 @@ class FlarumVersionGuesser
         }
 
         // Hashes changed in Flarum 1.0 https://github.com/flarum/core/pull/2805
-        if (preg_match('~/assets/forum\.js\?v=[0-9a-f]{8}"></script>~', $html) === 1) {
+        // Cloudflare Rocket Loader adds a type="" attribute to all script tags
+        if (preg_match('~/assets/forum\.js\?v=[0-9a-f]{8}"\s*(type="[^"]+")?></script>~', $html) === 1) {
             return [
                 FlarumVersion::V1_0_0,
                 FlarumVersion::V1_0_1,
