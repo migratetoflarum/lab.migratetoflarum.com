@@ -82,7 +82,7 @@ class RatingTest extends TestCase
             ],
             ScanGuessVersion::class => [
                 'versions' => [
-                    FlarumVersion::BETA_14,
+                    FlarumVersion::V1_6_3,
                 ],
             ],
         ], $report);
@@ -151,26 +151,12 @@ class RatingTest extends TestCase
             ],
         ]), 'D');
 
+        // Test just one of the older versions,
+        // But all below 1.6.3 are now vulnerable
         $this->assertReportRating($this->alterGoodReport([
             ScanGuessVersion::class => [
                 'versions' => [
-                    '0.1.0-beta.7',
-                ],
-            ],
-        ]), 'D');
-
-        $this->assertReportRating($this->alterGoodReport([
-            ScanGuessVersion::class => [
-                'versions' => [
-                    '0.1.0-beta.8',
-                ],
-            ],
-        ]), 'D');
-
-        $this->assertReportRating($this->alterGoodReport([
-            ScanGuessVersion::class => [
-                'versions' => [
-                    '0.1.0-beta.12',
+                    FlarumVersion::BETA_8,
                 ],
             ],
         ]), 'D');
@@ -179,8 +165,8 @@ class RatingTest extends TestCase
         $this->assertReportRating($this->alterGoodReport([
             ScanGuessVersion::class => [
                 'versions' => [
-                    '0.1.0-beta.12', // Vulnerable
-                    '0.1.0-beta.13', // Not vulnerable
+                    FlarumVersion::V1_6_2, // Vulnerable
+                    FlarumVersion::V1_6_3, // Not vulnerable
                 ],
             ],
         ]), 'A');
