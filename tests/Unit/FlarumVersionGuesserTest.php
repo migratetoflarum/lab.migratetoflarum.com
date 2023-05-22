@@ -580,6 +580,19 @@ class FlarumVersionGuesserTest extends TestCase
             FlarumVersion::V1_7_0,
             FlarumVersion::V1_7_1,
             FlarumVersion::V1_7_2,
+            FlarumVersion::V1_8_0,
+        ], $this->guesser->guess($html, $html));
+    }
+
+    function testV180Typical()
+    {
+        $html = file_get_contents(__DIR__ . '/version-guesser/1.8.0-typical.html');
+
+        $this->assertEquals([
+            FlarumVersion::V1_7_0,
+            FlarumVersion::V1_7_1,
+            FlarumVersion::V1_7_2,
+            FlarumVersion::V1_8_0,
         ], $this->guesser->guess($html, $html));
     }
 }

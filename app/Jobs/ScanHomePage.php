@@ -74,6 +74,10 @@ class ScanHomePage extends TaskJob
             $versionGuesser = new FlarumVersionGuesser();
             $versions = $versionGuesser->guess($bodyContent, $content);
 
+            foreach ($versionGuesser->debug as $debug) {
+                $this->log(self::LOG_PUBLIC, "[version-guesser] $debug");
+            }
+
             $this->log(self::LOG_PUBLIC, 'Reading boot modules');
 
             $matches = [];
@@ -116,6 +120,10 @@ class ScanHomePage extends TaskJob
         if (!$versions) {
             $versionGuesser = new FlarumVersionGuesser();
             $versions = $versionGuesser->guess($bodyContent, '');
+
+            foreach ($versionGuesser->debug as $debug) {
+                $this->log(self::LOG_PUBLIC, "[version-guesser] $debug");
+            }
         }
 
         $this->data['versions'] = $versions;

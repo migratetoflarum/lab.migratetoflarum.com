@@ -7,6 +7,78 @@ use Tests\TestCase;
 
 class JavascriptParserTest extends TestCase
 {
+    public function testV1_8ForumParser()
+    {
+        $parser = new Beta8JavascriptFileParser(file_get_contents(__DIR__ . '/javascript-parser/1.8.0-typical-forum.js'));
+
+        $this->assertEquals([
+            [
+                'id' => 'flarum-tags',
+                'checksum' => '53c36ff59296abcdb969b63d509a671b',
+                'size' => 36258,
+                'dev' => false,
+            ],
+            [
+                'id' => 'flarum-markdown',
+                'checksum' => 'ad32aab7c2923ab6195a1abde8b1bc38',
+                'size' => 4709,
+                'dev' => false,
+            ],
+            [
+                'id' => 'flarum-lock',
+                'checksum' => '4460587d7b1ab89a47274709c00b2227',
+                'size' => 3288,
+                'dev' => false,
+            ],
+        ], $parser->extensions());
+
+        $this->assertEquals([
+            [
+                'id' => 'core',
+                'checksum' => 'ca27d6971fd1b34f4279a5c6a30d87a1',
+                'size' => 427452,
+            ],
+            [
+                'id' => 'textformatter',
+                'size' => 57891,
+            ],
+        ], $parser->coreSize());
+    }
+
+    public function testV1_8AdminParser()
+    {
+        $parser = new Beta8JavascriptFileParser(file_get_contents(__DIR__ . '/javascript-parser/1.8.0-typical-admin.js'));
+
+        $this->assertEquals([
+            [
+                'id' => 'flarum-tags',
+                'checksum' => '8ee9564410acfcb48db33e2c89e08c55',
+                'size' => 72980,
+                'dev' => false,
+            ],
+            [
+                'id' => 'flarum-markdown',
+                'checksum' => '4e6913a6826b8ba31c514cc5c7e7767a',
+                'size' => 4709,
+                'dev' => false,
+            ],
+            [
+                'id' => 'flarum-lock',
+                'checksum' => '1e316a1cdeda0f2b33fd80c32390c191',
+                'size' => 823,
+                'dev' => false,
+            ],
+        ], $parser->extensions());
+
+        $this->assertEquals([
+            [
+                'id' => 'core',
+                'checksum' => '8771841497cd63f01b9c823d767a5044',
+                'size' => 356167,
+            ],
+        ], $parser->coreSize());
+    }
+
     public function testV1_7ForumParser()
     {
         $parser = new Beta8JavascriptFileParser(file_get_contents(__DIR__ . '/javascript-parser/1.7.1-typical-forum.js'));
