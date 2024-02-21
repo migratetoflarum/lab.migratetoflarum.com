@@ -11,6 +11,7 @@ export default {
             if (version === 'dev-master') {
                 labelVersions.push('dev-master');
                 titleVersions.push('(development version)');
+                return;
             }
 
             const stableMatches = /^([0-9]+\.[0-9]+)\.[0-9]+$/.exec(version);
